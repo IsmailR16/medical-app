@@ -1,0 +1,104 @@
+app/
+├── (marketing)/                  # Public pages (no auth required)
+│   ├── layout.tsx
+│   ├── page.tsx                  # Landing page
+│   ├── pricing/page.tsx
+│   └── about/page.tsx
+│
+├── (auth)/                       # Clerk auth pages
+│   ├── sign-in/[[...sign-in]]/page.tsx
+│   └── sign-up/[[...sign-up]]/page.tsx
+│
+├── (dashboard)/                  # Authenticated area
+│   ├── layout.tsx                # Sidebar + header + ClerkProvider boundary
+│   ├── dashboard/page.tsx        # User home: stats, recent sessions
+│   ├── cases/
+│   │   ├── page.tsx              # Case library (browse, filter, search)
+│   │   └── [caseId]/
+│   │       └── page.tsx          # Case detail / start session
+│   ├── session/
+│   │   └── [sessionId]/
+│   │       ├── page.tsx          # Active chat session (patient interview)
+│   │       └── submit/page.tsx   # Diagnosis submission form
+│   ├── results/
+│   │   └── [sessionId]/page.tsx  # Evaluation & feedback
+│   ├── history/page.tsx          # Past sessions + scores
+│   ├── settings/page.tsx         # Profile, subscription
+│   └── admin/                    # Admin-only (teachers/institutions)
+│       ├── cases/
+│       │   ├── page.tsx          # Manage cases CRUD
+│       │   └── [caseId]/edit/page.tsx
+│       └── students/page.tsx     # View student progress
+│
+├── api/
+│   ├── chat/route.ts             # AI chat endpoint (streaming)
+│   ├── evaluate/route.ts         # AI evaluation endpoint
+│   ├── cases/route.ts            # Cases CRUD API
+│   ├── sessions/route.ts         # Session management API
+│   ├── webhooks/
+│   │   ├── clerk/route.ts        # Clerk webhook → sync users to Supabase
+│   │   └── stripe/route.ts       # Stripe webhook → sync subscriptions
+│   └── stripe/
+│       └── checkout/route.ts     # Create Stripe Checkout session
+│
+├── globals.css
+└── layout.tsx                    # Root layout (ClerkProvider, ThemeProvider)
+
+components/
+├── ui/                           # shadcn/ui components
+├── chat/
+│   ├── chat-interface.tsx        # Main chat container
+│   ├── message-bubble.tsx        # Single message display
+│   ├── chat-input.tsx            # User text input
+│   ├── clinical-data-panel.tsx   # Side panel: vitals, labs, imaging
+│   └── typing-indicator.tsx
+├── cases/
+│   ├── case-card.tsx             # Case preview card
+│   ├── case-filters.tsx          # Filter/search bar
+│   └── case-detail-view.tsx
+├── evaluation/
+│   ├── diagnosis-form.tsx        # Submit diagnosis + differentials
+│   ├── score-card.tsx            # Score/rubric display
+│   └── feedback-panel.tsx        # Detailed feedback view
+├── dashboard/
+│   ├── stats-overview.tsx        # Performance stats
+│   ├── recent-sessions.tsx
+│   └── sidebar.tsx
+├── admin/
+│   ├── case-editor.tsx           # Create/edit case form
+│   └── student-table.tsx
+└── shared/
+    ├── header.tsx
+    ├── theme-toggle.tsx
+    └── loading-skeleton.tsx
+
+lib/
+├── utils.ts                      # (existing) cn() helper
+├── supabase/
+│   ├── client.ts                 # Browser Supabase client
+│   ├── server.ts                 # Server-side Supabase client
+│   └── admin.ts                  # Service-role client (webhooks)
+├── ai/
+│   ├── patient-prompt.ts         # System prompt builder for patient roleplay
+│   ├── evaluator-prompt.ts       # System prompt builder for evaluation
+│   └── openai.ts                 # OpenAI SDK client init
+├── stripe/
+│   └── client.ts                 # Stripe SDK init + helpers
+├── clerk/
+│   └── helpers.ts                # Clerk user helpers
+├── validators/
+│   ├── case.ts                   # Zod schemas for case data
+│   ├── session.ts                # Zod schemas for sessions
+│   └── diagnosis.ts              # Zod schemas for submission
+└── constants.ts                  # Roles, plans, limits
+
+hooks/
+├── use-chat-session.ts           # Chat state + streaming logic
+├── use-clinical-data.ts          # Manage revealed vitals/labs/imaging
+└── use-subscription.ts           # Check user plan/limits
+
+types/
+├── case.ts                       # MedicalCase, CaseSymptom, CaseVitals, etc.
+├── session.ts                    # Session, Message, ClinicalDataRequest
+├── evaluation.ts                 # EvaluationResult, Score, Feedback
+└── user.ts                       # User roles, subscription tiers
