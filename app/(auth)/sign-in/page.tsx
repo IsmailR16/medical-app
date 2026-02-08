@@ -1,9 +1,9 @@
-const SignInPage = () => {
+import { SignIn } from "@clerk/nextjs";
+
+export default function SignInPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">Sign In Page</h1>
+    <div className="flex min-h-screen items-center justify-center">
+      <SignIn />
     </div>
   );
-};
-
-export default SignInPage;
+}

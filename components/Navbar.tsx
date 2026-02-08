@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 const NAV_LINKS = [
   { href: "/features", label: "Features" },
@@ -29,12 +36,21 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild className="text-sm font-semibold text-slate-700">
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
-          <Button asChild className="rounded-xl bg-blue-600 px-5 text-sm font-semibold shadow-md hover:bg-blue-700">
-            <Link href="/sign-up">Get Started</Link>
-          </Button>
+          <SignedOut>
+            <SignInButton>
+              <Button variant="ghost" className="text-sm font-semibold text-slate-700">
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button className="rounded-xl bg-blue-600 px-5 text-sm font-semibold shadow-md hover:bg-blue-700">
+                Get Started
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </div>
       </div>
     </header>
