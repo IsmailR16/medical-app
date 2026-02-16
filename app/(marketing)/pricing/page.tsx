@@ -4,115 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Check, ChevronRight, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-/* ------------------------------------------------------------------ */
-/*  Data                                                               */
-/* ------------------------------------------------------------------ */
-
-interface Plan {
-  name: string;
-  description: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  highlighted?: boolean;
-  cta: string;
-  href: string;
-  features: string[];
-  excluded?: string[];
-}
-
-const PLANS: Plan[] = [
-  {
-    name: "Free",
-    description:
-      "Perfect for trying out AI patient simulations and exploring the platform.",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    cta: "Get Started",
-    href: "/sign-up",
-    features: [
-      "3 AI patient cases per month",
-      "Basic diagnostic feedback",
-      "Community access",
-      "Standard response speed",
-    ],
-    excluded: [
-      "Advanced analytics dashboard",
-      "Custom case creation",
-      "Priority support",
-      "Team collaboration",
-    ],
-  },
-  {
-    name: "Pro",
-    description:
-      "For medical students serious about mastering clinical reasoning skills.",
-    monthlyPrice: 29,
-    yearlyPrice: 19,
-    highlighted: true,
-    cta: "Start Free Trial",
-    href: "/sign-up?plan=pro",
-    features: [
-      "Unlimited AI patient cases",
-      "Advanced diagnostic analytics",
-      "Custom case creation",
-      "Priority response speed",
-      "Detailed performance rubrics",
-      "Export session reports",
-      "Priority email support",
-    ],
-    excluded: [
-      "Team collaboration",
-    ],
-  },
-  {
-    name: "Institution",
-    description:
-      "Built for universities and teaching hospitals managing student cohorts.",
-    monthlyPrice: 99,
-    yearlyPrice: 79,
-    cta: "Contact Sales",
-    href: "/sign-up?plan=institution",
-    features: [
-      "Everything in Pro",
-      "Unlimited team members",
-      "Admin dashboard & analytics",
-      "Custom curriculum integration",
-      "SSO & SAML authentication",
-      "Dedicated account manager",
-      "SLA & uptime guarantee",
-      "On-premise deployment option",
-    ],
-  },
-];
-
-const FAQ: { question: string; answer: string }[] = [
-  {
-    question: "Can I switch plans at any time?",
-    answer:
-      "Yes. You can upgrade, downgrade, or cancel your plan at any time from your account settings. Changes take effect at the start of your next billing cycle.",
-  },
-  {
-    question: "Is there a free trial for the Pro plan?",
-    answer:
-      "Absolutely — every Pro subscription starts with a 14-day free trial. No credit card required to begin.",
-  },
-  {
-    question: "What payment methods do you accept?",
-    answer:
-      "We accept all major credit and debit cards (Visa, Mastercard, Amex) as well as PayPal. Institutional plans can also pay via invoice.",
-  },
-  {
-    question: "Do you offer student discounts?",
-    answer:
-      "Yes! Verified students receive an additional 20% off the Pro plan. Verify your student status in your account settings after signing up.",
-  },
-  {
-    question: "What happens to my data if I cancel?",
-    answer:
-      "Your session data and reports are retained for 90 days after cancellation, giving you time to export anything you need.",
-  },
-];
+import { PLANS, FAQ } from "@/lib/plans";
+import type { Plan } from "@/lib/plans";
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -132,22 +25,22 @@ export default function PricingPage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-600">
             <Sparkles size={14} aria-hidden="true" />
-            Simple, transparent pricing
+            Enkel, transparent prissättning
           </div>
 
           <h1
             id="pricing-heading"
             className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
           >
-            Choose the plan that fits{" "}
+            Välj planen som passar{" "}
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              your journey
+              din resa
             </span>
           </h1>
 
           <p className="mx-auto max-w-xl text-lg text-slate-600">
-            Start free and scale as you grow. All plans include access to our
-            core AI patient simulation engine.
+            Börja gratis och skala upp i takt med att du växer. Alla planer
+            inkluderar tillgång till vår AI-patientsimuleringsmotor.
           </p>
 
           {/* Billing toggle */}
@@ -157,7 +50,7 @@ export default function PricingPage() {
 
       {/* Cards */}
       <section
-        aria-label="Pricing plans"
+        aria-label="Prisplaner"
         className="relative -mt-8 px-6 pb-20 lg:px-8 lg:pb-28"
       >
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-3">
@@ -181,7 +74,7 @@ export default function PricingPage() {
             id="faq-heading"
             className="mb-12 text-center text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
           >
-            Frequently Asked Questions
+            Vanliga frågor
           </h2>
 
           <dl className="space-y-8">
@@ -220,14 +113,14 @@ function BillingToggle({
           !annual ? "text-slate-900" : "text-slate-500"
         }`}
       >
-        Monthly
+        Månadsvis
       </span>
 
       <button
         type="button"
         role="switch"
         aria-checked={annual}
-        aria-label="Toggle annual billing"
+        aria-label="Växla årsbetalning"
         onClick={() => onChange(!annual)}
         className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 data-[state=checked]:bg-blue-600"
         data-state={annual ? "checked" : "unchecked"}
@@ -245,9 +138,9 @@ function BillingToggle({
           annual ? "text-slate-900" : "text-slate-500"
         }`}
       >
-        Annual{" "}
+        Årsvis{" "}
         <span className="ml-1 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">
-          Save 35%
+          Spara 35%
         </span>
       </span>
     </div>
@@ -275,7 +168,7 @@ function PricingCard({
       {/* Popular badge */}
       {isHighlighted && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
-          Most Popular
+          Mest populär
         </div>
       )}
 
@@ -291,21 +184,21 @@ function PricingCard({
       <div className="mb-8">
         <div className="flex items-baseline gap-1">
           <span className="text-5xl font-extrabold tracking-tight text-slate-900">
-            ${price}
+            {price} kr
           </span>
           {price > 0 && (
             <span className="text-base font-medium text-slate-500">
-              /mo
+              /mån
             </span>
           )}
         </div>
         {price > 0 && annual && (
           <p className="mt-1 text-sm text-slate-500">
-            Billed annually (${price * 12}/year)
+            Faktureras årsvis ({price * 12} kr/år)
           </p>
         )}
         {price === 0 && (
-          <p className="mt-1 text-sm text-slate-500">Free forever</p>
+          <p className="mt-1 text-sm text-slate-500">Gratis för alltid</p>
         )}
       </div>
 
