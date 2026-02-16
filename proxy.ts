@@ -31,6 +31,10 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(new URL("/dashboard", origin));
     }
 
+    if (createRouteMatcher(["/"]) (req) && userId) {
+      return NextResponse.redirect(new URL("/dashboard", origin));
+    }
+
     return NextResponse.next();
 });
 
