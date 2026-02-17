@@ -6,6 +6,8 @@ import { Check, ChevronRight, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLANS, FAQ } from "@/lib/plans";
 import type { Plan } from "@/lib/plans";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -13,6 +15,43 @@ import type { Plan } from "@/lib/plans";
 
 export default function PricingPage() {
   const [annual, setAnnual] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
+  const router = useRouter();
+
+  async function handleCheckout(planName: string) {
+    if (!user) {
+      router.push("/sign-up?plan=pro");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const interval = annual ? "yearly" : "monthly";
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planType: `${planName.toLowerCase()}_${interval}`,
+          userId: user.id,
+          email: user.primaryEmailAddress?.emailAddress,
+        }),
+      });
+      
+      if (!res.ok) {
+        console.error("Failed to create checkout session", await res.text());
+        alert("Ett fel inträffade. Försök igen senare.");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.url) { 
+        window.location.href = data.url;
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
   
   return (
     <>
@@ -59,6 +98,8 @@ export default function PricingPage() {
               key={plan.name}
               plan={plan}
               annual={annual}
+              loading={loading}
+              onCheckout={handleCheckout}
             />
           ))}
         </div>
@@ -150,9 +191,13 @@ function BillingToggle({
 function PricingCard({
   plan,
   annual,
+  loading,
+  onCheckout,
 }: {
   plan: Plan;
   annual: boolean;
+  loading: boolean;
+  onCheckout: (planName: string) => void;
 }) {
   const price = annual ? plan.yearlyPrice : plan.monthlyPrice;
   const isHighlighted = plan.highlighted;
@@ -203,23 +248,38 @@ function PricingCard({
       </div>
 
       {/* CTA */}
-      <Button
-        asChild
-        className={`mb-8 h-auto w-full rounded-2xl px-6 py-3.5 text-base font-bold group ${
-          isHighlighted
-            ? "bg-blue-600 shadow-xl shadow-blue-500/20 hover:bg-blue-700"
-            : "bg-slate-900 hover:bg-slate-800"
-        }`}
-      >
-        <Link href={plan.href}>
-          {plan.cta}
+      {plan.name === "Pro" ? (
+        <Button
+          onClick={() => onCheckout(plan.name)}
+          disabled={loading}
+          className={`mb-8 h-auto w-full rounded-2xl px-6 py-3.5 text-base font-bold group bg-blue-600 shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50`}
+        >
+          {loading ? "Laddar…" : plan.cta}
           <ChevronRight
             size={18}
             className="transition-transform group-hover:translate-x-1"
             aria-hidden="true"
           />
-        </Link>
-      </Button>
+        </Button>
+      ) : (
+        <Button
+          asChild
+          className={`mb-8 h-auto w-full rounded-2xl px-6 py-3.5 text-base font-bold group ${
+            isHighlighted
+              ? "bg-blue-600 shadow-xl shadow-blue-500/20 hover:bg-blue-700"
+              : "bg-slate-900 hover:bg-slate-800"
+          }`}
+        >
+          <Link href={plan.href}>
+            {plan.cta}
+            <ChevronRight
+              size={18}
+              className="transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </Link>
+        </Button>
+      )}
 
       {/* Features */}
       <ul role="list" className="flex-1 space-y-3">
