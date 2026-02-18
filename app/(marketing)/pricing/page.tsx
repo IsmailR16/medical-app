@@ -8,6 +8,7 @@ import { PLANS, FAQ } from "@/lib/plans";
 import type { Plan } from "@/lib/plans";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -16,6 +17,8 @@ import { useRouter } from "next/navigation";
 export default function PricingPage() {
   const [annual, setAnnual] = useState(true);
   const [loading, setLoading] = useState(false);
+  /** Visually-hidden live region text for screen readers */
+  const [statusMessage, setStatusMessage] = useState("");
   const { user } = useUser();
   const router = useRouter();
 
@@ -26,6 +29,9 @@ export default function PricingPage() {
     }
 
     setLoading(true);
+    setStatusMessage("Skapar betalningssession…");
+    const toastId = toast.loading("Skapar betalningssession…");
+
     try {
       const interval = annual ? "yearly" : "monthly";
       const res = await fetch("/api/stripe/checkout", {
@@ -37,24 +43,58 @@ export default function PricingPage() {
           email: user.primaryEmailAddress?.emailAddress,
         }),
       });
-      
+
       if (!res.ok) {
-        console.error("Failed to create checkout session", await res.text());
-        alert("Ett fel inträffade. Försök igen senare.");
+        const errorBody = await res.text().catch(() => "Unknown error");
+        console.error("Failed to create checkout session:", errorBody);
+        toast.error("Ett fel inträffade. Försök igen senare.", { id: toastId });
+        setStatusMessage("Ett fel inträffade. Försök igen senare.");
         return;
       }
 
-      const data = await res.json();
-      if (data.url) { 
-        window.location.href = data.url;
+      let data: { url?: string };
+      try {
+        data = await res.json();
+      } catch {
+        console.error("Invalid JSON response from checkout API");
+        toast.error("Oväntat svar från servern. Försök igen.", { id: toastId });
+        setStatusMessage("Oväntat svar från servern.");
+        return;
       }
+
+      if (data.url) {
+        toast.dismiss(toastId);
+        setStatusMessage("Omdirigerar till betalning…");
+        window.location.href = data.url;
+      } else {
+        console.error("Checkout session URL missing from response");
+        toast.error("Kunde inte skapa betalningslänk. Försök igen.", {
+          id: toastId,
+        });
+        setStatusMessage("Kunde inte skapa betalningslänk.");
+      }
+    } catch (error) {
+      // Network failures, AbortError, etc.
+      console.error("Network error during checkout:", error);
+      toast.error("Nätverksfel. Kontrollera din anslutning och försök igen.", {
+        id: toastId,
+      });
+      setStatusMessage("Nätverksfel. Försök igen.");
     } finally {
       setLoading(false);
     }
   }
-  
+
   return (
+    /* Using fragment — the marketing layout already provides <main> */
     <>
+      <Toaster position="top-right" />
+
+      {/* Visually-hidden live region for screen-reader status updates */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {statusMessage}
+      </div>
+
       {/* Hero / Header */}
       <section
         aria-labelledby="pricing-heading"
@@ -163,12 +203,12 @@ function BillingToggle({
         aria-checked={annual}
         aria-label="Växla årsbetalning"
         onClick={() => onChange(!annual)}
-        className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 data-[state=checked]:bg-blue-600"
+        className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-slate-200 motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 data-[state=checked]:bg-blue-600"
         data-state={annual ? "checked" : "unchecked"}
       >
         <span
           aria-hidden="true"
-          className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${
+          className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 motion-safe:transition-transform ${
             annual ? "translate-x-5" : "translate-x-0.5"
           }`}
         />
@@ -201,10 +241,11 @@ function PricingCard({
 }) {
   const price = annual ? plan.yearlyPrice : plan.monthlyPrice;
   const isHighlighted = plan.highlighted;
+  const isCheckoutPlan = plan.name === "Pro";
 
   return (
     <article
-      className={`relative flex flex-col rounded-3xl border p-8 transition-shadow lg:p-10 ${
+      className={`relative flex flex-col rounded-3xl border p-8 motion-safe:transition-shadow lg:p-10 ${
         isHighlighted
           ? "border-blue-600 bg-white shadow-2xl shadow-blue-500/10 ring-1 ring-blue-600"
           : "border-slate-200 bg-white hover:shadow-xl"
@@ -248,16 +289,18 @@ function PricingCard({
       </div>
 
       {/* CTA */}
-      {plan.name === "Pro" ? (
+      {isCheckoutPlan ? (
         <Button
+          type="button"
           onClick={() => onCheckout(plan.name)}
           disabled={loading}
-          className={`mb-8 h-auto w-full rounded-2xl px-6 py-3.5 text-base font-bold group bg-blue-600 shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50`}
+          aria-busy={loading}
+          className="mb-8 h-auto w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-base font-bold shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50 group"
         >
           {loading ? "Laddar…" : plan.cta}
           <ChevronRight
             size={18}
-            className="transition-transform group-hover:translate-x-1"
+            className="motion-safe:transition-transform group-hover:translate-x-1"
             aria-hidden="true"
           />
         </Button>
@@ -274,7 +317,7 @@ function PricingCard({
             {plan.cta}
             <ChevronRight
               size={18}
-              className="transition-transform group-hover:translate-x-1"
+              className="motion-safe:transition-transform group-hover:translate-x-1"
               aria-hidden="true"
             />
           </Link>
