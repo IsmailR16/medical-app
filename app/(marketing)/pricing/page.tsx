@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronRight, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,20 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false);
   /** Visually-hidden live region text for screen readers */
   const [statusMessage, setStatusMessage] = useState("");
+  /** Synchronous guard — prevents double-click firing two checkout calls */
+  const checkoutInFlight = useRef(false);
   const { user } = useUser();
   const router = useRouter();
 
   async function handleCheckout(planName: string) {
+    if (checkoutInFlight.current) return;
+
     if (!user) {
       router.push("/sign-up?plan=pro");
       return;
     }
 
+    checkoutInFlight.current = true;
     setLoading(true);
     setStatusMessage("Skapar betalningssession…");
     const toastId = toast.loading("Skapar betalningssession…");
@@ -79,6 +84,7 @@ export default function PricingPage() {
       });
       setStatusMessage("Nätverksfel. Försök igen.");
     } finally {
+      checkoutInFlight.current = false;
       setLoading(false);
     }
   }
