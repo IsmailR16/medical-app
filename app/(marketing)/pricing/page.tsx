@@ -39,8 +39,6 @@ export default function PricingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planType: `${planName.toLowerCase()}_${interval}`,
-          userId: user.id,
-          email: user.primaryEmailAddress?.emailAddress,
         }),
       });
 

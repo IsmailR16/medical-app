@@ -1,14 +1,23 @@
 import { getPriceId } from '@/lib/plans';
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { url } from 'inspector';
+import { auth, currentUser } from '@clerk/nextjs/server';
 
 export async function POST(request: NextRequest) {
 
   try {
-    const { planType, userId, email } = await request.json();
+    // Authenticate server-side — never trust userId from the client
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!planType || !userId || !email) {
+    const user = await currentUser();
+    const email = user?.emailAddresses[0]?.emailAddress;
+
+    const { planType } = await request.json();
+
+    if (!planType) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
