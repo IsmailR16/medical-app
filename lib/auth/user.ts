@@ -81,7 +81,7 @@ export async function getOrCreateUser(): Promise<AppUser | null> {
       full_name: fullName,
       avatar_url: avatarUrl,
       plan: "free",
-      subscription_status: "active",
+      subscription_status: "inactive",
       cancel_at_period_end: false,
     })
     .select("*")
