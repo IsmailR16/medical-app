@@ -1,4 +1,4 @@
-import { getPriceId } from '@/lib/plans';
+import { getPriceId } from '@/lib/plans.server';
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { auth, currentUser } from '@clerk/nextjs/server';
