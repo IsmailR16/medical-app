@@ -8,7 +8,7 @@ import { PLANS, FAQ } from "@/lib/plans";
 import type { Plan } from "@/lib/plans";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -92,7 +92,6 @@ export default function PricingPage() {
   return (
     /* Using fragment — the marketing layout already provides <main> */
     <>
-      <Toaster position="top-right" />
 
       {/* Visually-hidden live region for screen-reader status updates */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
