@@ -3,7 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { getSessionWithMessages } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { ChatComposer } from "@/components/dashboard/ChatComposer";
-import { Badge } from "@/components/ui/badge";
+import { SessionHeader } from "@/components/dashboard/SessionHeader";
+import { ClinicalDataSidebar } from "@/components/dashboard/ClinicalDataSidebar";
 
 interface SessionPageProps {
   params: Promise<{ id: string }>;
@@ -23,27 +24,33 @@ export default async function SessionPage({ params }: SessionPageProps) {
   return (
     <>
       <TopBar title={session.case_title} />
-      <div className="flex flex-1 flex-col">
-        {/* Session info bar */}
-        <div className="flex items-center gap-3 border-b px-4 py-2 lg:px-6">
-          <Badge variant="outline" className="capitalize">
-            {session.status === "active"
-              ? "Pågående"
-              : session.status === "submitted"
-                ? "Inskickad"
-                : "Utvärderad"}
-          </Badge>
-          <p className="text-sm text-muted-foreground">
-            {session.case_description}
-          </p>
-        </div>
-
-        {/* Chat */}
-        <ChatComposer
+      <div className="max-w-[1600px] mx-auto px-4 py-6 lg:px-6">
+        {/* Header with title, badges, and submit button */}
+        <SessionHeader
           sessionId={session.id}
-          initialMessages={messages}
-          sessionStatus={session.status}
+          title={session.case_title}
+          specialty={session.case_specialty}
+          difficulty={session.case_difficulty}
+          status={session.status}
+          description={session.case_description}
         />
+
+        {/* 2-column layout: Chat (2/3) + Clinical Data (1/3) */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Chat Area */}
+          <div className="lg:col-span-2">
+            <ChatComposer
+              sessionId={session.id}
+              initialMessages={messages}
+              sessionStatus={session.status}
+            />
+          </div>
+
+          {/* Clinical Data Sidebar */}
+          <div className="space-y-4">
+            <ClinicalDataSidebar sections={session.clinical_data} />
+          </div>
+        </div>
       </div>
     </>
   );

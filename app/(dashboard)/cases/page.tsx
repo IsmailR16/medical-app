@@ -22,17 +22,16 @@ export default async function CasesPage() {
   return (
     <>
       <TopBar title="Fallbibliotek" />
-      <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-7xl mx-auto w-full">
+        {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Välj ett patientfall
-          </h2>
+          <h1 className="text-3xl font-semibold mb-2">Patientfall</h1>
           <p className="text-muted-foreground">
             {limitReached
               ? `Du har använt ${sessionsUsed}/${FREE_LIMIT} fall denna månad. Uppgradera till Pro för obegränsat.`
               : isFree
-                ? `${sessionsUsed}/${FREE_LIMIT} fall använda denna månad.`
-                : "Obegränsat antal fall med din Pro-plan."}
+                ? `Välj ett patientfall att träna på — ${sessionsUsed}/${FREE_LIMIT} fall använda denna månad.`
+                : "Välj ett patientfall att träna på från vårt bibliotek."}
           </p>
         </div>
 

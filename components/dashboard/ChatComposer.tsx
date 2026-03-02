@@ -4,6 +4,13 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { IconSend } from "@tabler/icons-react";
 import { ChatBubble } from "@/components/dashboard/ChatBubble";
 import type { MessageRow } from "@/lib/db/dashboard";
@@ -97,58 +104,69 @@ export function ChatComposer({
   };
 
   return (
-    <div className="flex flex-1 flex-col">
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => (
-          <ChatBubble
-            key={msg.id}
-            content={msg.content}
-            role={msg.role as "user" | "assistant" | "system"}
-            timestamp={new Date(msg.created_at).toLocaleTimeString("sv-SE", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          />
-        ))}
-        {sending && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-lg px-4 py-2 text-sm text-muted-foreground">
-              Patienten skriver…
+    <Card className="border-border h-[700px] flex flex-col">
+      <CardHeader className="border-b border-border py-4">
+        <CardTitle className="text-lg">Patient-intervju</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 p-0 flex flex-col overflow-hidden">
+        {/* Messages */}
+        <ScrollArea ref={scrollRef} className="flex-1 p-6">
+          <div className="space-y-4">
+            {messages.map((msg) => (
+              <ChatBubble
+                key={msg.id}
+                content={msg.content}
+                role={msg.role as "user" | "assistant" | "system"}
+                timestamp={new Date(msg.created_at).toLocaleTimeString("sv-SE", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              />
+            ))}
+            {sending && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-2xl px-4 py-3 text-sm text-muted-foreground">
+                  Patienten skriver…
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Input */}
+        {isActive ? (
+          <div className="border-t border-border p-4 bg-muted/30">
+            <div className="flex gap-2">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ställ en fråga till patienten…"
+                maxLength={2000}
+                disabled={sending}
+                aria-label="Meddelande"
+                className="flex-1"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={sending || !input.trim()}
+                size="icon"
+                aria-label="Skicka"
+              >
+                <IconSend className="size-4" />
+              </Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Ställ öppna frågor för att samla anamnes och förstå patientens tillstånd
+            </p>
+          </div>
+        ) : (
+          <div className="border-t border-border p-4 text-center text-sm text-muted-foreground">
+            Sessionen är avslutad.
           </div>
         )}
-      </div>
-
-      {/* Input */}
-      {isActive ? (
-        <div className="border-t p-4">
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Skriv en fråga till patienten…"
-              maxLength={2000}
-              disabled={sending}
-              aria-label="Meddelande"
-            />
-            <Button
-              onClick={sendMessage}
-              disabled={sending || !input.trim()}
-              size="icon"
-              aria-label="Skicka"
-            >
-              <IconSend className="size-4" />
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="border-t p-4 text-center text-sm text-muted-foreground">
-          Sessionen är avslutad.
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

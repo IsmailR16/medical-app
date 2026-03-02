@@ -158,6 +158,11 @@ export async function getPublishedCases(): Promise<CaseListItem[]> {
 /*  Session + Messages for chat page                                   */
 /* ------------------------------------------------------------------ */
 
+export interface ClinicalDataSection {
+  title: string;
+  items: { label: string; value: string }[];
+}
+
 export interface SessionDetail {
   id: string;
   user_id: string;
@@ -173,7 +178,10 @@ export interface SessionDetail {
   primary_diagnosis: string | null;
   case_title: string;
   case_description: string;
+  case_specialty: string;
+  case_difficulty: string;
   presenting_complaint: string;
+  clinical_data: ClinicalDataSection[];
 }
 
 export interface MessageRow {
@@ -201,7 +209,7 @@ export async function getSessionWithMessages(
 
   const { data: caseRow } = await sb
     .from("cases")
-    .select("title, description, presenting_complaint")
+    .select("title, description, specialty, difficulty, presenting_complaint, vitals, lab_results, imaging, physical_exam")
     .eq("id", session.case_id)
     .single();
 
@@ -210,6 +218,21 @@ export async function getSessionWithMessages(
     .select("id, role, content, clinical_data_type, created_at")
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true });
+
+  // Build clinical data sections from the case JSONB columns
+  function jsonToItems(obj: Record<string, unknown>): { label: string; value: string }[] {
+    return Object.entries(obj ?? {}).map(([key, val]) => ({
+      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      value: String(val),
+    }));
+  }
+
+  const clinicalData: ClinicalDataSection[] = [
+    { title: "Vitala parametrar", items: jsonToItems(caseRow?.vitals as Record<string, unknown> ?? {}) },
+    { title: "Laboratorieprover", items: jsonToItems(caseRow?.lab_results as Record<string, unknown> ?? {}) },
+    { title: "Bilddiagnostik", items: jsonToItems(caseRow?.imaging as Record<string, unknown> ?? {}) },
+    { title: "Fysikaliska fynd", items: jsonToItems(caseRow?.physical_exam as Record<string, unknown> ?? {}) },
+  ].filter((s) => s.items.length > 0);
 
   return {
     session: {
@@ -227,7 +250,10 @@ export async function getSessionWithMessages(
       primary_diagnosis: session.primary_diagnosis,
       case_title: caseRow?.title ?? "Okänt fall",
       case_description: caseRow?.description ?? "",
+      case_specialty: caseRow?.specialty ?? "",
+      case_difficulty: caseRow?.difficulty ?? "medium",
       presenting_complaint: caseRow?.presenting_complaint ?? "",
+      clinical_data: clinicalData,
     },
     messages: (messages as MessageRow[]) ?? [],
   };
