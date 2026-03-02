@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IconSend } from "@tabler/icons-react";
+import { ChatBubble } from "@/components/dashboard/ChatBubble";
 import type { MessageRow } from "@/lib/db/dashboard";
 
 interface ChatComposerProps {
@@ -100,24 +101,15 @@ export function ChatComposer({
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg) => (
-          <div
+          <ChatBubble
             key={msg.id}
-            className={`flex ${
-              msg.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 text-sm ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : msg.role === "system"
-                    ? "bg-muted text-muted-foreground italic"
-                    : "bg-muted"
-              }`}
-            >
-              {msg.content}
-            </div>
-          </div>
+            content={msg.content}
+            role={msg.role as "user" | "assistant" | "system"}
+            timestamp={new Date(msg.created_at).toLocaleTimeString("sv-SE", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          />
         ))}
         {sending && (
           <div className="flex justify-start">

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { IconPlayerPlay } from "@tabler/icons-react";
+import { DifficultyBadge } from "@/components/dashboard/DifficultyBadge";
 import type { CaseListItem } from "@/lib/db/dashboard";
 
 interface CaseGridProps {
@@ -19,17 +20,7 @@ interface CaseGridProps {
   limitReached: boolean;
 }
 
-const difficultyLabel: Record<string, string> = {
-  easy: "Lätt",
-  medium: "Medel",
-  hard: "Svår",
-};
 
-const difficultyVariant: Record<string, "default" | "secondary" | "outline"> = {
-  easy: "outline",
-  medium: "secondary",
-  hard: "default",
-};
 
 export function CaseGrid({ cases, limitReached }: CaseGridProps) {
   const router = useRouter();
@@ -90,9 +81,7 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
           <CardHeader className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="outline">{c.specialty}</Badge>
-              <Badge variant={difficultyVariant[c.difficulty] ?? "outline"}>
-                {difficultyLabel[c.difficulty] ?? c.difficulty}
-              </Badge>
+              <DifficultyBadge difficulty={c.difficulty as "easy" | "medium" | "hard"} />
             </div>
             <CardTitle className="text-base">{c.title}</CardTitle>
             <CardDescription className="line-clamp-2">
