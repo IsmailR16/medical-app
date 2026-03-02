@@ -31,12 +31,6 @@ interface CaseGridProps {
   limitReached: boolean;
 }
 
-const difficultyMap: Record<string, "easy" | "medium" | "hard"> = {
-  Lätt: "easy",
-  Medel: "medium",
-  Svår: "hard",
-};
-
 export function CaseGrid({ cases, limitReached }: CaseGridProps) {
   const router = useRouter();
   const [startingId, setStartingId] = useState<string | null>(null);
@@ -123,7 +117,7 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
               placeholder="Sök efter titel eller beskrivning…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 bg-white"
             />
           </div>
         </div>
@@ -131,10 +125,10 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
         <div className="space-y-2">
           <Label htmlFor="specialty-filter">Specialitet</Label>
           <Select value={specialty} onValueChange={setSpecialty}>
-            <SelectTrigger id="specialty-filter">
+            <SelectTrigger id="specialty-filter" className="w-full bg-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="max-h-60">
               <SelectItem value="all">Alla specialiteter</SelectItem>
               {specialties.map((s) => (
                 <SelectItem key={s} value={s}>
@@ -148,10 +142,10 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
         <div className="space-y-2">
           <Label htmlFor="difficulty-filter">Svårighetsgrad</Label>
           <Select value={difficulty} onValueChange={setDifficulty}>
-            <SelectTrigger id="difficulty-filter">
+            <SelectTrigger id="difficulty-filter" className="w-full bg-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="max-h-60">
               <SelectItem value="all">Alla nivåer</SelectItem>
               <SelectItem value="easy">Lätt</SelectItem>
               <SelectItem value="medium">Medel</SelectItem>
@@ -200,7 +194,7 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
                 </p>
                 <Button
                   variant="outline"
-                  className="w-full group"
+                  className="w-full group mt-auto"
                   disabled={limitReached || startingId === c.id}
                   onClick={() => handleStart(c.id)}
                 >

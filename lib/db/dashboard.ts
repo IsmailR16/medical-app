@@ -148,7 +148,6 @@ export async function getPublishedCases(): Promise<CaseListItem[]> {
     .from("cases")
     .select("id, title, description, specialty, difficulty")
     .eq("is_published", true)
-    .eq("is_community", true)
     .order("title", { ascending: true });
 
   return (data as CaseListItem[]) ?? [];
