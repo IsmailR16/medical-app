@@ -258,3 +258,149 @@ export async function getSessionWithMessages(
     messages: (messages as MessageRow[]) ?? [],
   };
 }
+
+/* ------------------------------------------------------------------ */
+/*  All sessions (for sessions list page)                              */
+/* ------------------------------------------------------------------ */
+
+export interface SessionListItem {
+  id: string;
+  status: string;
+  started_at: string;
+  submitted_at: string | null;
+  evaluated_at: string | null;
+  case_title: string;
+  case_specialty: string;
+  case_difficulty: string;
+  overall_score: number | null;
+}
+
+export async function getAllSessions(
+  userId: string
+): Promise<SessionListItem[]> {
+  const sb = createServiceRoleClient();
+
+  const { data: sessions } = await sb
+    .from("sessions")
+    .select("id, status, started_at, submitted_at, evaluated_at, case_id")
+    .eq("user_id", userId)
+    .order("started_at", { ascending: false });
+
+  if (!sessions || sessions.length === 0) return [];
+
+  // Fetch case info
+  const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
+  const { data: cases } = await sb
+    .from("cases")
+    .select("id, title, specialty, difficulty")
+    .in("id", caseIds);
+  const caseMap = new Map(
+    (cases ?? []).map((c: { id: string; title: string; specialty: string; difficulty: string }) => [
+      c.id,
+      c,
+    ])
+  );
+
+  // Fetch evaluations for scored sessions
+  const sessionIds = sessions.map((s) => s.id as string);
+  const { data: evals } = await sb
+    .from("evaluations")
+    .select("session_id, overall_score")
+    .in("session_id", sessionIds);
+  const evalMap = new Map(
+    (evals ?? []).map((e: { session_id: string; overall_score: number }) => [
+      e.session_id,
+      e.overall_score,
+    ])
+  );
+
+  return sessions.map((s) => {
+    const c = caseMap.get(s.case_id as string);
+    return {
+      id: s.id as string,
+      status: s.status as string,
+      started_at: s.started_at as string,
+      submitted_at: (s.submitted_at as string) ?? null,
+      evaluated_at: (s.evaluated_at as string) ?? null,
+      case_title: c?.title ?? "Okänt fall",
+      case_specialty: c?.specialty ?? "",
+      case_difficulty: c?.difficulty ?? "medium",
+      overall_score: evalMap.get(s.id as string) ?? null,
+    };
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Evaluation detail                                                  */
+/* ------------------------------------------------------------------ */
+
+export interface EvaluationDetail {
+  id: string;
+  session_id: string;
+  overall_score: number;
+  history_taking_score: number;
+  physical_exam_score: number;
+  diagnosis_score: number;
+  treatment_score: number;
+  reasoning_score: number;
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  missed_findings: string[];
+  diagnosis_correct: boolean;
+  created_at: string;
+  case_title: string;
+  case_specialty: string;
+  case_difficulty: string;
+  hidden_diagnosis: string;
+}
+
+export async function getEvaluationBySession(
+  sessionId: string,
+  userId: string
+): Promise<EvaluationDetail | null> {
+  const sb = createServiceRoleClient();
+
+  // Verify ownership
+  const { data: session } = await sb
+    .from("sessions")
+    .select("id, case_id")
+    .eq("id", sessionId)
+    .eq("user_id", userId)
+    .single();
+  if (!session) return null;
+
+  const { data: ev } = await sb
+    .from("evaluations")
+    .select("*")
+    .eq("session_id", sessionId)
+    .single();
+  if (!ev) return null;
+
+  const { data: caseRow } = await sb
+    .from("cases")
+    .select("title, specialty, difficulty, hidden_diagnosis")
+    .eq("id", session.case_id)
+    .single();
+
+  return {
+    id: ev.id,
+    session_id: ev.session_id,
+    overall_score: ev.overall_score,
+    history_taking_score: ev.history_taking_score,
+    physical_exam_score: ev.physical_exam_score,
+    diagnosis_score: ev.diagnosis_score,
+    treatment_score: ev.treatment_score,
+    reasoning_score: ev.reasoning_score,
+    summary: ev.summary,
+    strengths: ev.strengths ?? [],
+    improvements: ev.improvements ?? [],
+    missed_findings: ev.missed_findings ?? [],
+    diagnosis_correct: ev.diagnosis_correct,
+    created_at: ev.created_at,
+    case_title: caseRow?.title ?? "Okänt fall",
+    case_specialty: caseRow?.specialty ?? "",
+    case_difficulty: caseRow?.difficulty ?? "medium",
+    hidden_diagnosis: caseRow?.hidden_diagnosis ?? "",
+  };
+}
