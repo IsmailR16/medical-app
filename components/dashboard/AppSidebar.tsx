@@ -1,15 +1,12 @@
 "use client";
 
-import {
-  IconHelp,
-  IconSettings,
-} from "@tabler/icons-react";
 import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import {
   IconCreditCard,
   IconLogout,
   IconUserCircle,
+  IconStethoscope,
 } from "@tabler/icons-react";
 
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
@@ -37,11 +34,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-} from "@/components/ui/sidebar";
-import { IconStethoscope } from "@tabler/icons-react";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
@@ -72,29 +64,6 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarNav />
-        {/* Secondary nav at bottom */}
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/settings">
-                    <IconSettings />
-                    <span>Inställningar</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/help">
-                    <IconHelp />
-                    <span>Hjälp</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <UserFooter user={user} />

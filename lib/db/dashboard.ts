@@ -404,3 +404,72 @@ export async function getEvaluationBySession(
     hidden_diagnosis: caseRow?.hidden_diagnosis ?? "",
   };
 }
+
+/* ------------------------------------------------------------------ */
+/*  Dashboard overview stats                                           */
+/* ------------------------------------------------------------------ */
+
+/** Average overall_score across all user evaluations. */
+export async function getAverageScore(userId: string): Promise<number> {
+  const sb = createServiceRoleClient();
+
+  // Get session IDs for this user
+  const { data: sessions } = await sb
+    .from("sessions")
+    .select("id")
+    .eq("user_id", userId);
+
+  if (!sessions || sessions.length === 0) return 0;
+
+  const sessionIds = sessions.map((s) => s.id as string);
+
+  const { data: evals } = await sb
+    .from("evaluations")
+    .select("overall_score")
+    .in("session_id", sessionIds);
+
+  if (!evals || evals.length === 0) return 0;
+
+  const sum = evals.reduce(
+    (acc, e) => acc + (e.overall_score as number),
+    0
+  );
+  return Math.round(sum / evals.length);
+}
+
+/** Number of consecutive days (up to today) with at least one session. */
+export async function getSessionStreak(userId: string): Promise<number> {
+  const sb = createServiceRoleClient();
+
+  const { data: sessions } = await sb
+    .from("sessions")
+    .select("started_at")
+    .eq("user_id", userId)
+    .order("started_at", { ascending: false });
+
+  if (!sessions || sessions.length === 0) return 0;
+
+  // Build unique date set (YYYY-MM-DD in local time)
+  const dateset = new Set<string>();
+  for (const s of sessions) {
+    dateset.add(new Date(s.started_at as string).toISOString().slice(0, 10));
+  }
+
+  // Walk backwards from today
+  let streak = 0;
+  const day = new Date();
+  day.setHours(0, 0, 0, 0);
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const key = day.toISOString().slice(0, 10);
+    if (dateset.has(key)) {
+      streak++;
+      day.setDate(day.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
