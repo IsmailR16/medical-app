@@ -28,7 +28,7 @@ export default function Navbar() {
             <Link
               key={href}
               href={href}
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm"
             >
               {label}
             </Link>
@@ -43,7 +43,7 @@ export default function Navbar() {
               </Button>
             </SignInButton>
             <SignUpButton>
-              <Button className="rounded-xl bg-blue-600 px-5 text-sm font-semibold shadow-md hover:bg-blue-700">
+              <Button className="rounded-xl bg-teal-700 px-5 text-sm font-semibold shadow-md hover:bg-teal-800">
                 Get Started
               </Button>
             </SignUpButton>
@@ -59,8 +59,8 @@ export default function Navbar() {
 
 function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-sm" aria-label="MedSim AI — Home">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white" aria-hidden="true">
+    <Link href="/" className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm" aria-label="MedSim AI — Home">
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-700 text-sm font-bold text-white" aria-hidden="true">
         M
       </div>
       <span className="text-xl font-bold tracking-tight text-slate-900">

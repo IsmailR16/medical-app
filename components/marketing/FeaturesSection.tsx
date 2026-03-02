@@ -49,7 +49,7 @@ export default function FeaturesSection() {
 function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <article className="group rounded-3xl border border-slate-100 bg-white p-8 transition-shadow hover:shadow-xl">
-      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 transition-colors group-hover:bg-teal-700 group-hover:text-white">
         {feature.icon}
       </div>
       <h3 className="mb-3 text-xl font-bold text-slate-900 lg:text-2xl">

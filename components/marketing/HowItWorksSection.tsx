@@ -60,10 +60,10 @@ export default function HowItWorksSection() {
         <ol className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4" role="list">
           {STEPS.map((step) => (
             <li key={step.number} className="relative flex flex-col rounded-3xl border border-slate-200 bg-white p-8">
-              <span className="mb-4 text-4xl font-black text-blue-100 lg:text-5xl">
+              <span className="mb-4 text-4xl font-black text-teal-200 lg:text-5xl">
                 {step.number}
               </span>
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
                 {step.icon}
               </div>
               <h3 className="mb-2 text-lg font-bold text-slate-900">{step.title}</h3>

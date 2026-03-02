@@ -22,7 +22,7 @@ export default function CTASection() {
         <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
           <Button
             asChild
-            className="h-auto w-full rounded-2xl bg-blue-600 px-8 py-4 text-lg font-bold shadow-xl shadow-blue-500/30 hover:bg-blue-700 sm:w-auto group"
+            className="h-auto w-full rounded-2xl bg-teal-700 px-8 py-4 text-lg font-bold shadow-xl shadow-teal-500/30 hover:bg-teal-800 sm:w-auto group"
           >
             <Link href="/sign-up">
               Start Practicing for Free

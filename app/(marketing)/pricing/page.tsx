@@ -105,7 +105,7 @@ export default function PricingPage() {
       >
         <div className="mx-auto max-w-3xl space-y-6">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-600">
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-teal-700">
             <Sparkles size={14} aria-hidden="true" />
             Enkel, transparent prissättning
           </div>
@@ -115,7 +115,7 @@ export default function PricingPage() {
             className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
           >
             Välj planen som passar{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
               din resa
             </span>
           </h1>
@@ -206,7 +206,7 @@ function BillingToggle({
         aria-checked={annual}
         aria-label="Växla årsbetalning"
         onClick={() => onChange(!annual)}
-        className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-slate-200 motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 data-[state=checked]:bg-blue-600"
+        className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-slate-200 motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2 data-[state=checked]:bg-teal-700"
         data-state={annual ? "checked" : "unchecked"}
       >
         <span
@@ -250,13 +250,13 @@ function PricingCard({
     <article
       className={`relative flex flex-col rounded-3xl border p-8 motion-safe:transition-shadow lg:p-10 ${
         isHighlighted
-          ? "border-blue-600 bg-white shadow-2xl shadow-blue-500/10 ring-1 ring-blue-600"
+          ? "border-teal-700 bg-white shadow-2xl shadow-teal-500/10 ring-1 ring-teal-700"
           : "border-slate-200 bg-white hover:shadow-xl"
       }`}
     >
       {/* Popular badge */}
       {isHighlighted && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-teal-700 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
           Mest populär
         </div>
       )}
@@ -298,7 +298,7 @@ function PricingCard({
           onClick={() => onCheckout(plan.name)}
           disabled={loading}
           aria-busy={loading}
-          className="mb-8 h-auto w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-base font-bold shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50 group"
+          className="mb-8 h-auto w-full rounded-2xl bg-teal-700 px-6 py-3.5 text-base font-bold shadow-xl shadow-teal-500/20 hover:bg-teal-800 disabled:opacity-50 group"
         >
           {loading ? "Laddar…" : plan.cta}
           <ChevronRight
@@ -312,7 +312,7 @@ function PricingCard({
           asChild
           className={`mb-8 h-auto w-full rounded-2xl px-6 py-3.5 text-base font-bold group ${
             isHighlighted
-              ? "bg-blue-600 shadow-xl shadow-blue-500/20 hover:bg-blue-700"
+              ? "bg-teal-700 shadow-xl shadow-teal-500/20 hover:bg-teal-800"
               : "bg-slate-900 hover:bg-slate-800"
           }`}
         >
@@ -333,7 +333,7 @@ function PricingCard({
           <li key={feature} className="flex items-start gap-3">
             <Check
               size={18}
-              className="mt-0.5 shrink-0 text-blue-600"
+              className="mt-0.5 shrink-0 text-teal-700"
               aria-hidden="true"
             />
             <span className="text-sm text-slate-700">{feature}</span>

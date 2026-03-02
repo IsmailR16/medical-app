@@ -36,7 +36,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-white">
               <div
-                className="flex h-7 w-7 items-center justify-center rounded bg-blue-600 text-xs font-bold"
+                className="flex h-7 w-7 items-center justify-center rounded bg-teal-700 text-xs font-bold"
                 aria-hidden="true"
               >
                 M
@@ -59,7 +59,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-sm"
+                      className="transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-sm"
                     >
                       {link.label}
                     </Link>

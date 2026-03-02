@@ -39,7 +39,7 @@ export default function SocialProofSection() {
               </p>
               <footer className="flex items-center gap-3">
                 <div
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700"
                   aria-hidden="true"
                 >
                   {testimonial.name[0]}
