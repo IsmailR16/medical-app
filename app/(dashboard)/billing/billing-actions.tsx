@@ -14,7 +14,11 @@ export default function BillingActions({ mode }: BillingActionsProps) {
   async function handleUpgrade() {
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planType: "pro_monthly" }),
+      });
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.error ?? "Kunde inte starta checkout.");
