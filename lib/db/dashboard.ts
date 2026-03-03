@@ -333,6 +333,92 @@ export async function getAllSessions(
 /*  Evaluation detail                                                  */
 /* ------------------------------------------------------------------ */
 
+export interface EvaluationListItem {
+  id: string;
+  session_id: string;
+  case_title: string;
+  case_specialty: string;
+  overall_score: number;
+  history_taking_score: number;
+  physical_exam_score: number;
+  diagnosis_score: number;
+  treatment_score: number;
+  created_at: string;
+  started_at: string;
+  duration_min: number | null;
+}
+
+export async function getEvaluatedSessions(
+  userId: string
+): Promise<EvaluationListItem[]> {
+  const sb = createServiceRoleClient();
+
+  // Get evaluated sessions
+  const { data: sessions } = await sb
+    .from("sessions")
+    .select("id, case_id, started_at, submitted_at, evaluated_at")
+    .eq("user_id", userId)
+    .in("status", ["evaluated", "submitted"])
+    .order("started_at", { ascending: false });
+
+  if (!sessions || sessions.length === 0) return [];
+
+  const sessionIds = sessions.map((s) => s.id as string);
+  const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
+
+  // Fetch evaluations
+  const { data: evals } = await sb
+    .from("evaluations")
+    .select(
+      "id, session_id, overall_score, history_taking_score, physical_exam_score, diagnosis_score, treatment_score, created_at"
+    )
+    .in("session_id", sessionIds);
+
+  const evalMap = new Map(
+    (evals ?? []).map((e: Record<string, unknown>) => [e.session_id as string, e])
+  );
+
+  // Fetch cases
+  const { data: cases } = await sb
+    .from("cases")
+    .select("id, title, specialty")
+    .in("id", caseIds);
+
+  const caseMap = new Map(
+    (cases ?? []).map((c: { id: string; title: string; specialty: string }) => [c.id, c])
+  );
+
+  return sessions
+    .filter((s) => evalMap.has(s.id as string))
+    .map((s) => {
+      const ev = evalMap.get(s.id as string) as Record<string, unknown>;
+      const c = caseMap.get(s.case_id as string);
+      const endTime = (s.submitted_at ?? s.evaluated_at) as string | null;
+      const durationMin = endTime
+        ? Math.round(
+            (new Date(endTime).getTime() -
+              new Date(s.started_at as string).getTime()) /
+              60000
+          )
+        : null;
+
+      return {
+        id: ev.id as string,
+        session_id: s.id as string,
+        case_title: c?.title ?? "Okänt fall",
+        case_specialty: c?.specialty ?? "",
+        overall_score: ev.overall_score as number,
+        history_taking_score: ev.history_taking_score as number,
+        physical_exam_score: ev.physical_exam_score as number,
+        diagnosis_score: ev.diagnosis_score as number,
+        treatment_score: ev.treatment_score as number,
+        created_at: ev.created_at as string,
+        started_at: s.started_at as string,
+        duration_min: durationMin,
+      };
+    });
+}
+
 export interface EvaluationDetail {
   id: string;
   session_id: string;
