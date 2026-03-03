@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import BillingActions from "./billing-actions";
+import { TopBar } from "@/components/dashboard/TopBar";
 
 export default async function BillingPage() {
   const user = await getOrCreateUser();
@@ -20,7 +21,9 @@ export default async function BillingPage() {
   const progressValue = isPro ? 0 : Math.min((usedCases / 3) * 100, 100);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <>
+      <TopBar title="Abonnemang" />
+      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-5xl mx-auto w-full">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-semibold mb-2">Abonnemang</h1>
@@ -282,6 +285,7 @@ export default async function BillingPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

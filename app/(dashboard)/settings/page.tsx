@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { getOrCreateUser } from "@/lib/auth/user";
 import SettingsActions from "./settings-actions";
+import { TopBar } from "@/components/dashboard/TopBar";
 
 export default async function SettingsPage() {
   const clerkUser = await currentUser();
@@ -27,7 +28,9 @@ export default async function SettingsPage() {
     .slice(0, 2);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <>
+      <TopBar title="Inställningar" />
+      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-4xl mx-auto w-full">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-semibold mb-2">Inställningar</h1>
@@ -166,6 +169,7 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }
