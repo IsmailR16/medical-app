@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { IconSend } from "@tabler/icons-react";
 import { ChatBubble } from "@/components/dashboard/ChatBubble";
 import type { MessageRow } from "@/lib/db/dashboard";
@@ -110,7 +110,7 @@ export function ChatComposer({
       </CardHeader>
       <CardContent className="flex-1 p-0 flex flex-col overflow-hidden">
         {/* Messages */}
-        <ScrollArea ref={scrollRef} className="flex-1 p-6">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-6">
           <div className="space-y-4">
             {messages.map((msg) => (
               <ChatBubble
@@ -131,7 +131,7 @@ export function ChatComposer({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Input */}
         {isActive ? (
