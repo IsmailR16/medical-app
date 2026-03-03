@@ -71,7 +71,7 @@ export default async function SessionsPage() {
       {/* Stats */}
       <div className="grid md:grid-cols-4 gap-4">
         <Card className="border-border">
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="text-2xl font-semibold mb-1">{total}</div>
             <div className="text-sm text-muted-foreground">
               Totalt antal sessioner
@@ -79,7 +79,7 @@ export default async function SessionsPage() {
           </CardContent>
         </Card>
         <Card className="border-border">
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="text-2xl font-semibold mb-1 text-emerald-600">
               {completed}
             </div>
@@ -87,7 +87,7 @@ export default async function SessionsPage() {
           </CardContent>
         </Card>
         <Card className="border-border">
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="text-2xl font-semibold mb-1 text-amber-600">
               {inProgress}
             </div>
@@ -95,7 +95,7 @@ export default async function SessionsPage() {
           </CardContent>
         </Card>
         <Card className="border-border">
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="text-2xl font-semibold mb-1">{avgScore}</div>
             <div className="text-sm text-muted-foreground">
               Genomsnittlig poäng
