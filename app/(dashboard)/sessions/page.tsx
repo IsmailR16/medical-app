@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DifficultyBadge } from "@/components/dashboard/DifficultyBadge";
+import { TopBar } from "@/components/dashboard/TopBar";
 
 export default async function SessionsPage() {
   const user = await getOrCreateUser();
@@ -48,7 +49,9 @@ export default async function SessionsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <>
+      <TopBar title="Mina sessioner" />
+      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -215,6 +218,7 @@ export default async function SessionsPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 }
