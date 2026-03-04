@@ -54,7 +54,14 @@ export function DiagnosisModal({
         throw new Error(body?.error ?? "Kunde inte skicka diagnosen.");
       }
 
-      toast.success("Diagnos inskickad! ✅", { id: toastId });
+      const data = await res.json();
+
+      if (data.evaluated) {
+        toast.success(`Utvärderad! Poäng: ${data.score}/100 ✅`, { id: toastId });
+      } else {
+        toast.success("Diagnos inskickad! ✅", { id: toastId });
+      }
+
       onOpenChange(false);
       router.refresh();
     } catch (err) {
