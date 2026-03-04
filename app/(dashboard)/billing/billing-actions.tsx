@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 
 interface BillingActionsProps {
   mode: "upgrade" | "manage";
+  interval?: "monthly" | "yearly";
 }
 
-export default function BillingActions({ mode }: BillingActionsProps) {
+export default function BillingActions({ mode, interval = "monthly" }: BillingActionsProps) {
   const [loading, setLoading] = useState(false);
 
   async function handleUpgrade() {
@@ -17,7 +18,7 @@ export default function BillingActions({ mode }: BillingActionsProps) {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: "pro_monthly" }),
+        body: JSON.stringify({ planType: `pro_${interval}` }),
       });
       const data = await res.json();
       if (!res.ok) {

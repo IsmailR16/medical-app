@@ -36,8 +36,8 @@ export const PLANS: Plan[] = [
     name: "Pro",
     description:
       "För läkarstudenter som vill bemästra kliniskt resonemang på allvar.",
-    monthlyPrice: 299,
-    yearlyPrice: 199,
+    monthlyPrice: 95,
+    yearlyPrice: 71,
     highlighted: true,
     cta: "Starta gratis provperiod",
     href: "/sign-up?plan=pro",
