@@ -63,7 +63,7 @@ export function DiagnosisModal({
       }
 
       onOpenChange(false);
-      router.refresh();
+      router.push(`/evaluations/${sessionId}`);
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Något gick fel.",

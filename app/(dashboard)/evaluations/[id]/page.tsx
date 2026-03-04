@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ScoreCard } from "@/components/dashboard/ScoreCard";
+import { TopBar } from "@/components/dashboard/TopBar";
 
 interface EvaluationPageProps {
   params: Promise<{ id: string }>;
@@ -51,7 +52,9 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <>
+      <TopBar title="Utvärdering" />
+      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-5xl mx-auto w-full">
       {/* Back */}
       <Link href="/sessions">
         <Button variant="ghost" size="sm">
@@ -244,5 +247,6 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
         </Link>
       </div>
     </div>
+    </>
   );
 }
