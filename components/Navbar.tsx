@@ -20,8 +20,10 @@ export default function Navbar() {
       className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl"
       role="banner"
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:h-20 lg:px-8">
-        <Logo />
+      <div className="mx-auto flex h-16 max-w-7xl items-center px-6 lg:h-20 lg:px-8">
+        <div className="flex-1">
+          <Logo />
+        </div>
 
         <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map(({ href, label }) => (
@@ -35,7 +37,7 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-center justify-end gap-3">
           <SignedOut>
             <SignInButton>
               <Button variant="ghost" className="text-sm font-semibold text-slate-700">
