@@ -103,7 +103,7 @@ export async function POST(
   const { data: caseRow } = await sb
     .from("cases")
     .select(
-      "patient_name, patient_age, patient_gender, patient_background, presenting_complaint, hidden_diagnosis, differential_diagnoses, vitals, lab_results, imaging, physical_exam, medications, system_prompt_extra"
+      "description, patient_name, patient_age, patient_gender, patient_background, presenting_complaint, hidden_diagnosis, differential_diagnoses, vitals, lab_results, imaging, physical_exam, medications, system_prompt_extra"
     )
     .eq("id", session.case_id)
     .single();
@@ -116,6 +116,7 @@ export async function POST(
   }
 
   const caseContext: CaseContext = {
+    description: caseRow.description,
     patient_name: caseRow.patient_name,
     patient_age: caseRow.patient_age,
     patient_gender: caseRow.patient_gender,
