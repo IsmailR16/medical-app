@@ -25,7 +25,7 @@ export function ChatBubble({ content, role, timestamp }: ChatBubbleProps) {
                 : "border border-border bg-white text-foreground dark:bg-card"
           )}
         >
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
             {content}
           </p>
         </div>

@@ -24,7 +24,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
   return (
     <>
       <TopBar title={session.case_title} />
-      <div className="max-w-[1600px] mx-auto px-4 py-6 lg:px-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 py-6 lg:px-6">
         {/* Header with title, badges, and submit button */}
         <SessionHeader
           sessionId={session.id}
@@ -38,7 +38,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
         {/* 2-column layout: Chat (2/3) + Clinical Data (1/3) */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Chat Area */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0">
             <ChatComposer
               sessionId={session.id}
               initialMessages={messages}

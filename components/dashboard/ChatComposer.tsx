@@ -104,13 +104,13 @@ export function ChatComposer({
   };
 
   return (
-    <Card className="border-border h-[700px] flex flex-col">
+    <Card className="border-border h-[700px] flex flex-col overflow-hidden">
       <CardHeader className="border-b border-border py-4">
         <CardTitle className="text-lg">Patient-intervju</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 p-0 flex flex-col overflow-hidden">
         {/* Messages */}
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-6">
+        <div ref={scrollRef} className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-6">
           <div className="space-y-4">
             {messages.map((msg) => (
               <ChatBubble
