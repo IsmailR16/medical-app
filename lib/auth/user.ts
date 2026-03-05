@@ -1,3 +1,4 @@
+import "server-only";
 import { currentUser } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
