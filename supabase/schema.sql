@@ -1,12 +1,8 @@
 -- =============================================================================
 -- MedSim AI — Full Database Schema
 -- =============================================================================
--- Run this file against your Supabase SQL editor to create all tables.
--- Order matters: tables with foreign keys come after the tables they reference.
--- =============================================================================
 
--- 1. USERS (already exists — included here for completeness)
--- If you already have this table, skip this section.
+-- 1. USERS
 -- -----------------------------------------------------------------------------
 
 create table public.users (
@@ -279,9 +275,6 @@ create table public.usage (
 
 -- =============================================================================
 -- Row-Level Security (RLS) policies
--- Enable RLS on all tables so Supabase enforces access control.
--- The service-role client (used in API routes/webhooks) bypasses RLS.
--- These policies cover the browser Supabase client if used directly.
 -- =============================================================================
 
 alter table public.users enable row level security;
