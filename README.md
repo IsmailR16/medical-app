@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Medical Simulation App
 
-## Getting Started
+**AI-powered clinical case simulations for medical students.**
 
-First, run the development server:
+> ⚠️ **This app is currently in development mode.** Features may change and data may be reset.
+>
+> 🇸🇪 The core application (UI, cases, and AI interactions) is in **Swedish**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🔗 **Live demo:** [medical-app-five-orpin.vercel.app](https://medical-app-five-orpin.vercel.app)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What is MedSim AI?
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+MedSim AI lets medical students practice clinical reasoning by interacting with AI-simulated patients. You pick a case, take a history, order tests, and submit a diagnosis — then receive an instant evaluation with feedback on what you did well and what you missed.
 
-## Learn More
+### Key Features
 
-To learn more about Next.js, take a look at the following resources:
+- 🩺 **AI Patient Conversations** — Chat with a realistic AI patient that responds based on the clinical case
+- 🧪 **Clinical Data** — Request vitals, lab results, and imaging during the consultation
+- 📊 **Instant Evaluation** — Get scored on history-taking, clinical reasoning, and diagnostic accuracy
+- 💳 **Subscription Plans** — Free tier with limited cases, Pro tier for unlimited access
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Test Payments
 
-## Deploy on Vercel
+Stripe is running in **test mode**. To try a Pro subscription, use:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Field       | Value                    |
+|-------------|--------------------------|
+| Card number | `4242 4242 4242 4242`    |
+| Expiry      | Any future date          |
+| CVC         | Any 3 digits             |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Tech Stack
+
+- **Next.js** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS** + **shadcn/ui**
+- **Clerk** — Authentication
+- **Supabase** — Database (PostgreSQL)
+- **OpenAI** — AI patient & evaluation engine
+- **Stripe** — Subscription billing
+- **Vercel** — Hosting
