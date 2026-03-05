@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
 import ToastProvider from "@/components/ToastProvider";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         >
           <ToastProvider />
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
