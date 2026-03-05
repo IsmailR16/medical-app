@@ -58,33 +58,28 @@ export async function POST(request: Request) {
     );
   }
 
-  /* ---- Free-tier limit check ---- */
+  /* ---- Free-tier limit check (atomic) ---- */
   const isFree = userRow.plan === "free";
 
   if (isFree) {
     const period = currentPeriod();
 
-    // Upsert usage row (create if missing) and check count atomically
-    const { data: usageRow } = await sb
-      .from("usage")
-      .upsert(
-        { user_id: userId, period, sessions_started: 0 },
-        { onConflict: "user_id,period", ignoreDuplicates: true }
-      )
-      .select("sessions_started")
-      .single();
+    const { data: result, error: rpcError } = await sb.rpc("increment_usage", {
+      p_user_id: userId,
+      p_period: period,
+      p_limit: FREE_LIMIT,
+    });
 
-    // Re-fetch to get current value (upsert with ignoreDuplicates doesn't return the existing row reliably)
-    const { data: currentUsage } = await sb
-      .from("usage")
-      .select("sessions_started")
-      .eq("user_id", userId)
-      .eq("period", period)
-      .single();
+    if (rpcError) {
+      console.error("Usage increment RPC failed:", rpcError);
+      return NextResponse.json(
+        { error: "Kunde inte verifiera användningsgräns." },
+        { status: 500 }
+      );
+    }
 
-    const used = currentUsage?.sessions_started ?? usageRow?.sessions_started ?? 0;
-
-    if (used >= FREE_LIMIT) {
+    // result === -1 means the limit was already reached
+    if (result === -1) {
       return NextResponse.json(
         {
           error: `Du har nått månadens gräns (${FREE_LIMIT} fall). Uppgradera till Pro för obegränsat.`,
@@ -92,14 +87,6 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
-
-    // Increment usage atomically using RPC
-    // Fallback: simple increment (tiny race window acceptable for MVP)
-    await sb
-      .from("usage")
-      .update({ sessions_started: used + 1 })
-      .eq("user_id", userId)
-      .eq("period", period);
   }
 
   /* ---- Create session ---- */

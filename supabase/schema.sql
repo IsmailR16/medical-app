@@ -346,3 +346,39 @@ create policy "Members can read fellow members"
       where user_id = auth.jwt() ->> 'sub'
     )
   );
+
+-- =============================================================================
+-- FUNCTIONS
+-- =============================================================================
+
+-- Atomic usage increment for free-tier limit enforcement.
+-- Returns the new count if increment succeeds, or -1 if already at/over the limit.
+create or replace function public.increment_usage(
+  p_user_id text,
+  p_period text,
+  p_limit int
+)
+returns int
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  new_count int;
+begin
+  insert into public.usage (user_id, period, sessions_started)
+  values (p_user_id, p_period, 1)
+  on conflict (user_id, period) do update
+    set sessions_started = public.usage.sessions_started + 1,
+        updated_at = now()
+    where public.usage.sessions_started < p_limit
+  returning sessions_started into new_count;
+
+  -- If new_count is null, the WHERE clause prevented the update (limit reached)
+  if new_count is null then
+    return -1;
+  end if;
+
+  return new_count;
+end;
+$$;
