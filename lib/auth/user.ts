@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { currentUser } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
@@ -20,14 +21,14 @@ export interface AppUser {
 }
 
 /**
- * JIT (Just-In-Time) user sync.
+ * JIT (Just-In-Time) user sync — deduplicated per request via React cache().
  * Call this in any server component or API route that needs the current user.
  *
  * - If the user already exists in Supabase → returns it
  * - If not → creates a new row with free-tier defaults
  * - Also updates email/name/avatar if they changed in Clerk
  */
-export async function getOrCreateUser(): Promise<AppUser | null> {
+export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
   const clerkUser = await currentUser();
   if (!clerkUser) return null;
 
@@ -94,4 +95,4 @@ export async function getOrCreateUser(): Promise<AppUser | null> {
   }
 
   return newUser as AppUser;
-}
+});
