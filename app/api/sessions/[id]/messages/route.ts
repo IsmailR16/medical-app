@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import {
@@ -230,6 +231,10 @@ export async function POST(
         .select("id, role, content, created_at")
         .single();
 
+      /* ---- Invalidate cached data ---- */
+      revalidateTag(`sessions-${userId}`, "default");
+      revalidateTag(`evaluations-${userId}`, "default");
+
       return NextResponse.json({
         message: {
           id: evalMsg?.id ?? "eval",
@@ -244,6 +249,8 @@ export async function POST(
       console.error("Evaluation failed:", evalErr);
 
       // Still mark as submitted even if evaluation fails
+      revalidateTag(`sessions-${userId}`, "default");
+
       const fallbackContent =
         "Din diagnos har tagits emot. Utvärderingen misslyckades tyvärr — försök igen senare.";
 

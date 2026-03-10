@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
@@ -114,6 +115,10 @@ export async function POST(request: Request) {
     role: "assistant",
     content: caseRow.presenting_complaint,
   });
+
+  /* ---- Invalidate cached data ---- */
+  revalidateTag(`sessions-${userId}`, "default");
+  revalidateTag(`usage-${userId}`, "default");
 
   return NextResponse.json({ sessionId: session.id });
 }

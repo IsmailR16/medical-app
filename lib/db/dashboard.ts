@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
 /* ------------------------------------------------------------------ */
@@ -45,90 +46,98 @@ export function currentPeriod(): string {
 /* ------------------------------------------------------------------ */
 
 /** Fetch the usage row for the current month (or null if none exists). */
-export async function getMonthlyUsage(
-  userId: string
-): Promise<UsageRow | null> {
-  const sb = createServiceRoleClient();
-  const { data } = await sb
-    .from("usage")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("period", currentPeriod())
-    .single();
-  return (data as UsageRow) ?? null;
-}
+export const getMonthlyUsage = (userId: string) =>
+  unstable_cache(
+    async (): Promise<UsageRow | null> => {
+      const sb = createServiceRoleClient();
+      const { data } = await sb
+        .from("usage")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("period", currentPeriod())
+        .single();
+      return (data as UsageRow) ?? null;
+    },
+    [`usage-${userId}-${currentPeriod()}`],
+    { tags: [`usage-${userId}`], revalidate: 30 }
+  )();
 
 /* ------------------------------------------------------------------ */
 /*  Recent sessions (last 10)                                          */
 /* ------------------------------------------------------------------ */
 
-export async function getRecentSessions(
-  userId: string
-): Promise<RecentSession[]> {
-  const sb = createServiceRoleClient();
-  const { data } = await sb
-    .from("sessions")
-    .select("id, status, started_at, case_id")
-    .eq("user_id", userId)
-    .order("started_at", { ascending: false })
-    .limit(10);
+export const getRecentSessions = (userId: string) =>
+  unstable_cache(
+    async (): Promise<RecentSession[]> => {
+      const sb = createServiceRoleClient();
+      const { data } = await sb
+        .from("sessions")
+        .select("id, status, started_at, case_id")
+        .eq("user_id", userId)
+        .order("started_at", { ascending: false })
+        .limit(10);
 
-  if (!data || data.length === 0) return [];
+      if (!data || data.length === 0) return [];
 
-  // Fetch case titles in a single query
-  const caseIds = [...new Set(data.map((s) => s.case_id as string))];
-  const { data: cases } = await sb
-    .from("cases")
-    .select("id, title")
-    .in("id", caseIds);
+      const caseIds = [...new Set(data.map((s) => s.case_id as string))];
+      const { data: cases } = await sb
+        .from("cases")
+        .select("id, title")
+        .in("id", caseIds);
 
-  const titleMap = new Map(
-    (cases ?? []).map((c: { id: string; title: string }) => [c.id, c.title])
-  );
+      const titleMap = new Map(
+        (cases ?? []).map((c: { id: string; title: string }) => [c.id, c.title])
+      );
 
-  return data.map((s) => ({
-    id: s.id as string,
-    status: s.status as string,
-    started_at: s.started_at as string,
-    case_title: titleMap.get(s.case_id as string) ?? "Okänt fall",
-  }));
-}
+      return data.map((s) => ({
+        id: s.id as string,
+        status: s.status as string,
+        started_at: s.started_at as string,
+        case_title: titleMap.get(s.case_id as string) ?? "Okänt fall",
+      }));
+    },
+    [`recent-sessions-${userId}`],
+    { tags: [`sessions-${userId}`], revalidate: 60 }
+  )();
 
 /* ------------------------------------------------------------------ */
 /*  Latest evaluations (last 5)                                        */
 /* ------------------------------------------------------------------ */
 
-export async function getLatestEvaluations(
-  userId: string
-): Promise<LatestEvaluation[]> {
-  const sb = createServiceRoleClient();
-  const { data } = await sb
-    .from("evaluations")
-    .select("id, overall_score, diagnosis_correct, created_at, case_id")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+export const getLatestEvaluations = (userId: string) =>
+  unstable_cache(
+    async (): Promise<LatestEvaluation[]> => {
+      const sb = createServiceRoleClient();
+      const { data } = await sb
+        .from("evaluations")
+        .select("id, overall_score, diagnosis_correct, created_at, case_id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5);
 
-  if (!data || data.length === 0) return [];
+      if (!data || data.length === 0) return [];
 
-  const caseIds = [...new Set(data.map((e) => e.case_id as string))];
-  const { data: cases } = await sb
-    .from("cases")
-    .select("id, title")
-    .in("id", caseIds);
+      const caseIds = [...new Set(data.map((e) => e.case_id as string))];
+      const { data: cases } = await sb
+        .from("cases")
+        .select("id, title")
+        .in("id", caseIds);
 
-  const titleMap = new Map(
-    (cases ?? []).map((c: { id: string; title: string }) => [c.id, c.title])
-  );
+      const titleMap = new Map(
+        (cases ?? []).map((c: { id: string; title: string }) => [c.id, c.title])
+      );
 
-  return data.map((e) => ({
-    id: e.id as string,
-    overall_score: e.overall_score as number,
-    diagnosis_correct: e.diagnosis_correct as boolean,
-    created_at: e.created_at as string,
-    case_title: titleMap.get(e.case_id as string) ?? "Okänt fall",
-  }));
-}
+      return data.map((e) => ({
+        id: e.id as string,
+        overall_score: e.overall_score as number,
+        diagnosis_correct: e.diagnosis_correct as boolean,
+        created_at: e.created_at as string,
+        case_title: titleMap.get(e.case_id as string) ?? "Okänt fall",
+      }));
+    },
+    [`latest-evals-${userId}`],
+    { tags: [`evaluations-${userId}`], revalidate: 60 }
+  )();
 
 /* ------------------------------------------------------------------ */
 /*  Published community cases for the case picker                      */
@@ -142,16 +151,21 @@ export interface CaseListItem {
   difficulty: string;
 }
 
-export async function getPublishedCases(): Promise<CaseListItem[]> {
-  const sb = createServiceRoleClient();
-  const { data } = await sb
-    .from("cases")
-    .select("id, title, description, specialty, difficulty")
-    .eq("is_published", true)
-    .order("title", { ascending: true });
+export const getPublishedCases = () =>
+  unstable_cache(
+    async (): Promise<CaseListItem[]> => {
+      const sb = createServiceRoleClient();
+      const { data } = await sb
+        .from("cases")
+        .select("id, title, description, specialty, difficulty")
+        .eq("is_published", true)
+        .order("title", { ascending: true });
 
-  return (data as CaseListItem[]) ?? [];
-}
+      return (data as CaseListItem[]) ?? [];
+    },
+    ["published-cases"],
+    { tags: ["cases"], revalidate: 120 }
+  )();
 
 /* ------------------------------------------------------------------ */
 /*  Session + Messages for chat page                                   */
@@ -274,10 +288,10 @@ export interface SessionListItem {
   overall_score: number | null;
 }
 
-export async function getAllSessions(
-  userId: string
-): Promise<SessionListItem[]> {
-  const sb = createServiceRoleClient();
+export const getAllSessions = (userId: string) =>
+  unstable_cache(
+    async (): Promise<SessionListItem[]> => {
+      const sb = createServiceRoleClient();
 
   const { data: sessions } = await sb
     .from("sessions")
@@ -327,7 +341,10 @@ export async function getAllSessions(
       overall_score: evalMap.get(s.id as string) ?? null,
     };
   });
-}
+    },
+    [`all-sessions-${userId}`],
+    { tags: [`sessions-${userId}`], revalidate: 60 }
+  )();
 
 /* ------------------------------------------------------------------ */
 /*  Evaluation detail                                                  */
@@ -348,10 +365,10 @@ export interface EvaluationListItem {
   duration_min: number | null;
 }
 
-export async function getEvaluatedSessions(
-  userId: string
-): Promise<EvaluationListItem[]> {
-  const sb = createServiceRoleClient();
+export const getEvaluatedSessions = (userId: string) =>
+  unstable_cache(
+    async (): Promise<EvaluationListItem[]> => {
+      const sb = createServiceRoleClient();
 
   // Get evaluated sessions
   const { data: sessions } = await sb
@@ -417,7 +434,10 @@ export async function getEvaluatedSessions(
         duration_min: durationMin,
       };
     });
-}
+    },
+    [`evaluated-sessions-${userId}`],
+    { tags: [`evaluations-${userId}`], revalidate: 60 }
+  )();
 
 export interface EvaluationDetail {
   id: string;
@@ -440,121 +460,130 @@ export interface EvaluationDetail {
   hidden_diagnosis: string;
 }
 
-export async function getEvaluationBySession(
-  sessionId: string,
-  userId: string
-): Promise<EvaluationDetail | null> {
-  const sb = createServiceRoleClient();
+export const getEvaluationBySession = (sessionId: string, userId: string) =>
+  unstable_cache(
+    async (): Promise<EvaluationDetail | null> => {
+      const sb = createServiceRoleClient();
 
-  // Verify ownership
-  const { data: session } = await sb
-    .from("sessions")
-    .select("id, case_id")
-    .eq("id", sessionId)
-    .eq("user_id", userId)
-    .single();
-  if (!session) return null;
+      // Verify ownership
+      const { data: session } = await sb
+        .from("sessions")
+        .select("id, case_id")
+        .eq("id", sessionId)
+        .eq("user_id", userId)
+        .single();
+      if (!session) return null;
 
-  const { data: ev } = await sb
-    .from("evaluations")
-    .select("*")
-    .eq("session_id", sessionId)
-    .single();
-  if (!ev) return null;
+      const { data: ev } = await sb
+        .from("evaluations")
+        .select("*")
+        .eq("session_id", sessionId)
+        .single();
+      if (!ev) return null;
 
-  const { data: caseRow } = await sb
-    .from("cases")
-    .select("title, specialty, difficulty, hidden_diagnosis")
-    .eq("id", session.case_id)
-    .single();
+      const { data: caseRow } = await sb
+        .from("cases")
+        .select("title, specialty, difficulty, hidden_diagnosis")
+        .eq("id", session.case_id)
+        .single();
 
-  return {
-    id: ev.id,
-    session_id: ev.session_id,
-    overall_score: ev.overall_score,
-    history_taking_score: ev.history_taking_score,
-    physical_exam_score: ev.physical_exam_score,
-    diagnosis_score: ev.diagnosis_score,
-    treatment_score: ev.treatment_score,
-    reasoning_score: ev.reasoning_score,
-    summary: ev.summary,
-    strengths: ev.strengths ?? [],
-    improvements: ev.improvements ?? [],
-    missed_findings: ev.missed_findings ?? [],
-    diagnosis_correct: ev.diagnosis_correct,
-    created_at: ev.created_at,
-    case_title: caseRow?.title ?? "Okänt fall",
-    case_specialty: caseRow?.specialty ?? "",
-    case_difficulty: caseRow?.difficulty ?? "medium",
-    hidden_diagnosis: caseRow?.hidden_diagnosis ?? "",
-  };
-}
+      return {
+        id: ev.id,
+        session_id: ev.session_id,
+        overall_score: ev.overall_score,
+        history_taking_score: ev.history_taking_score,
+        physical_exam_score: ev.physical_exam_score,
+        diagnosis_score: ev.diagnosis_score,
+        treatment_score: ev.treatment_score,
+        reasoning_score: ev.reasoning_score,
+        summary: ev.summary,
+        strengths: ev.strengths ?? [],
+        improvements: ev.improvements ?? [],
+        missed_findings: ev.missed_findings ?? [],
+        diagnosis_correct: ev.diagnosis_correct,
+        created_at: ev.created_at,
+        case_title: caseRow?.title ?? "Okänt fall",
+        case_specialty: caseRow?.specialty ?? "",
+        case_difficulty: caseRow?.difficulty ?? "medium",
+        hidden_diagnosis: caseRow?.hidden_diagnosis ?? "",
+      };
+    },
+    [`evaluation-${sessionId}`],
+    { tags: [`evaluations-${userId}`, `evaluation-${sessionId}`], revalidate: 300 }
+  )();
 
 /* ------------------------------------------------------------------ */
 /*  Dashboard overview stats                                           */
 /* ------------------------------------------------------------------ */
 
 /** Average overall_score across all user evaluations. */
-export async function getAverageScore(userId: string): Promise<number> {
-  const sb = createServiceRoleClient();
+export const getAverageScore = (userId: string) =>
+  unstable_cache(
+    async (): Promise<number> => {
+      const sb = createServiceRoleClient();
 
-  // Get session IDs for this user
-  const { data: sessions } = await sb
-    .from("sessions")
-    .select("id")
-    .eq("user_id", userId);
+      const { data: sessions } = await sb
+        .from("sessions")
+        .select("id")
+        .eq("user_id", userId);
 
-  if (!sessions || sessions.length === 0) return 0;
+      if (!sessions || sessions.length === 0) return 0;
 
-  const sessionIds = sessions.map((s) => s.id as string);
+      const sessionIds = sessions.map((s) => s.id as string);
 
-  const { data: evals } = await sb
-    .from("evaluations")
-    .select("overall_score")
-    .in("session_id", sessionIds);
+      const { data: evals } = await sb
+        .from("evaluations")
+        .select("overall_score")
+        .in("session_id", sessionIds);
 
-  if (!evals || evals.length === 0) return 0;
+      if (!evals || evals.length === 0) return 0;
 
-  const sum = evals.reduce(
-    (acc, e) => acc + (e.overall_score as number),
-    0
-  );
-  return Math.round(sum / evals.length);
-}
+      const sum = evals.reduce(
+        (acc, e) => acc + (e.overall_score as number),
+        0
+      );
+      return Math.round(sum / evals.length);
+    },
+    [`avg-score-${userId}`],
+    { tags: [`evaluations-${userId}`], revalidate: 60 }
+  )();
 
 /** Number of consecutive days (up to today) with at least one session. */
-export async function getSessionStreak(userId: string): Promise<number> {
-  const sb = createServiceRoleClient();
+export const getSessionStreak = (userId: string) =>
+  unstable_cache(
+    async (): Promise<number> => {
+      const sb = createServiceRoleClient();
 
-  const { data: sessions } = await sb
-    .from("sessions")
-    .select("started_at")
-    .eq("user_id", userId)
-    .order("started_at", { ascending: false });
+      const { data: sessions } = await sb
+        .from("sessions")
+        .select("started_at")
+        .eq("user_id", userId)
+        .order("started_at", { ascending: false });
 
-  if (!sessions || sessions.length === 0) return 0;
+      if (!sessions || sessions.length === 0) return 0;
 
-  // Build unique date set (YYYY-MM-DD in local time)
-  const dateset = new Set<string>();
-  for (const s of sessions) {
-    dateset.add(new Date(s.started_at as string).toISOString().slice(0, 10));
-  }
+      const dateset = new Set<string>();
+      for (const s of sessions) {
+        dateset.add(new Date(s.started_at as string).toISOString().slice(0, 10));
+      }
 
-  // Walk backwards from today
-  let streak = 0;
-  const day = new Date();
-  day.setHours(0, 0, 0, 0);
+      let streak = 0;
+      const day = new Date();
+      day.setHours(0, 0, 0, 0);
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const key = day.toISOString().slice(0, 10);
-    if (dateset.has(key)) {
-      streak++;
-      day.setDate(day.getDate() - 1);
-    } else {
-      break;
-    }
-  }
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const key = day.toISOString().slice(0, 10);
+        if (dateset.has(key)) {
+          streak++;
+          day.setDate(day.getDate() - 1);
+        } else {
+          break;
+        }
+      }
 
-  return streak;
-}
+      return streak;
+    },
+    [`streak-${userId}`],
+    { tags: [`sessions-${userId}`], revalidate: 60 }
+  )();
