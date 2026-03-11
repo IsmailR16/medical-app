@@ -22,8 +22,6 @@ export default clerkMiddleware(async (auth, req) => {
     const {userId} = userAuth;
     const {pathname, origin} = req.nextUrl;
 
-    console.log("Middleware auth check:", { userId, pathname, origin });
-
     if (!isPublicRoute(req) && !userId) {
       return NextResponse.redirect(new URL("/sign-up", origin));
     }
