@@ -10,21 +10,21 @@ interface Feature {
 const FEATURES: Feature[] = [
   {
     icon: <Brain aria-hidden="true" />,
-    title: "Cognitive Depth",
+    title: "Kognitivt djup",
     description:
-      "Patients remember history, respond to nuanced questions, and display realistic emotional states grounded in case data.",
+      "Patienterna minns sin historik, svarar på nyanserade frågor och visar realistiska känslotillstånd grundade i falldata.",
   },
   {
     icon: <Shield aria-hidden="true" />,
-    title: "Risk-Free Practice",
+    title: "Riskfri träning",
     description:
-      "Simulate high-stakes clinical encounters without risk. Learn from mistakes in a controlled, judgment-free setting.",
+      "Simulera högriskscenarier i kliniska möten utan risk. Lär dig av misstag i en kontrollerad och dömningsfri miljö.",
   },
   {
     icon: <Zap aria-hidden="true" />,
-    title: "Real-time Analytics",
+    title: "Realtidsanalys",
     description:
-      "Detailed rubrics break down your diagnostic performance across history taking, examination, and treatment plan.",
+      "Detaljerade bedömningsrubriker bryter ner din diagnostiska prestation inom anamnestagning, undersökning och behandlingsplan.",
   },
 ];
 
@@ -33,7 +33,7 @@ export default function FeaturesSection() {
     <section aria-labelledby="features-heading" className="px-6 py-20 lg:px-8 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <h2 id="features-heading" className="sr-only">
-          Key Features
+          Nyckelfunktioner
         </h2>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-12">

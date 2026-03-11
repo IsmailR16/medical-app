@@ -12,7 +12,7 @@ export default function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-teal-700">
           <Zap size={14} fill="currentColor" aria-hidden="true" />
-          The future of medical training
+          Framtiden för medicinsk träning
         </div>
 
         {/* Heading */}
@@ -20,17 +20,17 @@ export default function HeroSection() {
           id="hero-heading"
           className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-7xl"
         >
-          Master Clinical Reasoning with{" "}
+          Bemästra kliniskt resonemang med{" "}
             <span className="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
-            Realistic AI Patients
+            realistiska AI-patienter
           </span>
         </h1>
 
         {/* Subheading */}
         <p className="mx-auto max-w-2xl text-lg text-slate-600 sm:text-xl">
-          Practice diagnostics, interviews, and treatment planning in a
-          risk-free environment. Receive real-time feedback from our intelligent
-          medical assessment engine.
+          Träna diagnostik, patientintervjuer och behandlingsplanering i en
+          riskfri miljö. Få realtidsfeedback från vår intelligenta
+          medicinska bedömningsmotor.
         </p>
 
         {/* CTA */}
@@ -40,7 +40,7 @@ export default function HeroSection() {
             className="h-auto w-full rounded-2xl bg-teal-700 px-8 py-4 text-lg font-bold shadow-xl shadow-teal-500/20 hover:bg-teal-800 sm:w-auto group"
           >
             <Link href="/sign-up">
-              Get Started for Free
+              Kom igång gratis
               <ChevronRight
                 className="transition-transform group-hover:translate-x-1"
                 aria-hidden="true"
@@ -52,7 +52,7 @@ export default function HeroSection() {
             variant="outline"
             className="h-auto w-full rounded-2xl border-slate-200 px-8 py-4 text-lg font-bold sm:w-auto"
           >
-            <Link href="/features">View Demo</Link>
+            <Link href="/features">Visa demo</Link>
           </Button>
         </div>
       </div>

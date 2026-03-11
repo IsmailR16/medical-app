@@ -1,8 +1,8 @@
 const STATS = [
-  { value: "10,000+", label: "Cases Practiced" },
-  { value: "95%", label: "Student Satisfaction" },
-  { value: "50+", label: "Medical Specialties" },
-  { value: "24/7", label: "Available Anytime" },
+  { value: "10 000+", label: "Genomförda fall" },
+  { value: "95%", label: "Studentnöjdhet" },
+  { value: "50+", label: "Medicinska specialiteter" },
+  { value: "24/7", label: "Alltid tillgänglig" },
 ] as const;
 
 export default function SocialProofSection() {
@@ -10,7 +10,7 @@ export default function SocialProofSection() {
     <section aria-labelledby="social-proof-heading" className="px-6 py-20 lg:px-8 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <h2 id="social-proof-heading" className="sr-only">
-          Platform Statistics
+          Plattformsstatistik
         </h2>
 
         {/* Stats */}
@@ -60,20 +60,20 @@ export default function SocialProofSection() {
 const TESTIMONIALS = [
   {
     quote:
-      "MedSim AI transformed how I approach patient interviews. The feedback on missed findings is incredibly valuable.",
-    name: "Sarah Chen",
-    role: "4th Year Medical Student",
+      "MedSim AI förändrade hur jag närmar mig patientintervjuer. Feedbacken på missade fynd är otroligt värdefull.",
+    name: "Sara Lindqvist",
+    role: "Läkarstudent, termin 10",
   },
   {
     quote:
-      "I use it daily to practice rare cases I'd never see in my rotation. The AI patients feel surprisingly real.",
-    name: "Marcus Johnson",
-    role: "Internal Medicine Resident",
+      "Jag använder det dagligen för att öva på sällsynta fall jag aldrig skulle se under min placering. AI-patienterna känns förvånansvärt verkliga.",
+    name: "Marcus Johansson",
+    role: "AT-läkare, internmedicin",
   },
   {
     quote:
-      "As an instructor, the analytics dashboard helps me identify where my students struggle most.",
-    name: "Dr. Emily Torres",
-    role: "Clinical Instructor, NYU",
+      "Som handledare hjälper analyspanelen mig att identifiera var mina studenter har svårast.",
+    name: "Dr. Emma Bergström",
+    role: "Klinisk handledare, Karolinska",
   },
 ] as const;

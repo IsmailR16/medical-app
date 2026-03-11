@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MedSim AI — Practice Clinical Reasoning with AI Patients",
+  title: "MedSim AI — Träna kliniskt resonemang med AI-patienter",
   description:
-    "A virtual patient simulator for medical students to practice diagnostics, history taking, and clinical reasoning with realistic AI-powered patients.",
+    "En virtuell patientsimulatör för läkarstudenter att träna diagnostik, anamnestagning och kliniskt resonemang med realistiska AI-drivna patienter.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="sv">
         <body
           className={`${inter.variable} ${geistMono.variable} antialiased`}
         >

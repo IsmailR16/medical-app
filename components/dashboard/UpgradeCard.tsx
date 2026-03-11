@@ -12,7 +12,7 @@ export function UpgradeCard() {
   return (
     <Card className="border-primary/20 bg-primary/5">
       <CardHeader>
-        <CardDescription>Free-plan</CardDescription>
+        <CardDescription>Gratisplan</CardDescription>
         <CardTitle className="text-lg font-semibold">
           Uppgradera till Pro
         </CardTitle>

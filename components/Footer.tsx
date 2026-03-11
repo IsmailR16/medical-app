@@ -3,26 +3,26 @@ import { Github } from "lucide-react";
 
 const FOOTER_SECTIONS = [
   {
-    title: "Product",
+    title: "Produkt",
     links: [
-      { label: "Features", href: "/features" },
-      { label: "Case Library", href: "/cases" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Funktioner", href: "/features" },
+      { label: "Fallbibliotek", href: "/cases" },
+      { label: "Priser", href: "/pricing" },
     ],
   },
   {
-    title: "Resources",
+    title: "Resurser",
     links: [
-      { label: "FAQ", href: "/faq" },
-      { label: "Documentation", href: "#" },
-      { label: "Privacy Policy", href: "#" },
+      { label: "Vanliga frågor", href: "/faq" },
+      { label: "Dokumentation", href: "#" },
+      { label: "Integritetspolicy", href: "#" },
     ],
   },
   {
-    title: "Contact",
+    title: "Kontakt",
     links: [
       { label: "Support", href: "#" },
-      { label: "Sales", href: "#" },
+      { label: "Försäljning", href: "#" },
     ],
   },
 ] as const;
@@ -44,7 +44,7 @@ export default function Footer() {
               <span className="text-lg font-bold">MedSim AI</span>
             </div>
             <p className="text-sm leading-relaxed">
-              Redefining medical education through high-fidelity AI simulations. Practice, learn, and excel.
+              Omdefinierar medicinsk utbildning genom högkvalitativa AI-simuleringar. Öva, lär och excellera.
             </p>
           </div>
 
@@ -65,7 +65,7 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
-                {section.title === "Contact" && (
+                {section.title === "Kontakt" && (
                   <li className="mt-4 flex items-center gap-2" aria-label="GitHub">
                     <Github size={18} aria-hidden="true" />
                     <span>@medsim-ai</span>
@@ -77,7 +77,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-16 border-t border-slate-800 pt-8 text-center text-xs">
-          <p>&copy; {new Date().getFullYear()} MedSim AI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} MedSim AI. Alla rättigheter förbehållna.</p>
         </div>
       </div>
     </footer>

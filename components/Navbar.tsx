@@ -9,9 +9,9 @@ import {
 } from "@clerk/nextjs";
 
 const NAV_LINKS = [
-  { href: "/features", label: "Features" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/faq", label: "FAQ" },
+  { href: "/features", label: "Funktioner" },
+  { href: "/pricing", label: "Priser" },
+  { href: "/faq", label: "Vanliga frågor" },
 ] as const;
 
 export default function Navbar() {
@@ -41,12 +41,12 @@ export default function Navbar() {
           <SignedOut>
             <SignInButton>
               <Button variant="ghost" className="text-sm font-semibold text-slate-700">
-                Sign In
+                Logga in
               </Button>
             </SignInButton>
             <SignUpButton>
               <Button className="rounded-xl bg-teal-700 px-5 text-sm font-semibold shadow-md hover:bg-teal-800">
-                Get Started
+                Kom igång
               </Button>
             </SignUpButton>
           </SignedOut>
@@ -61,7 +61,7 @@ export default function Navbar() {
 
 function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm" aria-label="MedSim AI — Home">
+    <Link href="/" className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm" aria-label="MedSim AI — Hem">
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-700 text-sm font-bold text-white" aria-hidden="true">
         M
       </div>

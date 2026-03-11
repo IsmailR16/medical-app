@@ -13,11 +13,11 @@ export default function CTASection() {
           id="cta-heading"
           className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
         >
-          Ready to Sharpen Your Clinical Skills?
+          Redo att skärpa dina kliniska färdigheter?
         </h2>
         <p className="mx-auto max-w-xl text-lg text-slate-400">
-          Join thousands of medical students who are building diagnostic
-          confidence through realistic AI patient simulations.
+          Gå med tusentals läkarstudenter som bygger diagnostisk
+          självsäkerhet genom realistiska AI-patientsimuleringar.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
           <Button
@@ -25,7 +25,7 @@ export default function CTASection() {
             className="h-auto w-full rounded-2xl bg-teal-700 px-8 py-4 text-lg font-bold shadow-xl shadow-teal-500/30 hover:bg-teal-800 sm:w-auto group"
           >
             <Link href="/sign-up">
-              Start Practicing for Free
+              Börja öva gratis
               <ChevronRight
                 className="transition-transform group-hover:translate-x-1"
                 aria-hidden="true"
@@ -37,7 +37,7 @@ export default function CTASection() {
             variant="outline"
             className="h-auto w-full rounded-2xl border-slate-700 bg-transparent px-8 py-4 text-lg font-bold text-white hover:bg-slate-800 hover:text-white sm:w-auto"
           >
-            <Link href="/pricing">View Pricing</Link>
+            <Link href="/pricing">Se priser</Link>
           </Button>
         </div>
       </div>

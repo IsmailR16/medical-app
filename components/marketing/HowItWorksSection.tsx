@@ -11,30 +11,30 @@ const STEPS = [
   {
     number: "01",
     icon: <Stethoscope className="size-6" aria-hidden="true" />,
-    title: "Select a Case",
+    title: "Välj ett fall",
     description:
-      "Browse our curated case library by specialty and difficulty. Each case has a real patient with a hidden diagnosis.",
+      "Bläddra i vårt kurerade fallbibliotek efter specialitet och svårighetsgrad. Varje fall har en riktig patient med en dold diagnos.",
   },
   {
     number: "02",
     icon: <MessageSquare className="size-6" aria-hidden="true" />,
-    title: "Interview the Patient",
+    title: "Intervjua patienten",
     description:
-      "Ask questions in natural language. The AI patient responds realistically — only revealing what a real patient would know.",
+      "Ställ frågor på naturligt språk. AI-patienten svarar realistiskt — och avslöjar bara det en verklig patient skulle veta.",
   },
   {
     number: "03",
     icon: <ClipboardCheck className="size-6" aria-hidden="true" />,
-    title: "Submit Your Diagnosis",
+    title: "Skicka in din diagnos",
     description:
-      "Provide your primary diagnosis, differential diagnoses, and proposed treatment plan based on your findings.",
+      "Ange din primära diagnos, differentialdiagnoser och föreslagen behandlingsplan baserat på dina fynd.",
   },
   {
     number: "04",
     icon: <BarChart3 className="size-6" aria-hidden="true" />,
-    title: "Get Detailed Feedback",
+    title: "Få detaljerad feedback",
     description:
-      "Receive a structured rubric with scores, missed findings, and personalized learning points to improve.",
+      "Få en strukturerad bedömning med poäng, missade fynd och personliga lärpunkter för att förbättras.",
   },
 ] as const;
 
@@ -50,10 +50,10 @@ export default function HowItWorksSection() {
             id="how-it-works-heading"
             className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
           >
-            How It Works
+            Så fungerar det
           </h2>
           <p className="mt-4 text-lg text-slate-500">
-            Four steps to sharpen your clinical reasoning skills.
+            Fyra steg för att skärpa ditt kliniska resonemang.
           </p>
         </div>
 
