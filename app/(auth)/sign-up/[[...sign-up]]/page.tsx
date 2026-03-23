@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import { SignUp } from "@clerk/nextjs";
+
+export const metadata: Metadata = {
+  title: "Skapa konto | MedSim AI",
+};
 
 export default function SignUpPage() {
   return (

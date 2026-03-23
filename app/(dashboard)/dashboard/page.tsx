@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -25,6 +26,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TopBar } from "@/components/dashboard/TopBar";
+
+export const metadata: Metadata = {
+  title: "Översikt",
+};
 
 const FREE_LIMIT = 3;
 

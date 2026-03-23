@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import {
@@ -7,6 +8,10 @@ import {
   AlertCircle,
   TrendingUp,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Utvärdering",
+};
 
 import { getOrCreateUser } from "@/lib/auth/user";
 import { getEvaluationBySession } from "@/lib/db/dashboard";

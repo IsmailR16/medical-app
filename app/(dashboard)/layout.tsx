@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | MedSim AI",
+    default: "Dashboard | MedSim AI",
+  },
+};
 
 export default async function DashboardLayout({
   children,

@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Check, Crown, Zap } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Fakturering",
+};
 
 import { PLANS } from "@/lib/plans";
 import { getOrCreateUser } from "@/lib/auth/user";

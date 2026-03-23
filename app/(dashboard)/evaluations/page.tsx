@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -9,6 +10,10 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Utvärderingar",
+};
 
 import { getOrCreateUser } from "@/lib/auth/user";
 import { getEvaluatedSessions } from "@/lib/db/dashboard";

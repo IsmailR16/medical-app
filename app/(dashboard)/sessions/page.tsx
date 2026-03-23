@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Calendar, CheckCircle2, Clock } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Sessioner",
+};
 
 import { getOrCreateUser } from "@/lib/auth/user";
 import { getAllSessions } from "@/lib/db/dashboard";

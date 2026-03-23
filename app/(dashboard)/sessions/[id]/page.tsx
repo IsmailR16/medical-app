@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getSessionWithMessages } from "@/lib/db/dashboard";
@@ -5,6 +6,10 @@ import { TopBar } from "@/components/dashboard/TopBar";
 import { ChatComposer } from "@/components/dashboard/ChatComposer";
 import { SessionHeader } from "@/components/dashboard/SessionHeader";
 import { ClinicalDataSidebar } from "@/components/dashboard/ClinicalDataSidebar";
+
+export const metadata: Metadata = {
+  title: "Session",
+};
 
 interface SessionPageProps {
   params: Promise<{ id: string }>;
