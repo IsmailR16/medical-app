@@ -524,12 +524,16 @@ export const getAverageScore = (userId: string) =>
 
       const { data } = await sb
         .from("evaluations")
-        .select("overall_score.avg()")
-        .eq("user_id", userId)
-        .single();
+        .select("overall_score")
+        .eq("user_id", userId);
 
-      const avg = (data as Record<string, unknown> | null)?.avg;
-      return avg ? Math.round(Number(avg)) : 0;
+      if (!data || data.length === 0) return 0;
+
+      const sum = data.reduce(
+        (acc, e) => acc + (e.overall_score as number),
+        0
+      );
+      return Math.round(sum / data.length);
     },
     [`avg-score-${userId}`],
     { tags: [`evaluations-${userId}`], revalidate: 60 }
