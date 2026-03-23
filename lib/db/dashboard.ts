@@ -545,10 +545,14 @@ export const getSessionStreak = (userId: string) =>
     async (): Promise<number> => {
       const sb = createServiceRoleClient();
 
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
       const { data: sessions } = await sb
         .from("sessions")
         .select("started_at")
         .eq("user_id", userId)
+        .gte("started_at", sixtyDaysAgo.toISOString())
         .order("started_at", { ascending: false });
 
       if (!sessions || sessions.length === 0) return 0;
