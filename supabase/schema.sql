@@ -28,7 +28,7 @@ create table public.users (
   constraint users_stripe_subscription_id_key unique (stripe_subscription_id),
   constraint users_plan_check check (plan in ('free', 'pro', 'institution')),
   constraint users_subscription_status_check check (
-    subscription_status in ('active', 'canceled', 'past_due', 'trialing', 'incomplete')
+    subscription_status in ('active', 'inactive', 'canceled', 'past_due', 'trialing', 'incomplete')
   )
 );
 
