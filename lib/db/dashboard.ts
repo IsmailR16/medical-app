@@ -522,27 +522,14 @@ export const getAverageScore = (userId: string) =>
     async (): Promise<number> => {
       const sb = createServiceRoleClient();
 
-      const { data: sessions } = await sb
-        .from("sessions")
-        .select("id")
-        .eq("user_id", userId);
-
-      if (!sessions || sessions.length === 0) return 0;
-
-      const sessionIds = sessions.map((s) => s.id as string);
-
-      const { data: evals } = await sb
+      const { data } = await sb
         .from("evaluations")
-        .select("overall_score")
-        .in("session_id", sessionIds);
+        .select("overall_score.avg()")
+        .eq("user_id", userId)
+        .single();
 
-      if (!evals || evals.length === 0) return 0;
-
-      const sum = evals.reduce(
-        (acc, e) => acc + (e.overall_score as number),
-        0
-      );
-      return Math.round(sum / evals.length);
+      const avg = (data as Record<string, unknown> | null)?.avg;
+      return avg ? Math.round(Number(avg)) : 0;
     },
     [`avg-score-${userId}`],
     { tags: [`evaluations-${userId}`], revalidate: 60 }
