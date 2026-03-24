@@ -25,13 +25,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FREE_LIMIT } from "@/lib/plans";
 import { TopBar } from "@/components/dashboard/TopBar";
 
 export const metadata: Metadata = {
   title: "Översikt",
 };
-
-const FREE_LIMIT = 3;
 
 export default async function DashboardPage() {
   const user = await getOrCreateUser();

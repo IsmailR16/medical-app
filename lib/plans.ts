@@ -1,3 +1,6 @@
+/** Max sessions per month on the free plan. */
+export const FREE_LIMIT = 3;
+
 export interface Plan {
   name: string;
   description: string;

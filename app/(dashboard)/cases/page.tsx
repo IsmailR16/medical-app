@@ -4,12 +4,11 @@ import { getOrCreateUser } from "@/lib/auth/user";
 import { getPublishedCases, getMonthlyUsage } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { CaseGrid } from "@/components/dashboard/CaseGrid";
+import { FREE_LIMIT } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Fallbibliotek",
 };
-
-const FREE_LIMIT = 3;
 
 export default async function CasesPage() {
   const user = await getOrCreateUser();

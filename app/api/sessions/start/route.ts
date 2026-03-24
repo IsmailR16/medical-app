@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-
-const FREE_LIMIT = 3;
+import { FREE_LIMIT } from "@/lib/plans";
 
 export async function POST(request: Request) {
   /* ---- Auth ---- */
