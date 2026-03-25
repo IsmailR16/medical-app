@@ -124,9 +124,14 @@ export function ChatComposer({
               />
             ))}
             {sending && (
-              <div className="flex justify-start">
-                <div className="bg-muted rounded-2xl px-4 py-3 text-sm text-muted-foreground">
-                  Patienten skriver…
+              <div className="flex justify-start" role="status" aria-live="polite">
+                <div className="bg-muted rounded-2xl px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
+                  <span>Patienten skriver</span>
+                  <span className="flex items-center gap-0.5" aria-hidden="true">
+                    <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:300ms]" />
+                  </span>
                 </div>
               </div>
             )}
