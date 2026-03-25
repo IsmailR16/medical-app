@@ -1,5 +1,16 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   SignInButton,
   SignUpButton,
@@ -15,6 +26,8 @@ const NAV_LINKS = [
 ] as const;
 
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
   return (
     <header
       className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl"
@@ -25,6 +38,7 @@ export default function Navbar() {
           <Logo />
         </div>
 
+        {/* Desktop nav */}
         <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
@@ -40,12 +54,12 @@ export default function Navbar() {
         <div className="flex flex-1 items-center justify-end gap-3">
           <SignedOut>
             <SignInButton>
-              <Button variant="ghost" className="text-sm font-semibold text-slate-700">
+              <Button variant="ghost" className="hidden text-sm font-semibold text-slate-700 md:inline-flex">
                 Logga in
               </Button>
             </SignInButton>
             <SignUpButton>
-              <Button className="rounded-xl bg-teal-700 px-5 text-sm font-semibold shadow-md hover:bg-teal-800">
+              <Button className="hidden rounded-xl bg-teal-700 px-5 text-sm font-semibold shadow-md hover:bg-teal-800 md:inline-flex">
                 Kom igång
               </Button>
             </SignUpButton>
@@ -53,6 +67,58 @@ export default function Navbar() {
           <SignedIn>
             <UserButton />
           </SignedIn>
+
+          {/* Mobile hamburger */}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Öppna meny"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <SheetHeader>
+                <SheetTitle>Meny</SheetTitle>
+              </SheetHeader>
+              <nav aria-label="Mobile navigation" className="flex flex-col gap-1 px-4">
+                {NAV_LINKS.map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-base font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-700"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+              <SignedOut>
+                <div className="mt-4 flex flex-col gap-2 border-t border-slate-200 px-4 pt-4">
+                  <SignInButton>
+                    <Button
+                      variant="outline"
+                      className="w-full text-sm font-semibold"
+                      onClick={() => setOpen(false)}
+                    >
+                      Logga in
+                    </Button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <Button
+                      className="w-full rounded-xl bg-teal-700 text-sm font-semibold shadow-md hover:bg-teal-800"
+                      onClick={() => setOpen(false)}
+                    >
+                      Kom igång
+                    </Button>
+                  </SignUpButton>
+                </div>
+              </SignedOut>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
