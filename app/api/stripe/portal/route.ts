@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { stripe, BASE_URL } from "@/lib/stripe";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
@@ -44,7 +44,7 @@ export async function POST() {
     // Create a Stripe Billing Portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: user.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
+      return_url: `${BASE_URL}/dashboard`,
     });
 
     return NextResponse.json({ url: portalSession.url });

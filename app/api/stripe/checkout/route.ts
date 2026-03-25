@@ -1,6 +1,6 @@
 import { getPriceId } from '@/lib/plans.server';
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { stripe, BASE_URL } from '@/lib/stripe';
 import { auth, currentUser } from '@clerk/nextjs/server';
 
 export async function POST(request: NextRequest) {
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       customer_email: email,
       mode: "subscription",
       metadata: { clerkUserId: userId, planType },
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+      success_url: `${BASE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${BASE_URL}/pricing`,
     })
 
     return NextResponse.json({ url: session.url });

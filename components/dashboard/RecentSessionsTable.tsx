@@ -78,6 +78,7 @@ export function RecentSessionsTable({ sessions }: RecentSessionsTableProps) {
                   <Link
                     href={`/sessions/${s.id}`}
                     className="hover:underline"
+                    aria-label={`Visa session: ${s.case_title}`}
                   >
                     {s.case_title}
                   </Link>
