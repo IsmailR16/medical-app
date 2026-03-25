@@ -40,7 +40,7 @@ export function ChatComposer({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages.length]);
+  }, [messages[messages.length - 1]?.id]);
 
   const sendMessage = useCallback(async () => {
     const content = input.trim();
