@@ -13,12 +13,12 @@ import CTASection from "@/components/marketing/CTASection";
 
 export default function LandingPage() {
   return (
-    <main>
+    <>
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
       <SocialProofSection />
       <CTASection />
-    </main>
+    </>
   );
 }
