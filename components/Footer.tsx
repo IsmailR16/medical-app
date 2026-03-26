@@ -51,9 +51,9 @@ export default function Footer() {
           {/* Link sections */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
+              <p className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
                 {section.title}
-              </h3>
+              </p>
               <ul className="space-y-3 text-sm" role="list">
                 {section.links.map((link) => (
                   <li key={link.label}>
@@ -66,9 +66,9 @@ export default function Footer() {
                   </li>
                 ))}
                 {section.title === "Kontakt" && (
-                  <li className="mt-4 flex items-center gap-2" aria-label="GitHub">
+                  <li className="mt-4 flex items-center gap-2">
                     <Github size={18} aria-hidden="true" />
-                    <span>@medsim-ai</span>
+                    <span>GitHub: @medsim-ai</span>
                   </li>
                 )}
               </ul>
