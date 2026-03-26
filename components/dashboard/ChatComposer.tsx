@@ -149,7 +149,7 @@ export function ChatComposer({
                 onKeyDown={handleKeyDown}
                 placeholder="Ställ en fråga till patienten…"
                 maxLength={2000}
-                disabled={sending}
+                autoFocus
                 aria-label="Meddelande"
                 className="flex-1"
               />
