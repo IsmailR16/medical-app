@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Vanliga frågor",
   description:
-    "Svar på vanliga frågor om MedSim AI — priser, funktioner, prenumerationer och hur AI-patientsimuleringarna fungerar.",
+    "Svar på vanliga frågor om Diagnostika — priser, funktioner, prenumerationer och hur AI-patientsimuleringarna fungerar.",
 };
 
 export default function FAQPage() {

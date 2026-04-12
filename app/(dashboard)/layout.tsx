@@ -6,8 +6,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | MedSim AI",
-    default: "Dashboard | MedSim AI",
+    template: "%s | Diagnostika",
+    default: "Dashboard | Diagnostika",
   },
 };
 

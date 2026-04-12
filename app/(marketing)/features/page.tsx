@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Funktioner",
   description:
-    "Utforska MedSim AI:s funktioner — kognitivt djup, riskfri träning och realtidsanalys för kliniskt resonemang.",
+    "Utforska Diagnostikas funktioner — kognitivt djup, riskfri träning och realtidsanalys för kliniskt resonemang.",
 };
 
 export default function FeaturesPage() {

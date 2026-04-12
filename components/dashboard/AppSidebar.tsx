@@ -56,7 +56,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             >
               <Link href="/dashboard">
                 <IconStethoscope className="!size-5" />
-                <span className="text-base font-semibold">MedSim AI</span>
+                <span className="text-base font-semibold">Diagnostika</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

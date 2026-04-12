@@ -1,139 +1,282 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import Logo from "@/components/Logo";
+import { useUser } from "@clerk/nextjs";
 
-const NAV_LINKS = [
-  { href: "/features", label: "Funktioner" },
-  { href: "/pricing", label: "Priser" },
-  { href: "/faq", label: "Vanliga frågor" },
-] as const;
+const UserButton = dynamic(
+  () => import("@clerk/nextjs").then((m) => ({ default: m.UserButton })),
+  { ssr: false }
+);
+
+const MOBILE_BREAKPOINT = 768;
+const SCROLL_THRESHOLD = 80;
+const SCROLL_DELTA = 4;
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const { isSignedIn } = useUser();
+
+  useEffect(() => {
+    // Nav scroll morph (pill effect) + smart hide on mobile
+    let lastY = window.scrollY;
+    let hidden = false;
+    let navScrolled = false;
+
+    // Apply initial state if page is already scrolled (e.g. reload)
+    if (window.scrollY > SCROLL_THRESHOLD) {
+      navScrolled = true;
+      navRef.current?.classList.add("nav-scrolled");
+    }
+
+    function onScroll() {
+      const currentY = window.scrollY;
+
+      // Pill morph
+      const shouldScroll = currentY > SCROLL_THRESHOLD;
+      if (shouldScroll !== navScrolled) {
+        navScrolled = shouldScroll;
+        navRef.current?.classList.toggle("nav-scrolled", navScrolled);
+      }
+
+      // Smart hide on mobile
+      if (window.innerWidth >= MOBILE_BREAKPOINT) {
+        if (hidden) {
+          hidden = false;
+          headerRef.current?.style.removeProperty("transform");
+        }
+        lastY = currentY;
+        return;
+      }
+
+      const delta = currentY - lastY;
+
+      if (delta > SCROLL_DELTA && currentY > SCROLL_THRESHOLD && !hidden) {
+        hidden = true;
+        if (headerRef.current) {
+          headerRef.current.style.transform = "translateY(-100%)";
+        }
+      } else if (delta < -SCROLL_DELTA && hidden) {
+        hidden = false;
+        if (headerRef.current) {
+          headerRef.current.style.transform = "translateY(0)";
+        }
+      }
+
+      lastY = currentY;
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  // Focus trap + Escape key for mobile menu
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        closeMenu();
+        hamburgerRef.current?.focus();
+        return;
+      }
+
+      if (e.key === "Tab" && menuRef.current) {
+        const focusable = menuRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    // Move focus into menu on open
+    const firstLink = menuRef.current?.querySelector<HTMLElement>("a[href]");
+    firstLink?.focus();
+
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
+  function closeMenu() {
+    setMenuOpen(false);
+    document.body.style.overflow = "";
+  }
+
+  function toggleMenu() {
+    const next = !menuOpen;
+    setMenuOpen(next);
+    document.body.style.overflow = next ? "hidden" : "";
+  }
 
   return (
-    <header
-      className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl"
-      role="banner"
-    >
-      <div className="mx-auto flex h-16 max-w-7xl items-center px-6 lg:h-20 lg:px-8">
-        <div className="flex-1">
-          <Logo />
-        </div>
+    <>
+      <header
+        ref={headerRef}
+        className="fixed top-0 left-0 right-0 z-40 pt-5 header-slide"
+      >
+        <nav
+          ref={navRef}
+          id="mainNav"
+          className="mx-auto flex items-center justify-between max-w-[1400px] w-full rounded-xl px-4 md:px-8 lg:px-16 py-3 border border-transparent bg-transparent shadow-none"
+        >
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            <Logo />
+          </a>
 
-        {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm"
+          <div className="hidden md:flex items-center gap-8">
+            <a
+              href="#funktioner"
+              className="text-[13px] font-medium text-[#64748B] hover:text-[#1D3557] transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
             >
-              {label}
-            </Link>
-          ))}
-        </nav>
+              Funktioner
+            </a>
+            <a
+              href="#hur-det-fungerar"
+              className="text-[13px] font-medium text-[#64748B] hover:text-[#1D3557] transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            >
+              Hur det fungerar
+            </a>
+            <a
+              href="#priser"
+              className="text-[13px] font-medium text-[#64748B] hover:text-[#1D3557] transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            >
+              Priser
+            </a>
+          </div>
 
-        <div className="flex flex-1 items-center justify-end gap-3">
-          <SignedOut>
-            <SignInButton>
-              <Button variant="ghost" className="hidden text-sm font-semibold text-slate-700 md:inline-flex">
-                Logga in
-              </Button>
-            </SignInButton>
-            <SignUpButton>
-              <Button className="hidden rounded-xl bg-teal-700 px-5 text-sm font-semibold shadow-md hover:bg-teal-800 md:inline-flex">
-                Kom igång
-              </Button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          {isSignedIn ? (
+            <div className="hidden md:block">
+              <UserButton />
+            </div>
+          ) : (
+            <Link
+              href="/sign-up"
+              className="hidden md:inline-flex items-center gap-2 bg-[#1D3557] text-white text-[13px] font-semibold rounded-full pl-4 pr-1.5 py-1.5 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#1D3557] active:scale-[0.98] group"
+            >
+              <span>Kom igång</span>
+              <span className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </span>
+            </Link>
+          )}
 
           {/* Mobile hamburger */}
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                aria-label="Öppna meny"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <SheetHeader>
-                <SheetTitle>Meny</SheetTitle>
-              </SheetHeader>
-              <nav aria-label="Mobile navigation" className="flex flex-col gap-1 px-4">
-                {NAV_LINKS.map(({ href, label }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-base font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-700"
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </nav>
-              <SignedOut>
-                <div className="mt-4 flex flex-col gap-2 border-t border-slate-200 px-4 pt-4">
-                  <SignInButton>
-                    <Button
-                      variant="outline"
-                      className="w-full text-sm font-semibold"
-                      onClick={() => setOpen(false)}
-                    >
-                      Logga in
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton>
-                    <Button
-                      className="w-full rounded-xl bg-teal-700 text-sm font-semibold shadow-md hover:bg-teal-800"
-                      onClick={() => setOpen(false)}
-                    >
-                      Kom igång
-                    </Button>
-                  </SignUpButton>
-                </div>
-              </SignedOut>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
-    </header>
-  );
-}
+          <button
+            ref={hamburgerRef}
+            className="md:hidden flex items-center justify-center ham-btn"
+            aria-label="Meny"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            onClick={toggleMenu}
+          >
+            <div
+              className={`ham-lines${menuOpen ? " ham-active" : ""}`}
+            >
+              <span className="ham-line" />
+              <span className="ham-line" />
+              <span className="ham-line" />
+            </div>
+          </button>
+        </nav>
+      </header>
 
-function Logo() {
-  return (
-    <Link href="/" className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-sm" aria-label="MedSim AI — Hem">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-700 text-sm font-bold text-white" aria-hidden="true">
-        M
+      {/* Mobile Menu */}
+      <div
+        ref={menuRef}
+        id="mobile-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobilmeny"
+        aria-hidden={!menuOpen}
+        className={`fixed inset-0 z-30 bg-white/[0.97] flex items-center justify-center transition-opacity duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]${menuOpen ? " opacity-100" : " opacity-0 pointer-events-none"}`}
+      >
+        <nav
+          className={`flex flex-col items-center gap-10${menuOpen ? " menu-open" : ""}`}
+        >
+          <a
+            href="#funktioner"
+            className="menu-link text-2xl font-semibold"
+            onClick={closeMenu}
+          >
+            Funktioner
+          </a>
+          <a
+            href="#hur-det-fungerar"
+            className="menu-link text-2xl font-semibold"
+            onClick={closeMenu}
+          >
+            Hur det fungerar
+          </a>
+          <a
+            href="#priser"
+            className="menu-link text-2xl font-semibold"
+            onClick={closeMenu}
+          >
+            Priser
+          </a>
+          <Link
+            href="/sign-up"
+            className="menu-link mt-4 inline-flex items-center gap-2 bg-[#1D3557] text-white rounded-full px-7 py-3.5 text-base font-semibold"
+            onClick={closeMenu}
+          >
+            Kom igång
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="7" y1="17" x2="17" y2="7" />
+              <polyline points="7 7 17 7 17 17" />
+            </svg>
+          </Link>
+        </nav>
       </div>
-      <span className="text-xl font-bold tracking-tight text-slate-900">
-        MedSim AI
-      </span>
-    </Link>
+    </>
   );
 }

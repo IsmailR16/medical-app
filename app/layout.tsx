@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import ToastProvider from "@/components/ToastProvider";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "MedSim AI — Träna kliniskt resonemang med AI-patienter",
+  title: "Diagnostika — Träna kliniskt resonemang med AI-patienter",
   description:
-    "En virtuell patientsimulatör för läkarstudenter att träna diagnostik, anamnestagning och kliniskt resonemang med realistiska AI-drivna patienter.",
+    "AI-driven klinisk träning för nästa generation läkare. Träna på realistiska patientfall, utveckla diagnostiska färdigheter och få omedelbar återkoppling.",
 };
 
 export default function RootLayout({
@@ -27,9 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="sv">
+      <html lang="sv" className="scroll-smooth">
         <body
-          className={`${inter.variable} ${geistMono.variable} antialiased`}
+          className={`${jakarta.variable} ${jetbrains.variable} antialiased body-fadein`}
         >
           <ToastProvider />
           {children}

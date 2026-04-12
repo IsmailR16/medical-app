@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SignUp } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
-  title: "Skapa konto | MedSim AI",
+  title: "Skapa konto | Diagnostika",
 };
 
 export default function SignUpPage() {
