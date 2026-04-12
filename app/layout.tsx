@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="sv" className="scroll-smooth">
       <body
-        className={`${jakarta.variable} ${jetbrains.variable} antialiased body-fadein`}
+        className={`${jakarta.variable} ${jetbrains.variable} antialiased`}
       >
         <ToastProvider />
         {children}

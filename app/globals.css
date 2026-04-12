@@ -279,7 +279,7 @@
 }
 
 .body-fadein {
-  animation: pageIn 0.4s ease-out both;
+  animation: pageIn 0.15s ease-out both;
 }
 
 .hero-gradient-tr {
