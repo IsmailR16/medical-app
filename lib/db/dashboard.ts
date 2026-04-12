@@ -234,10 +234,12 @@ export async function getSessionWithMessages(
 
   // Build clinical data sections from the case JSONB columns
   function jsonToItems(obj: Record<string, unknown>): { label: string; value: string }[] {
-    return Object.entries(obj ?? {}).map(([key, val]) => ({
-      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      value: String(val),
-    }));
+    return Object.entries(obj ?? {})
+      .filter(([, val]) => val != null && String(val).trim() !== "")
+      .map(([key, val]) => ({
+        label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        value: String(val),
+      }));
   }
 
   const clinicalData: ClinicalDataSection[] = [
@@ -391,8 +393,19 @@ export const getEvaluatedSessions = (userId: string) =>
     )
     .in("session_id", sessionIds);
 
+  type EvalRow = {
+    id: string;
+    session_id: string;
+    overall_score: number;
+    history_taking_score: number;
+    physical_exam_score: number;
+    diagnosis_score: number;
+    treatment_score: number;
+    created_at: string;
+  };
+
   const evalMap = new Map(
-    (evals ?? []).map((e: Record<string, unknown>) => [e.session_id as string, e])
+    (evals ?? []).map((e: EvalRow) => [e.session_id, e])
   );
 
   // Fetch cases
@@ -408,7 +421,7 @@ export const getEvaluatedSessions = (userId: string) =>
   return sessions
     .filter((s) => evalMap.has(s.id as string))
     .map((s) => {
-      const ev = evalMap.get(s.id as string) as Record<string, unknown>;
+      const ev = evalMap.get(s.id as string)!;
       const c = caseMap.get(s.case_id as string);
       const endTime = (s.submitted_at ?? s.evaluated_at) as string | null;
       const durationMin = endTime
@@ -420,16 +433,16 @@ export const getEvaluatedSessions = (userId: string) =>
         : null;
 
       return {
-        id: ev.id as string,
+        id: ev.id,
         session_id: s.id as string,
         case_title: c?.title ?? "Okänt fall",
         case_specialty: c?.specialty ?? "",
-        overall_score: ev.overall_score as number,
-        history_taking_score: ev.history_taking_score as number,
-        physical_exam_score: ev.physical_exam_score as number,
-        diagnosis_score: ev.diagnosis_score as number,
-        treatment_score: ev.treatment_score as number,
-        created_at: ev.created_at as string,
+        overall_score: ev.overall_score,
+        history_taking_score: ev.history_taking_score,
+        physical_exam_score: ev.physical_exam_score,
+        diagnosis_score: ev.diagnosis_score,
+        treatment_score: ev.treatment_score,
+        created_at: ev.created_at,
         started_at: s.started_at as string,
         duration_min: durationMin,
       };

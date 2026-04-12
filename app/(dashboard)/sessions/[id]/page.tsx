@@ -29,7 +29,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
   return (
     <>
       <TopBar title={session.case_title} />
-      <div className="w-full max-w-[1600px] mx-auto px-4 py-6 lg:px-6">
+      <div className="w-full max-w-[1600px] mx-auto p-6 md:p-10">
         {/* Header with title, badges, and submit button */}
         <SessionHeader
           sessionId={session.id}

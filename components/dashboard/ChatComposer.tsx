@@ -2,16 +2,8 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
-import { IconSend } from "@tabler/icons-react";
+import { Send } from "lucide-react";
 import { ChatBubble } from "@/components/dashboard/ChatBubble";
 import type { MessageRow } from "@/lib/db/dashboard";
 
@@ -104,14 +96,14 @@ export function ChatComposer({
   };
 
   return (
-    <Card className="border-border h-[700px] flex flex-col overflow-hidden">
-      <CardHeader className="border-b border-border py-4">
-        <CardTitle className="text-lg">Patient-intervju</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 p-0 flex flex-col overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] h-[700px] flex flex-col overflow-hidden">
+      <div className="border-b border-[#1d3557]/[0.04] px-6 py-4">
+        <h2 className="text-[15px] font-bold text-[#1d3557] tracking-tight">Patient-intervju</h2>
+      </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-6">
-          <div className="space-y-4">
+          <div className="space-y-0">
             {messages.map((msg) => (
               <ChatBubble
                 key={msg.id}
@@ -124,13 +116,16 @@ export function ChatComposer({
               />
             ))}
             {sending && (
-              <div className="flex justify-start" role="status" aria-live="polite">
-                <div className="bg-muted rounded-2xl px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
+              <div className="flex justify-start mb-4" role="status" aria-live="polite">
+                <div className="w-7 h-7 rounded-lg bg-[#457b9d]/10 flex items-center justify-center flex-shrink-0 mr-2.5 mt-0.5">
+                  <span className="w-3.5 h-3.5 text-[#457b9d]" />
+                </div>
+                <div className="bg-white border border-[#1d3557]/[0.04] rounded-2xl rounded-tl-md px-4 py-3 text-[13px] text-[#94A3B8] flex items-center gap-2 shadow-[0_1px_2px_rgba(29,53,87,0.03)]">
                   <span>Patienten skriver</span>
                   <span className="flex items-center gap-0.5" aria-hidden="true">
-                    <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:0ms]" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:150ms]" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:300ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#457b9d] animate-bounce [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#457b9d] animate-bounce [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#457b9d] animate-bounce [animation-delay:300ms]" />
                   </span>
                 </div>
               </div>
@@ -140,10 +135,11 @@ export function ChatComposer({
 
         {/* Input */}
         {isActive ? (
-          <div className="border-t border-border p-4 bg-muted/30">
-            <div className="flex gap-2">
-              <Input
+          <div className="border-t border-[#1d3557]/[0.04] p-4 bg-white">
+            <div className="flex items-center gap-2">
+              <input
                 ref={inputRef}
+                type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -151,27 +147,28 @@ export function ChatComposer({
                 maxLength={2000}
                 autoFocus
                 aria-label="Meddelande"
-                className="flex-1"
+                className="flex-1 px-4 py-2.5 bg-[#F9FAFB] border border-[#1d3557]/[0.06] rounded-xl text-[13px] text-[#1d3557] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-all duration-300"
               />
-              <Button
+              <button
                 onClick={sendMessage}
                 disabled={sending || !input.trim()}
-                size="icon"
                 aria-label="Skicka"
+                className="px-4 py-2.5 bg-[#457b9d] text-white rounded-xl text-[13px] font-semibold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_2px_8px_-2px_rgba(69,123,157,0.3)] flex items-center gap-1.5"
               >
-                <IconSend className="size-4" />
-              </Button>
+                Skicka
+                <Send className="w-3.5 h-3.5" strokeWidth={1.5} />
+              </button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-[11px] text-[#94A3B8] mt-2">
               Ställ öppna frågor för att samla anamnes och förstå patientens tillstånd
             </p>
           </div>
         ) : (
-          <div className="border-t border-border p-4 text-center text-sm text-muted-foreground">
+          <div className="border-t border-[#1d3557]/[0.04] p-4 text-center text-[13px] text-[#94A3B8]">
             Sessionen är avslutad.
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

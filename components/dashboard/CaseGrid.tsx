@@ -3,28 +3,22 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { IconArrowRight, IconSearch } from "@tabler/icons-react";
-import { DifficultyBadge } from "@/components/dashboard/DifficultyBadge";
+import { Search, ChevronDown, ArrowUpRight } from "lucide-react";
 import type { CaseListItem } from "@/lib/db/dashboard";
 
 /* ------------------------------------------------------------------ */
+
+const difficultyColor: Record<string, string> = {
+  easy: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
+  medium: "bg-amber-50 text-amber-700 border-amber-200/50",
+  hard: "bg-rose-50 text-rose-700 border-rose-200/50",
+};
+
+const difficultyLabel: Record<string, string> = {
+  easy: "Lätt",
+  medium: "Medel",
+  hard: "Svår",
+};
 
 interface CaseGridProps {
   cases: CaseListItem[];
@@ -39,7 +33,6 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
   /* ---------- Filters ---------- */
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
-  const [difficulty, setDifficulty] = useState("all");
 
   // Derive unique specialties from data
   const specialties = useMemo(
@@ -52,17 +45,15 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
     return cases.filter((c) => {
       if (q && !c.title.toLowerCase().includes(q) && !c.description.toLowerCase().includes(q)) return false;
       if (specialty !== "all" && c.specialty !== specialty) return false;
-      if (difficulty !== "all" && c.difficulty !== difficulty) return false;
       return true;
     });
-  }, [cases, search, specialty, difficulty]);
+  }, [cases, search, specialty]);
 
-  const hasFilters = search || specialty !== "all" || difficulty !== "all";
+  const hasFilters = search || specialty !== "all";
 
   const clearFilters = () => {
     setSearch("");
     setSpecialty("all");
-    setDifficulty("all");
   };
 
   /* ---------- Start session ---------- */
@@ -106,113 +97,101 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
   /* ---------- Render ---------- */
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="case-search">Sök fall</Label>
-          <div className="relative">
-            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              id="case-search"
-              placeholder="Sök efter titel eller beskrivning…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white"
-            />
-          </div>
+      {/* Search + Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#94A3B8]" strokeWidth={1.5} />
+          <input
+            type="text"
+            placeholder="Sök fall efter titel, kategori eller nyckelord..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-white border border-[#1d3557]/[0.06] rounded-xl text-[13px] text-[#1d3557] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-all duration-300"
+          />
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="specialty-filter">Specialitet</Label>
-          <Select value={specialty} onValueChange={setSpecialty}>
-            <SelectTrigger id="specialty-filter" className="w-full bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" className="max-h-60">
-              <SelectItem value="all">Alla specialiteter</SelectItem>
-              {specialties.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="difficulty-filter">Svårighetsgrad</Label>
-          <Select value={difficulty} onValueChange={setDifficulty}>
-            <SelectTrigger id="difficulty-filter" className="w-full bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" className="max-h-60">
-              <SelectItem value="all">Alla nivåer</SelectItem>
-              <SelectItem value="easy">Lätt</SelectItem>
-              <SelectItem value="medium">Medel</SelectItem>
-              <SelectItem value="hard">Svår</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="relative">
+          <select
+            value={specialty}
+            onChange={(e) => setSpecialty(e.target.value)}
+            className="px-4 pr-10 py-3 bg-white border border-[#1d3557]/[0.06] rounded-xl text-[13px] font-medium text-[#1d3557] cursor-pointer focus:outline-none focus:border-[#457b9d]/40 appearance-none transition-all duration-300"
+          >
+            <option value="all">Alla specialiteter</option>
+            {specialties.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <ChevronDown className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" strokeWidth={1.5} />
         </div>
       </div>
 
       {/* Results count */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-[#94A3B8]">
           Visar {filtered.length} av {cases.length} fall
         </p>
         {hasFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+          <button
+            onClick={clearFilters}
+            className="text-[13px] font-medium text-[#457b9d] hover:text-[#3a6781] transition-colors duration-200"
+          >
             Rensa filter
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Grid */}
       {filtered.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((c) => (
-            <Card
+            <button
               key={c.id}
-              className="hover:shadow-md transition-shadow border border-border flex flex-col"
+              disabled={limitReached || startingId === c.id}
+              onClick={() => handleStart(c.id)}
+              className="group text-left bg-white rounded-2xl p-6 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_12px_32px_-8px_rgba(29,53,87,0.12)] hover:border-[#1d3557]/[0.1] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg">{c.title}</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      {c.specialty}
-                    </CardDescription>
-                  </div>
-                  <DifficultyBadge
-                    difficulty={c.difficulty as "easy" | "medium" | "hard"}
-                  />
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-[15px] font-bold text-[#1d3557] tracking-tight mb-1">
+                    {c.title}
+                  </h3>
+                  <p className="text-[12px] font-medium text-[#457b9d]">
+                    {c.specialty}
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
-                  {c.description}
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full group mt-auto"
-                  disabled={limitReached || startingId === c.id}
-                  onClick={() => handleStart(c.id)}
-                >
-                  {startingId === c.id ? "Startar…" : "Starta fall"}
-                  <IconArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </CardContent>
-            </Card>
+                <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] border border-[#1d3557]/[0.04] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <ArrowUpRight className="w-4 h-4 text-[#457b9d]" strokeWidth={1.5} />
+                </div>
+              </div>
+
+              <p className="text-[13px] text-[#64748B] leading-relaxed mb-5 line-clamp-2">
+                {c.description}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${difficultyColor[c.difficulty] ?? "bg-zinc-50 text-zinc-600 border-zinc-200/50"}`}>
+                  {difficultyLabel[c.difficulty] ?? c.difficulty}
+                </span>
+                {startingId === c.id && (
+                  <span className="text-[11px] text-[#94A3B8] font-medium">Startar…</span>
+                )}
+              </div>
+            </button>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
+        <div className="text-center py-16 px-6 bg-white rounded-2xl border border-[#1d3557]/[0.06]">
+          <p className="text-[15px] font-medium text-[#1d3557] mb-1">
             Inga fall matchade dina filter
           </p>
-          <Button variant="outline" className="mt-4" onClick={clearFilters}>
+          <p className="text-[13px] text-[#94A3B8] mb-6">
+            Försök med andra sökord eller rensa filtren
+          </p>
+          <button
+            onClick={clearFilters}
+            className="px-5 py-2.5 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98]"
+          >
             Rensa filter
-          </Button>
+          </button>
         </div>
       )}
     </div>

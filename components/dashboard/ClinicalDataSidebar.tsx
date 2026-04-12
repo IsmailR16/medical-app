@@ -14,18 +14,18 @@ export function ClinicalDataSidebar({
 }: ClinicalDataSidebarProps) {
   if (sections.length === 0) {
     return (
-      <div className="text-sm text-muted-foreground py-4">
+      <div className="text-[13px] text-[#94A3B8] py-4">
         Inga kliniska data tillgängliga.
       </div>
     );
   }
 
   return (
-    <div className="sticky top-6 space-y-4">
+    <div className="sticky top-6 space-y-3">
       <div>
-        <h2 className="font-semibold">Kliniska data</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Klicka &quot;Visa&quot; för att se data när du behöver det
+        <h2 className="text-[14px] font-bold text-[#1d3557]">Kliniska data</h2>
+        <p className="text-[12px] text-[#94A3B8] mt-1">
+          Klicka för att visa data när du behöver det
         </p>
       </div>
       {sections.map((section, index) => (

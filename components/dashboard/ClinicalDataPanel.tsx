@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export interface ClinicalDataItem {
   label: string;
@@ -37,46 +30,38 @@ export function ClinicalDataPanel({ section, onReveal }: ClinicalDataPanelProps)
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{section.title}</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggle}
-            className="text-xs"
-          >
-            {isRevealed ? (
-              <>
-                <EyeOff className="mr-1 h-3.5 w-3.5" />
-                Dölj
-              </>
-            ) : (
-              <>
-                <Eye className="mr-1 h-3.5 w-3.5" />
-                Visa
-              </>
-            )}
-          </Button>
-        </div>
-      </CardHeader>
+    <div className="bg-white rounded-xl border border-[#1d3557]/[0.06] overflow-hidden">
+      <button
+        onClick={toggle}
+        className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-[#F9FAFB] transition-colors duration-200"
+      >
+        <h3 className="text-[13px] font-semibold text-[#1d3557]">{section.title}</h3>
+        {isRevealed ? (
+          <ChevronUp className="w-4 h-4 text-[#94A3B8]" strokeWidth={1.5} />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-[#94A3B8]" strokeWidth={1.5} />
+        )}
+      </button>
 
       {isRevealed && (
-        <CardContent className="pt-0">
+        <div className="px-4 pb-4 border-t border-[#1d3557]/[0.04] pt-3">
           <div className="space-y-2">
             {section.items.map((item) => (
               <div
                 key={item.label}
-                className="flex justify-between border-b border-border pb-2 text-sm last:border-0"
+                className="flex justify-between items-center py-1.5"
               >
-                <span className="text-muted-foreground">{item.label}</span>
-                <span className="font-medium">{item.value}</span>
+                <span className="text-[11px] text-[#94A3B8] uppercase tracking-wide font-medium">
+                  {item.label}
+                </span>
+                <span className="text-[13px] font-semibold text-[#1d3557] font-mono">
+                  {item.value}
+                </span>
               </div>
             ))}
           </div>
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }

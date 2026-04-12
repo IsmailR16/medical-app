@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ClerkProvider } from "@clerk/nextjs";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { DashboardShell, MainContent } from "@/components/dashboard/SidebarContext";
 
 export const metadata: Metadata = {
   title: {
@@ -32,19 +32,12 @@ export default async function DashboardLayout({
 
   return (
     <ClerkProvider>
-      <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 14)",
-          } as React.CSSProperties
-        }
-      >
-        <AppSidebar variant="inset" user={sidebarUser} />
-        <SidebarInset>
+      <DashboardShell>
+        <AppSidebar user={sidebarUser} />
+        <MainContent>
           {children}
-        </SidebarInset>
-      </SidebarProvider>
+        </MainContent>
+      </DashboardShell>
     </ClerkProvider>
   );
 }

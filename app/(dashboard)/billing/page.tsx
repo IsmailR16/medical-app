@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Check, Crown, Zap } from "lucide-react";
+import { Check, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Fakturering",
 };
 
-import { PLANS } from "@/lib/plans";
+import { FREE_LIMIT } from "@/lib/plans";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { getMonthlyUsage, currentPeriod } from "@/lib/db/dashboard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import BillingActions from "./billing-actions";
-import { UpgradeSection } from "./upgrade-section";
+import { PlanCards } from "./plan-cards";
 import { TopBar } from "@/components/dashboard/TopBar";
+import { FadeUp } from "@/components/dashboard/MotionWrappers";
 
 export default async function BillingPage() {
   const user = await getOrCreateUser();
@@ -24,187 +21,164 @@ export default async function BillingPage() {
   const usage = await getMonthlyUsage(user.user_id);
   const usedCases = usage?.sessions_started ?? 0;
   const isPro = user.plan === "pro" || user.plan === "institution";
-  const totalCases = isPro ? Infinity : 3;
-  const progressValue = isPro ? 0 : Math.min((usedCases / 3) * 100, 100);
+  const totalCases = isPro ? Infinity : FREE_LIMIT;
+  const progressValue = isPro ? 0 : Math.min((usedCases / FREE_LIMIT) * 100, 100);
 
   return (
     <>
-      <TopBar title="Abonnemang" />
-      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-5xl mx-auto w-full">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-semibold mb-2">Abonnemang</h1>
-        <p className="text-muted-foreground">
-          Hantera ditt abonnemang och fakturering
-        </p>
-      </div>
+      <TopBar title="Fakturering" />
+      <div className="p-6 md:p-10 max-w-[1400px] mx-auto w-full">
+        {/* Header */}
+        <FadeUp className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#1d3557] tracking-tight">
+            Fakturering
+          </h1>
+          <p className="text-[15px] text-[#94A3B8] mt-1">
+            Hantera din prenumeration och betalningsmetoder
+          </p>
+        </FadeUp>
 
-      {/* Current Plan */}
-      <Card className="border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        {/* Current Plan */}
+        <FadeUp delay={0.08} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-8">
+          <div className="px-6 py-5 border-b border-[#1d3557]/[0.04] flex items-center justify-between">
             <div>
-              <CardTitle>Nuvarande plan</CardTitle>
-              <CardDescription className="mt-1">
+              <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
+                Nuvarande plan
+              </h2>
+              <p className="text-[13px] text-[#94A3B8] mt-0.5">
                 Du är för närvarande på{" "}
-                <span className="font-medium capitalize">{user.plan}</span>
+                <span className="font-semibold capitalize text-[#1d3557]">{user.plan}</span>
                 -planen
-              </CardDescription>
+              </p>
             </div>
-            <Badge variant="outline" className="text-base px-4 py-1 capitalize">
-              {user.plan}
-            </Badge>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#457b9d]/[0.06] text-[#457b9d] rounded-lg text-[12px] font-semibold">
+              <Zap className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <span className="capitalize">{user.plan}</span>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Usage */}
-          {!isPro && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Månadsanvändning</span>
-                <span className="text-sm text-muted-foreground">
-                  {usedCases} av {totalCases} fall använda
-                </span>
-              </div>
-              <Progress value={progressValue} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-2">
-                Återställs den 1:a varje månad &bull; Period: {currentPeriod()}
-              </p>
-            </div>
-          )}
 
-          {isPro && (
-            <div className="py-2">
-              <p className="text-sm">
-                <span className="text-lg font-semibold text-emerald-600">
-                  {usedCases}
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  fall startade denna månad (obegränsade)
-                </span>
-              </p>
-              {user.current_period_end && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Nästa faktureringsperiod:{" "}
-                  {new Date(user.current_period_end).toLocaleDateString("sv-SE")}
+          <div className="p-6">
+            {/* Usage for free users */}
+            {!isPro && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[13px] font-semibold text-[#1d3557]">
+                    Månadsanvändning
+                  </span>
+                  <span className="text-[13px] text-[#94A3B8]">
+                    {usedCases} av {totalCases} fall använda
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[#1d3557]/[0.04]">
+                  <div
+                    className="h-full rounded-full bg-[#457b9d] transition-all duration-500"
+                    style={{ width: `${progressValue}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-[#94A3B8] mt-2">
+                  Återställs den 1:a varje månad &bull; Period: {currentPeriod()}
                 </p>
-              )}
-            </div>
-          )}
-
-          <div className="pt-4 border-t border-border">
-            <h3 className="font-medium mb-3">Din plan inkluderar:</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-[#0f766e]" />
-                <span>{isPro ? "Obegränsade" : "3"} patientfall per månad</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-[#0f766e]" />
-                <span>
-                  {isPro ? "Avancerad" : "Grundläggande"} AI-feedback
-                </span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-[#0f766e]" />
-                <span>Tillgång till alla specialiteter</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-[#0f766e]" />
-                <span>Sessionshistorik</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Manage subscription for Pro users */}
-          {isPro && (
-            <div className="pt-4">
-              <BillingActions mode="manage" />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Upgrade Section — only for free users */}
-      {!isPro && (
-        <UpgradeSection
-          monthlyPrice={PLANS.find((p) => p.name === "Pro")!.monthlyPrice}
-          yearlyPrice={PLANS.find((p) => p.name === "Pro")!.yearlyPrice}
-        />
-      )}
-
-      {/* Benefits */}
-      <Card className="border-border bg-gradient-to-br from-[#ecfdf5] to-white dark:from-emerald-950/20 dark:to-card">
-        <CardHeader>
-          <CardTitle>Varför uppgradera till Pro?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div>
-              <div className="h-10 w-10 rounded-lg bg-[#0f766e] flex items-center justify-center mb-3">
-                <Zap className="h-5 w-5 text-white" />
               </div>
-              <h3 className="font-medium mb-2">Obegränsad träning</h3>
-              <p className="text-sm text-muted-foreground">
-                Träna hur mycket du vill utan begränsningar. Perfekt för intensiv
-                förberedelse.
-              </p>
-            </div>
-            <div>
-              <div className="h-10 w-10 rounded-lg bg-[#0f766e] flex items-center justify-center mb-3">
-                <Check className="h-5 w-5 text-white" />
-              </div>
-              <h3 className="font-medium mb-2">Bättre feedback</h3>
-              <p className="text-sm text-muted-foreground">
-                Få mer detaljerad AI-analys av dina svar och lär dig snabbare.
-              </p>
-            </div>
-            <div>
-              <div className="h-10 w-10 rounded-lg bg-[#0f766e] flex items-center justify-center mb-3">
-                <Crown className="h-5 w-5 text-white" />
-              </div>
-              <h3 className="font-medium mb-2">Progressuppföljning</h3>
-              <p className="text-sm text-muted-foreground">
-                Se din utveckling över tid och identifiera områden att fokusera
-                på.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            )}
 
-      {/* FAQ */}
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="text-lg">Vanliga frågor</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="font-medium mb-1">
-              Kan jag avbryta när som helst?
-            </h4>
-            <p className="text-sm text-muted-foreground">
-              Ja, du kan avbryta ditt Pro-abonnemang när som helst. Du behåller
-              tillgång till Pro-funktioner till slutet av din betalda period.
-            </p>
+            {/* Stats for pro users */}
+            {isPro && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {[
+                  {
+                    label: "Nästa faktureringsdatum",
+                    value: user.current_period_end
+                      ? new Date(user.current_period_end).toLocaleDateString("sv-SE", { day: "numeric", month: "long", year: "numeric" })
+                      : "—",
+                  },
+                  {
+                    label: "Fall denna månad",
+                    value: `${usedCases} (obegränsade)`,
+                  },
+                  {
+                    label: "Period",
+                    value: currentPeriod(),
+                  },
+                ].map((item) => (
+                  <div key={item.label} className="p-4 bg-[#F9FAFB] rounded-xl border border-[#1d3557]/[0.04]">
+                    <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-1">
+                      {item.label}
+                    </p>
+                    <p className="text-[15px] font-bold text-[#1d3557] tracking-tight">
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Plan features */}
+            <div className="pt-5 border-t border-[#1d3557]/[0.04]">
+              <h3 className="text-[13px] font-bold text-[#1d3557] mb-3">
+                Din plan inkluderar:
+              </h3>
+              <ul className="space-y-2.5">
+                {[
+                  `${isPro ? "Obegränsade" : `${FREE_LIMIT}`} patientfall per månad`,
+                  `${isPro ? "Avancerad" : "Grundläggande"} AI-feedback`,
+                  "Tillgång till alla specialiteter",
+                  "Sessionshistorik",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-[13px] text-[#1d3557]">
+                    <div className="w-5 h-5 rounded-lg bg-[#457b9d]/[0.06] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-[#457b9d]" strokeWidth={2} />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Manage subscription for Pro users */}
+            {isPro && (
+              <div className="pt-5 mt-5 border-t border-[#1d3557]/[0.04]">
+                <BillingActions mode="manage" />
+              </div>
+            )}
           </div>
-          <div>
-            <h4 className="font-medium mb-1">
-              Vilka betalningsmetoder accepteras?
-            </h4>
-            <p className="text-sm text-muted-foreground">
-              Vi accepterar alla större kreditkort (Visa, Mastercard, American
-              Express) samt Swish.
-            </p>
+        </FadeUp>
+
+        {/* Available Plans */}
+        <FadeUp delay={0.16}>
+          <PlanCards isPro={isPro} />
+        </FadeUp>
+
+        {/* FAQ */}
+        <FadeUp delay={0.24} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] p-6 md:p-8">
+          <h2 className="text-lg font-bold text-[#1d3557] tracking-tight mb-5">
+            Vanliga frågor
+          </h2>
+          <div className="space-y-5">
+            {[
+              {
+                q: "Kan jag avbryta när som helst?",
+                a: "Ja, du kan avbryta ditt Pro-abonnemang när som helst. Du behåller tillgång till Pro-funktioner till slutet av din betalda period.",
+              },
+              {
+                q: "Vilka betalningsmetoder accepteras?",
+                a: "Vi accepterar alla större kreditkort (Visa, Mastercard, American Express) samt Swish.",
+              },
+              {
+                q: "Får jag faktura?",
+                a: "Ja, du får automatiskt en faktura via e-post efter varje betalning.",
+              },
+            ].map((faq) => (
+              <div key={faq.q}>
+                <h4 className="text-[14px] font-bold text-[#1d3557] mb-1">
+                  {faq.q}
+                </h4>
+                <p className="text-[13px] text-[#94A3B8] leading-relaxed">
+                  {faq.a}
+                </p>
+              </div>
+            ))}
           </div>
-          <div>
-            <h4 className="font-medium mb-1">Får jag faktura?</h4>
-            <p className="text-sm text-muted-foreground">
-              Ja, du får automatiskt en faktura via e-post efter varje betalning.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        </FadeUp>
       </div>
     </>
   );

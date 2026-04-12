@@ -1,56 +1,46 @@
 import { TopBar } from "@/components/dashboard/TopBar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EvaluationDetailLoading() {
   return (
     <>
       <TopBar title="Utvärdering" />
-      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-5xl mx-auto w-full">
-        {/* Back button */}
-        <Skeleton className="h-9 w-48" />
+      <div className="p-6 md:p-10 max-w-[1000px] mx-auto w-full space-y-6">
+        <Skeleton className="h-3.5 w-40 rounded-lg" />
 
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <Skeleton className="h-20 w-20 rounded-full mx-auto" />
-          <Skeleton className="h-10 w-64 mx-auto" />
-          <Skeleton className="h-5 w-48 mx-auto" />
+        <div className="text-center space-y-3">
+          <Skeleton className="h-12 w-12 rounded-2xl mx-auto" />
+          <Skeleton className="h-7 w-56 mx-auto rounded-lg" />
+          <Skeleton className="h-3.5 w-40 mx-auto rounded-lg" />
         </div>
 
-        {/* Overall Score Card */}
-        <Card className="border-2 border-[#0f766e]">
-          <CardContent className="p-8 text-center space-y-3">
-            <Skeleton className="h-16 w-24 mx-auto" />
-            <Skeleton className="h-5 w-32 mx-auto" />
-          </CardContent>
-        </Card>
+        <div className="rounded-[2rem] bg-[#1d3557]/[0.02] py-8 text-center space-y-3">
+          <Skeleton className="h-12 w-20 mx-auto rounded-lg" />
+          <Skeleton className="h-4 w-28 mx-auto rounded-lg" />
+        </div>
 
-        {/* Score Cards Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i} className="border-border">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-32" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-10 w-16 mb-2" />
-                <Skeleton className="h-2 w-full" />
-              </CardContent>
-            </Card>
+            <div key={i} className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-5 space-y-3">
+              <Skeleton className="h-3 w-28 rounded-lg" />
+              <Skeleton className="h-5 w-12 rounded-lg" />
+              <Skeleton className="h-1 w-full rounded-full" />
+            </div>
           ))}
         </div>
 
-        {/* Feedback Card */}
-        <Card className="border-border">
-          <CardHeader>
-            <Skeleton className="h-5 w-40" />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-6 space-y-3">
+          <Skeleton className="h-4 w-32 rounded-lg" />
+          <Skeleton className="h-3.5 w-full rounded-lg" />
+          <Skeleton className="h-3.5 w-full rounded-lg" />
+          <Skeleton className="h-3.5 w-2/3 rounded-lg" />
+        </div>
+
+        <div className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-6 space-y-3">
+          <Skeleton className="h-4 w-36 rounded-lg" />
+          <Skeleton className="h-3.5 w-full rounded-lg" />
+          <Skeleton className="h-3.5 w-5/6 rounded-lg" />
+        </div>
       </div>
     </>
   );

@@ -3,10 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
-  TrendingUp,
+  ArrowUpRight,
   Calendar,
-  Award,
-  Sparkles,
+  Target,
+  Flame,
+  Stethoscope,
 } from "lucide-react";
 
 import { getOrCreateUser } from "@/lib/auth/user";
@@ -16,21 +17,25 @@ import {
   getAverageScore,
   getSessionStreak,
 } from "@/lib/db/dashboard";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { FREE_LIMIT } from "@/lib/plans";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { PlanCheckout } from "@/components/dashboard/PlanCheckout";
+import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
 
 export const metadata: Metadata = {
   title: "Översikt",
+};
+
+const statusLabel: Record<string, string> = {
+  active: "Pågående",
+  submitted: "Inskickad",
+  evaluated: "Avslutad",
+};
+
+const statusStyle: Record<string, string> = {
+  active: "bg-amber-50 text-amber-700 border-amber-200/50",
+  submitted: "bg-blue-50 text-blue-700 border-blue-200/50",
+  evaluated: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
 };
 
 export default async function DashboardPage() {
@@ -46,271 +51,239 @@ export default async function DashboardPage() {
 
   const sessionsUsed = usage?.sessions_started ?? 0;
   const isFree = user.plan === "free";
-  const remaining = Math.max(FREE_LIMIT - sessionsUsed, 0);
 
   const firstName =
     user.full_name?.split(" ")[0] ?? user.email.split("@")[0];
+
+  const usageDisplay = isFree
+    ? `${sessionsUsed} / ${FREE_LIMIT}`
+    : `${sessionsUsed} / ∞`;
 
   return (
     <>
       <PlanCheckout />
       <TopBar title="Översikt" />
-      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6">
-        {/* ---- Header ---- */}
-        <div className="max-w-7xl mx-auto w-full">
-          <h1 className="text-3xl font-semibold mb-2">
-            Hej, {firstName} 👋
+
+      <div className="p-6 md:p-10 max-w-[1400px] mx-auto">
+        {/* Header */}
+        <FadeUp className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#1d3557] tracking-tight">
+            Hej {firstName}
           </h1>
-          <p className="text-muted-foreground">
-            Fortsätt utveckla ditt kliniska resonemang
+          <p className="text-[15px] text-[#94A3B8] mt-1">
+            Fortsätt utveckla ditt kliniska tänkande
           </p>
-        </div>
+        </FadeUp>
 
-        <div className="max-w-7xl mx-auto w-full space-y-8">
-          {/* ---- Stats Grid ---- */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Usage Card */}
-            <Card className="border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Månadens användning
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-semibold">
-                      {sessionsUsed}
-                    </span>
-                    <span className="text-muted-foreground">
-                      / {isFree ? FREE_LIMIT : "∞"} fall
-                    </span>
-                  </div>
-                  {isFree && (
-                    <>
-                      <Progress
-                        value={(sessionsUsed / FREE_LIMIT) * 100}
-                        className="h-2"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {remaining} fall kvar denna månad
-                      </p>
-                    </>
-                  )}
-                  {!isFree && (
-                    <p className="text-xs text-muted-foreground">
-                      Obegränsat med Pro-planen
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+        {/* Stats Row */}
+        <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {/* Usage */}
+          <StaggerItem className="bg-white rounded-2xl p-5 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_8px_24px_-8px_rgba(29,53,87,0.1)] transition-shadow duration-300">
+            <div className="w-9 h-9 rounded-xl bg-[#457b9d]/[0.06] flex items-center justify-center mb-4">
+              <Calendar className="w-[18px] h-[18px] text-[#457b9d]" strokeWidth={1.5} />
+            </div>
+            <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-1">
+              Månatlig användning
+            </p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-extrabold text-[#1d3557] tracking-tight font-mono">
+                {usageDisplay}
+              </span>
+              <span className="text-[13px] text-[#94A3B8] font-medium">fall</span>
+            </div>
+          </StaggerItem>
 
-            {/* Average Score Card */}
-            <Card className="border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Genomsnittlig poäng
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-semibold text-emerald-600">
-                      {avgScore}
-                    </span>
-                    <span className="text-muted-foreground">/ 100</span>
-                  </div>
-                  {avgScore > 0 && (
-                    <div className="flex items-center gap-2 text-emerald-600 text-sm">
-                      <TrendingUp className="h-4 w-4" />
-                      <span>Baserat på alla sessioner</span>
+          {/* Average Score */}
+          <StaggerItem className="bg-white rounded-2xl p-5 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_8px_24px_-8px_rgba(29,53,87,0.1)] transition-shadow duration-300">
+            <div className="w-9 h-9 rounded-xl bg-[#457b9d]/[0.06] flex items-center justify-center mb-4">
+              <Target className="w-[18px] h-[18px] text-[#457b9d]" strokeWidth={1.5} />
+            </div>
+            <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-1">
+              Genomsnittligt resultat
+            </p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-extrabold text-[#1d3557] tracking-tight font-mono">
+                {avgScore}
+              </span>
+              <span className="text-[13px] text-[#94A3B8] font-medium">/ 100</span>
+            </div>
+          </StaggerItem>
+
+          {/* Streak */}
+          <StaggerItem className="bg-white rounded-2xl p-5 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_8px_24px_-8px_rgba(29,53,87,0.1)] transition-shadow duration-300">
+            <div className="w-9 h-9 rounded-xl bg-[#e63946]/[0.06] flex items-center justify-center mb-4">
+              <Flame className="w-[18px] h-[18px] text-[#e63946]" strokeWidth={1.5} />
+            </div>
+            <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-1">
+              Aktiv streak
+            </p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-extrabold text-[#1d3557] tracking-tight font-mono">
+                {streak}
+              </span>
+              <span className="text-[13px] text-[#94A3B8] font-medium">dagar</span>
+            </div>
+          </StaggerItem>
+        </Stagger>
+
+        {/* Primary Action — Double-bezel card */}
+        <FadeUp delay={0.25} className="mb-8">
+          <div className="p-[3px] rounded-[2rem] bg-gradient-to-br from-[#457b9d]/20 to-[#a8dadc]/20 ring-1 ring-[#1d3557]/[0.04]">
+            <div className="bg-[#1d3557] rounded-[calc(2rem-3px)] p-8 md:p-10 relative overflow-hidden">
+              {/* Decorative blurs */}
+              <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#457b9d]/15 blur-3xl" />
+              <div className="absolute -left-10 -bottom-10 w-48 h-48 rounded-full bg-[#a8dadc]/[0.08] blur-2xl" />
+
+              <div className="relative flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-white/[0.06] border border-white/[0.06] rounded-xl flex items-center justify-center">
+                      <Stethoscope className="w-5 h-5 text-[#a8dadc]" strokeWidth={1.5} />
                     </div>
-                  )}
-                  {avgScore === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Ingen poäng ännu
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Streak Card */}
-            <Card className="border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Aktiv svit
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-semibold">{streak}</span>
-                    <span className="text-muted-foreground">dagar</span>
+                    <h2 className="text-xl font-bold text-white tracking-tight">
+                      Starta nytt patientfall
+                    </h2>
                   </div>
-                  {streak > 0 ? (
-                    <div className="flex items-center gap-2 text-amber-600 text-sm">
-                      <Award className="h-4 w-4" />
-                      <span>Bra jobbat!</span>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      Starta ett fall idag!
-                    </p>
-                  )}
+                  <p className="text-[15px] text-white/40 mb-6 max-w-[45ch] leading-relaxed">
+                    Välj ett fall från biblioteket och börja träna dina diagnostiska färdigheter.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      className="group inline-flex items-center gap-2 bg-[#e63946] text-white text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#d62839] active:scale-[0.98] shadow-[0_4px_16px_-4px_rgba(230,57,70,0.4)]"
+                    >
+                      Överraska mig
+                      <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={1.5} />
+                    </button>
+                    <Link
+                      href="/cases"
+                      className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/[0.08] text-white text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/[0.1] active:scale-[0.98] backdrop-blur-sm"
+                    >
+                      Bläddra i fall
+                    </Link>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="hidden lg:flex items-center justify-center ml-8">
+                  <div className="w-36 h-36 bg-white/[0.04] rounded-full border border-white/[0.06] flex items-center justify-center">
+                    <Stethoscope className="w-16 h-16 text-white/10" strokeWidth={1} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeUp>
+
+        {/* Recent Sessions */}
+        <FadeUp delay={0.35} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)]">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[#1d3557]/[0.04]">
+            <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
+              Senaste sessioner
+            </h2>
+            <Link
+              href="/sessions"
+              className="text-[13px] font-semibold text-[#457b9d] hover:text-[#3a6781] transition-colors duration-300 flex items-center gap-1"
+            >
+              Visa alla
+              <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+            </Link>
           </div>
 
-          {/* ---- Main CTA ---- */}
-          <Card className="border-2 border-[#0f766e] bg-gradient-to-br from-[#ecfdf5] to-white dark:from-emerald-950/20 dark:to-card">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-xl">
-                    Starta nytt patientfall
-                  </CardTitle>
-                  <CardDescription className="mt-1">
-                    Välj ett fall från biblioteket och börja träna
-                  </CardDescription>
-                </div>
-                <Sparkles className="h-6 w-6 text-[#0f766e]" />
+          {sessions.length === 0 ? (
+            <div className="text-center py-16 px-6">
+              <div className="w-14 h-14 rounded-2xl bg-[#457b9d]/[0.06] flex items-center justify-center mx-auto mb-4">
+                <Stethoscope className="w-6 h-6 text-[#94A3B8]" strokeWidth={1.5} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <Link href="/cases">
-                <Button size="lg">
-                  Bläddra patientfall
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* ---- Recent Sessions ---- */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Senaste sessioner</h2>
-              <Link href="/sessions">
-                <Button variant="ghost" size="sm">
-                  Visa alla
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+              <p className="text-[15px] font-medium text-[#1d3557] mb-1">
+                Inga sessioner ännu
+              </p>
+              <p className="text-[13px] text-[#94A3B8] mb-6">
+                Starta ditt första patientfall för att börja träna
+              </p>
+              <Link
+                href="/cases"
+                className="inline-block px-5 py-2.5 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98] shadow-[0_2px_8px_-2px_rgba(69,123,157,0.3)]"
+              >
+                Starta ditt första fall
               </Link>
             </div>
-
-            {sessions.length === 0 ? (
-              <Card className="border-border">
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  <p className="mb-1">
-                    Inga sessioner ännu — starta ditt första patientfall.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-border">
-                <CardContent className="p-0">
-                  <div className="divide-y divide-border">
-                    {sessions.map((session) => (
-                      <div
-                        key={session.id}
-                        className="flex items-center justify-between p-4 hover:bg-accent/50 transition-colors"
-                      >
-                        <div className="flex-1">
-                          <h3 className="font-medium mb-1">
-                            {session.case_title}
-                          </h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {new Date(
-                                session.started_at
-                              ).toLocaleDateString("sv-SE", {
-                                day: "numeric",
-                                month: "short",
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          {session.status === "evaluated" && (
-                            <div className="text-right">
-                              <div className="text-2xl font-semibold text-emerald-600">
-                                {/* Score not available in RecentSession type — show status */}
-                              </div>
-                            </div>
-                          )}
-                          {session.status === "active" && (
-                            <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium border border-amber-200">
-                              Pågående
-                            </span>
-                          )}
-                          {session.status === "evaluated" && (
-                            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium border border-emerald-200">
-                              Klar
-                            </span>
-                          )}
-                          {session.status === "submitted" && (
-                            <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-200">
-                              Inskickad
-                            </span>
-                          )}
-                          <Link
-                            href={
-                              session.status === "evaluated"
-                                ? `/evaluations/${session.id}`
-                                : `/sessions/${session.id}`
-                            }
-                          >
-                            <Button variant="ghost" size="sm">
-                              {session.status === "evaluated"
-                                ? "Se resultat"
-                                : "Fortsätt"}
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
+          ) : (
+            <div className="divide-y divide-[#1d3557]/[0.04]">
+              {sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 md:px-6 py-4 hover:bg-[#F9FAFB] transition-colors duration-200"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="min-w-0">
+                      <h3 className="text-[14px] font-semibold text-[#1d3557] mb-0.5 truncate">
+                        {session.case_title}
+                      </h3>
+                      <p className="text-[12px] text-[#94A3B8]">
+                        {new Date(session.started_at).toLocaleDateString(
+                          "sv-SE",
+                          { day: "numeric", month: "short" }
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
 
-          {/* ---- Upgrade CTA (free users only) ---- */}
-          {isFree && (
-            <Card className="border-border bg-gradient-to-r from-[#0f766e] to-[#14b8a6] text-white">
-              <CardHeader>
-                <CardTitle className="text-white">
-                  Uppgradera till Pro
-                </CardTitle>
-                <CardDescription className="text-white/90">
-                  Få obegränsad tillgång till alla patientfall och avancerad
-                  feedback
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-sm text-white/90">
-                      ✓ Obegränsade fall · ✓ Avancerad AI-feedback · ✓
-                      Progressanalys
-                    </p>
-                    <p className="text-2xl font-semibold">299 kr/månad</p>
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+                        statusStyle[session.status] ?? "bg-zinc-50 text-zinc-500 border-zinc-200/50"
+                      }`}
+                    >
+                      {session.status === "active" && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
+                      )}
+                      {session.status === "evaluated" && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
+                      )}
+                      {statusLabel[session.status] ?? session.status}
+                    </span>
+
+                    <Link
+                      href={
+                        session.status === "evaluated"
+                          ? `/evaluations/${session.id}`
+                          : `/sessions/${session.id}`
+                      }
+                      className="px-3 md:px-4 py-2 bg-[#F9FAFB] border border-[#1d3557]/[0.06] text-[#1d3557] text-[12px] font-semibold rounded-xl hover:border-[#1d3557]/[0.12] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap"
+                    >
+                      {session.status === "evaluated"
+                        ? "Visa resultat"
+                        : "Fortsätt"}
+                    </Link>
                   </div>
-                  <Link href="/billing">
-                    <Button variant="secondary" size="lg">
-                      Uppgradera nu
-                    </Button>
-                  </Link>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           )}
-        </div>
+        </FadeUp>
+
+        {/* Upgrade CTA (free users only) */}
+        {isFree && (
+          <FadeUp delay={0.45} className="mt-8 p-[3px] rounded-2xl bg-gradient-to-r from-[#457b9d]/30 to-[#a8dadc]/30">
+            <div className="bg-[#1d3557] rounded-[calc(1rem-1px)] p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white tracking-tight mb-1">
+                    Uppgradera till Pro
+                  </h3>
+                  <p className="text-[14px] text-white/50">
+                    Obegränsade fall · Avancerad AI-feedback · Progressanalys
+                  </p>
+                </div>
+                <Link
+                  href="/billing"
+                  className="inline-flex items-center gap-2 bg-white text-[#1d3557] text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/90 active:scale-[0.98] shadow-[0_2px_8px_-2px_rgba(255,255,255,0.2)]"
+                >
+                  Uppgradera nu
+                  <ArrowUpRight className="w-4 h-4" strokeWidth={1.5} />
+                </Link>
+              </div>
+            </div>
+          </FadeUp>
+        )}
       </div>
     </>
   );

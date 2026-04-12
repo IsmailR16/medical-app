@@ -1,55 +1,58 @@
 import { TopBar } from "@/components/dashboard/TopBar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 
 export default function SettingsLoading() {
   return (
     <>
       <TopBar title="Inställningar" />
-      <div className="flex flex-1 flex-col gap-8 p-4 md:p-6 max-w-4xl mx-auto w-full">
-        {/* Header */}
+      <div className="p-6 md:p-10 max-w-[1400px] mx-auto w-full space-y-6">
         <div>
-          <Skeleton className="h-9 w-44 mb-2" />
-          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-7 w-40 mb-2 rounded-lg" />
+          <Skeleton className="h-4 w-56 rounded-lg" />
         </div>
 
-        {/* Profile Card */}
-        <Card className="border-border">
-          <CardHeader>
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-4 w-56 mt-1" />
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-20 w-20 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-4 w-52" />
-                <Skeleton className="h-6 w-16 rounded-full" />
+        {/* Profile */}
+        <div className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-6 space-y-5">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-12 w-12 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-36 rounded-lg" />
+              <Skeleton className="h-3 w-44 rounded-lg" />
+            </div>
+          </div>
+          <div className="border-t border-[#1d3557]/[0.03] pt-5 grid md:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-1.5">
+                <Skeleton className="h-3 w-20 rounded-lg" />
+                <Skeleton className="h-3.5 w-40 rounded-lg" />
               </div>
-            </div>
-            <Separator />
-            <div className="grid gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-48" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        </div>
 
-        {/* Danger Zone */}
-        <Card className="border-border">
-          <CardHeader>
-            <Skeleton className="h-5 w-32" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-10 w-36" />
-          </CardContent>
-        </Card>
+        {/* Notifications */}
+        <div className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-6 space-y-4">
+          <Skeleton className="h-4 w-28 rounded-lg" />
+          <div className="grid md:grid-cols-2 gap-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="bg-[#F9FAFB] rounded-xl p-4 flex items-center justify-between">
+                <Skeleton className="h-3.5 w-32 rounded-lg" />
+                <Skeleton className="h-5 w-9 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Security + Preferences */}
+        <div className="grid md:grid-cols-2 gap-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-6 space-y-3">
+              <Skeleton className="h-4 w-24 rounded-lg" />
+              <Skeleton className="h-3.5 w-full rounded-lg" />
+              <Skeleton className="h-9 w-28 rounded-xl" />
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
