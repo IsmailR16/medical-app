@@ -27,7 +27,10 @@ export default clerkMiddleware(async (auth, req) => {
     }
 
     if (isSignInOrUpRoute(req) && userId) {
-      return NextResponse.redirect(new URL("/dashboard", origin));
+      const plan = req.nextUrl.searchParams.get("plan");
+      const target = new URL("/dashboard", origin);
+      if (plan) target.searchParams.set("plan", plan);
+      return NextResponse.redirect(target);
     }
 
     // if (createRouteMatcher(["/"]) (req) && userId) {

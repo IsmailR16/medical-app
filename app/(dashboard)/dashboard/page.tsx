@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/card";
 import { FREE_LIMIT } from "@/lib/plans";
 import { TopBar } from "@/components/dashboard/TopBar";
+import { PlanCheckout } from "@/components/dashboard/PlanCheckout";
 
 export const metadata: Metadata = {
   title: "Översikt",
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
 
   return (
     <>
+      <PlanCheckout />
       <TopBar title="Översikt" />
       <div className="flex flex-1 flex-col gap-8 p-4 md:p-6">
         {/* ---- Header ---- */}

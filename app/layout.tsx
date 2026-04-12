@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import ToastProvider from "@/components/ToastProvider";
 import "./globals.css";
 
@@ -28,15 +27,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="sv" className="scroll-smooth">
-        <body
-          className={`${jakarta.variable} ${jetbrains.variable} antialiased body-fadein`}
-        >
-          <ToastProvider />
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="sv" className="scroll-smooth">
+      <body
+        className={`${jakarta.variable} ${jetbrains.variable} antialiased body-fadein`}
+      >
+        <ToastProvider />
+        {children}
+      </body>
+    </html>
   );
 }

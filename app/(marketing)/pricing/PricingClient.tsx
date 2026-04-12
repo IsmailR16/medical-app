@@ -1,0 +1,356 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { Check, ChevronRight, Sparkles, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PLANS, FAQ } from "@/lib/plans";
+import type { Plan } from "@/lib/plans";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
+export default function PricingPage({ isSignedIn = false }: { isSignedIn?: boolean }) {
+  const [annual, setAnnual] = useState(true);
+  const [loading, setLoading] = useState(false);
+  /** Visually-hidden live region text for screen readers */
+  const [statusMessage, setStatusMessage] = useState("");
+  /** Synchronous guard — prevents double-click firing two checkout calls */
+  const checkoutInFlight = useRef(false);
+  const router = useRouter();
+
+  async function handleCheckout(planName: string) {
+    if (checkoutInFlight.current) return;
+
+    if (!isSignedIn) {
+      router.push("/sign-up?plan=pro");
+      return;
+    }
+
+    checkoutInFlight.current = true;
+    setLoading(true);
+    setStatusMessage("Skapar betalningssession…");
+    const toastId = toast.loading("Skapar betalningssession…");
+
+    try {
+      const interval = annual ? "yearly" : "monthly";
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planType: `${planName.toLowerCase()}_${interval}`,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorBody = await res.text().catch(() => "Unknown error");
+        console.error("Failed to create checkout session:", errorBody);
+        toast.error("Ett fel inträffade. Försök igen senare.", { id: toastId });
+        setStatusMessage("Ett fel inträffade. Försök igen senare.");
+        return;
+      }
+
+      let data: { url?: string };
+      try {
+        data = await res.json();
+      } catch {
+        console.error("Invalid JSON response from checkout API");
+        toast.error("Oväntat svar från servern. Försök igen.", { id: toastId });
+        setStatusMessage("Oväntat svar från servern.");
+        return;
+      }
+
+      if (data.url) {
+        toast.dismiss(toastId);
+        setStatusMessage("Omdirigerar till betalning…");
+        window.location.href = data.url;
+      } else {
+        console.error("Checkout session URL missing from response");
+        toast.error("Kunde inte skapa betalningslänk. Försök igen.", {
+          id: toastId,
+        });
+        setStatusMessage("Kunde inte skapa betalningslänk.");
+      }
+    } catch (error) {
+      // Network failures, AbortError, etc.
+      console.error("Network error during checkout:", error);
+      toast.error("Nätverksfel. Kontrollera din anslutning och försök igen.", {
+        id: toastId,
+      });
+      setStatusMessage("Nätverksfel. Försök igen.");
+    } finally {
+      checkoutInFlight.current = false;
+      setLoading(false);
+    }
+  }
+
+  return (
+    /* Using fragment — the marketing layout already provides <main> */
+    <>
+
+      {/* Visually-hidden live region for screen-reader status updates */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {statusMessage}
+      </div>
+
+      {/* Hero / Header */}
+      <section
+        aria-labelledby="pricing-heading"
+        className="bg-slate-50 px-6 py-20 text-center lg:px-8 lg:py-28"
+      >
+        <div className="mx-auto max-w-3xl space-y-6">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-teal-700">
+            <Sparkles size={14} aria-hidden="true" />
+            Enkel, transparent prissättning
+          </div>
+
+          <h1
+            id="pricing-heading"
+            className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+          >
+            Välj planen som passar{" "}
+            <span className="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+              din resa
+            </span>
+          </h1>
+
+          <p className="mx-auto max-w-xl text-lg text-slate-600">
+            Börja gratis och skala upp i takt med att du växer. Alla planer
+            inkluderar tillgång till vår AI-patientsimuleringsmotor.
+          </p>
+
+          {/* Billing toggle */}
+          <BillingToggle annual={annual} onChange={setAnnual} />
+        </div>
+      </section>
+
+      {/* Cards */}
+      <section
+        aria-label="Prisplaner"
+        className="relative -mt-8 px-6 pb-20 lg:px-8 lg:pb-28"
+      >
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-3">
+          {PLANS.map((plan) => (
+            <PricingCard
+              key={plan.name}
+              plan={plan}
+              annual={annual}
+              loading={loading}
+              onCheckout={handleCheckout}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section
+        aria-labelledby="faq-heading"
+        className="border-t border-slate-100 bg-white px-6 py-20 lg:px-8 lg:py-28"
+      >
+        <div className="mx-auto max-w-3xl">
+          <h2
+            id="faq-heading"
+            className="mb-12 text-center text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
+          >
+            Vanliga frågor
+          </h2>
+
+          <dl className="space-y-8">
+            {FAQ.map((item) => (
+              <div key={item.question}>
+                <dt className="text-lg font-semibold text-slate-900">
+                  {item.question}
+                </dt>
+                <dd className="mt-2 leading-relaxed text-slate-600">
+                  {item.answer}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sub-components                                                     */
+/* ------------------------------------------------------------------ */
+
+function BillingToggle({
+  annual,
+  onChange,
+}: {
+  annual: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-3 pt-2">
+      <span
+        className={`text-sm font-medium ${
+          !annual ? "text-slate-900" : "text-slate-500"
+        }`}
+      >
+        Månadsvis
+      </span>
+
+      <button
+        type="button"
+        role="switch"
+        aria-checked={annual}
+        aria-label="Växla årsbetalning"
+        onClick={() => onChange(!annual)}
+        className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-slate-200 motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2 data-[state=checked]:bg-teal-700"
+        data-state={annual ? "checked" : "unchecked"}
+      >
+        <span
+          aria-hidden="true"
+          className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 motion-safe:transition-transform ${
+            annual ? "translate-x-5" : "translate-x-0.5"
+          }`}
+        />
+      </button>
+
+      <span
+        className={`text-sm font-medium ${
+          annual ? "text-slate-900" : "text-slate-500"
+        }`}
+      >
+        Årsvis{" "}
+        <span className="ml-1 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">
+          Spara 35%
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function PricingCard({
+  plan,
+  annual,
+  loading,
+  onCheckout,
+}: {
+  plan: Plan;
+  annual: boolean;
+  loading: boolean;
+  onCheckout: (planName: string) => void;
+}) {
+  const price = annual ? plan.yearlyPrice : plan.monthlyPrice;
+  const isHighlighted = plan.highlighted;
+  const isCheckoutPlan = plan.name === "Pro";
+
+  return (
+    <article
+      className={`relative flex flex-col rounded-3xl border p-8 motion-safe:transition-shadow lg:p-10 ${
+        isHighlighted
+          ? "border-teal-700 bg-white shadow-2xl shadow-teal-500/10 ring-1 ring-teal-700"
+          : "border-slate-200 bg-white hover:shadow-xl"
+      }`}
+    >
+      {/* Popular badge */}
+      {isHighlighted && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-teal-700 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+          Mest populär
+        </div>
+      )}
+
+      {/* Plan name + description */}
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          {plan.description}
+        </p>
+      </div>
+
+      {/* Price */}
+      <div className="mb-8">
+        <div className="flex items-baseline gap-1">
+          <span className="text-5xl font-extrabold tracking-tight text-slate-900">
+            {price} kr
+          </span>
+          {price > 0 && (
+            <span className="text-base font-medium text-slate-500">
+              /mån
+            </span>
+          )}
+        </div>
+        {price > 0 && annual && (
+          <p className="mt-1 text-sm text-slate-500">
+            Faktureras årsvis ({price * 12} kr/år)
+          </p>
+        )}
+        {price === 0 && (
+          <p className="mt-1 text-sm text-slate-500">Gratis för alltid</p>
+        )}
+      </div>
+
+      {/* CTA */}
+      {isCheckoutPlan ? (
+        <Button
+          type="button"
+          onClick={() => onCheckout(plan.name)}
+          disabled={loading}
+          aria-busy={loading}
+          className="mb-8 h-auto w-full rounded-2xl bg-teal-700 px-6 py-3.5 text-base font-bold shadow-xl shadow-teal-500/20 hover:bg-teal-800 disabled:opacity-50 group"
+        >
+          {loading ? "Laddar…" : plan.cta}
+          <ChevronRight
+            size={18}
+            className="motion-safe:transition-transform group-hover:translate-x-1"
+            aria-hidden="true"
+          />
+        </Button>
+      ) : (
+        <Button
+          asChild
+          className={`mb-8 h-auto w-full rounded-2xl px-6 py-3.5 text-base font-bold group ${
+            isHighlighted
+              ? "bg-teal-700 shadow-xl shadow-teal-500/20 hover:bg-teal-800"
+              : "bg-slate-900 hover:bg-slate-800"
+          }`}
+        >
+          <Link href={plan.href}>
+            {plan.cta}
+            <ChevronRight
+              size={18}
+              className="motion-safe:transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </Link>
+        </Button>
+      )}
+
+      {/* Features */}
+      <ul role="list" className="flex-1 space-y-3">
+        {plan.features.map((feature) => (
+          <li key={feature} className="flex items-start gap-3">
+            <Check
+              size={18}
+              className="mt-0.5 shrink-0 text-teal-700"
+              aria-hidden="true"
+            />
+            <span className="text-sm text-slate-700">{feature}</span>
+          </li>
+        ))}
+        {plan.excluded?.map((feature) => (
+          <li
+            key={feature}
+            className="flex items-start gap-3 text-slate-400"
+          >
+            <X
+              size={18}
+              className="mt-0.5 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-sm">{feature}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}

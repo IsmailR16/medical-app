@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       mode: "subscription",
       metadata: { clerkUserId: userId, planType },
       success_url: `${BASE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${BASE_URL}/pricing`,
+      cancel_url: `${BASE_URL}/dashboard`,
     })
 
     return NextResponse.json({ url: session.url });

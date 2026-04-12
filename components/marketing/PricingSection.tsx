@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 function CheckIcon({ light }: { light?: boolean }) {
@@ -11,6 +14,7 @@ function CheckIcon({ light }: { light?: boolean }) {
 }
 
 export default function PricingSection() {
+  const [annual, setAnnual] = useState(true);
   return (
     <section
       id="priser"
@@ -31,6 +35,32 @@ export default function PricingSection() {
           <p className="reveal reveal-d2 mt-5 text-base md:text-lg leading-relaxed text-[#64748B]">
             Välj planen som passar dig bäst
           </p>
+
+          {/* Billing toggle */}
+          <div className="reveal reveal-d2 flex items-center justify-center gap-3 mt-8">
+            <span className={`text-[13px] font-medium transition-colors duration-300 ${!annual ? "text-[#1d3557]" : "text-[#64748B]"}`}>
+              Månadsvis
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={annual}
+              aria-label="Växla årsbetalning"
+              onClick={() => setAnnual(!annual)}
+              className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-[#1d3557]/10 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#457b9d] focus-visible:ring-offset-2"
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none block h-4 w-4 rounded-full bg-[#1d3557] shadow-sm ring-0 transition-transform duration-300 ${annual ? "translate-x-5" : "translate-x-0.5"}`}
+              />
+            </button>
+            <span className={`text-[13px] font-medium transition-colors duration-300 ${annual ? "text-[#1d3557]" : "text-[#64748B]"}`}>
+              Årsvis{" "}
+              <span className="ml-1 inline-block rounded-full bg-[#e63946]/10 px-2 py-0.5 text-[11px] font-semibold text-[#e63946]">
+                Spara 25%
+              </span>
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
@@ -84,7 +114,7 @@ export default function PricingSection() {
               </h3>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-white tracking-tighter">
-                  199 kr
+                  {annual ? "71 kr" : "95 kr"}
                 </span>
                 <span className="text-[14px] text-white/30">/månad</span>
               </div>
@@ -115,7 +145,7 @@ export default function PricingSection() {
                 </li>
               </ul>
               <Link
-                href="/sign-up"
+                href="/sign-up?plan=pro"
                 className="block w-full px-5 py-2.5 bg-white text-[#1d3557] rounded-xl text-[14px] font-medium text-center hover:bg-[#f1faee] active:scale-[0.98] transition-all duration-200"
               >
                 Börja nu
@@ -129,9 +159,10 @@ export default function PricingSection() {
               Institution
             </h3>
             <div className="mb-6">
-              <span className="text-2xl font-bold text-[#1d3557] tracking-tight">
-                Anpassat pris
+              <span className="text-4xl font-bold text-[#1d3557] tracking-tighter">
+                {annual ? "799 kr" : "999 kr"}
               </span>
+              <span className="text-[14px] text-[#1d3557]/30">/månad</span>
             </div>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start gap-2.5">

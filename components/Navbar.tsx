@@ -1,27 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { useUser } from "@clerk/nextjs";
-
-const UserButton = dynamic(
-  () => import("@clerk/nextjs").then((m) => ({ default: m.UserButton })),
-  { ssr: false }
-);
 
 const MOBILE_BREAKPOINT = 768;
 const SCROLL_THRESHOLD = 80;
 const SCROLL_DELTA = 4;
 
-export default function Navbar() {
+export default function Navbar({ isSignedIn = false }: { isSignedIn?: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
-  const { isSignedIn } = useUser();
 
   useEffect(() => {
     // Nav scroll morph (pill effect) + smart hide on mobile
@@ -174,9 +166,27 @@ export default function Navbar() {
           </div>
 
           {isSignedIn ? (
-            <div className="hidden md:block">
-              <UserButton />
-            </div>
+            <Link
+              href="/dashboard"
+              className="hidden md:inline-flex items-center gap-2 bg-[#1D3557] text-white text-[13px] font-semibold rounded-full pl-4 pr-1.5 py-1.5 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#1D3557] active:scale-[0.98] group"
+            >
+              <span>Dashboard</span>
+              <span className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </span>
+            </Link>
           ) : (
             <Link
               href="/sign-up"
@@ -256,11 +266,11 @@ export default function Navbar() {
             Priser
           </a>
           <Link
-            href="/sign-up"
+            href={isSignedIn ? "/dashboard" : "/sign-up"}
             className="menu-link mt-4 inline-flex items-center gap-2 bg-[#1D3557] text-white rounded-full px-7 py-3.5 text-base font-semibold"
             onClick={closeMenu}
           >
-            Kom igång
+            {isSignedIn ? "Dashboard" : "Kom igång"}
             <svg
               width="16"
               height="16"

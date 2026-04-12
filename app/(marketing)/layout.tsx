@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/marketing/ScrollReveal";
@@ -12,15 +13,17 @@ export const metadata: Metadata = {
     "En virtuell patientsimulatör för läkarstudenter att träna diagnostik, anamnestagning och kliniskt resonemang med realistiska AI-drivna patienter.",
 };
 
-export default function MarketingLayout({
+export default async function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { userId } = await auth();
+
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollReveal />
-      <Navbar />
+      <Navbar isSignedIn={!!userId} />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
