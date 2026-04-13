@@ -17,25 +17,30 @@ const isSignInOrUpRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+    const { pathname, origin } = req.nextUrl;
 
+    // Public marketing routes — skip auth entirely
+    if (isPublicRoute(req)) {
+      return NextResponse.next();
+    }
+
+    // Signed-in users hitting sign-in/up → redirect to dashboard
+    if (isSignInOrUpRoute(req)) {
+      const userAuth = await auth();
+      if (userAuth.userId) {
+        const plan = req.nextUrl.searchParams.get("plan");
+        const target = new URL("/dashboard", origin);
+        if (plan) target.searchParams.set("plan", plan);
+        return NextResponse.redirect(target);
+      }
+      return NextResponse.next();
+    }
+
+    // Everything else (dashboard, api) — require auth
     const userAuth = await auth();
-    const {userId} = userAuth;
-    const {pathname, origin} = req.nextUrl;
-
-    if (!isPublicRoute(req) && !userId) {
+    if (!userAuth.userId) {
       return NextResponse.redirect(new URL("/sign-up", origin));
     }
-
-    if (isSignInOrUpRoute(req) && userId) {
-      const plan = req.nextUrl.searchParams.get("plan");
-      const target = new URL("/dashboard", origin);
-      if (plan) target.searchParams.set("plan", plan);
-      return NextResponse.redirect(target);
-    }
-
-    // if (createRouteMatcher(["/"]) (req) && userId) {
-    //   return NextResponse.redirect(new URL("/dashboard", origin));
-    // }
 
     return NextResponse.next();
 });
