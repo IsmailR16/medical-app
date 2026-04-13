@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Logo from "@/components/Logo";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -8,8 +8,9 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-10 md:grid-cols-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-4 space-y-4">
-            <div className="text-white">
-              <Logo />
+            <div className="flex items-center gap-2.5">
+              <Image src="/Logo-Footer.png" alt="Logo" width={32} height={32} className="w-8 h-8" />
+              <span className="text-[15px] font-bold tracking-tight text-white">Diagnostika</span>
             </div>
             <p className="text-[13px] leading-relaxed text-white/40 max-w-xs">
               AI-driven klinisk träning för nästa generation läkare.

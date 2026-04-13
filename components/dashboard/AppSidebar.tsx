@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "motion/react";
@@ -15,7 +16,6 @@ import {
   ChevronLeft,
   X,
   LogOut,
-  Stethoscope,
   User,
 } from "lucide-react";
 import { useSidebarCtx } from "./SidebarContext";
@@ -87,8 +87,14 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-white/[0.06]">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/[0.06] flex items-center justify-center flex-shrink-0">
-              <Stethoscope className="w-5 h-5 text-white" strokeWidth={1.5} />
+            <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <Image
+                src="/Logo.png"
+                alt="Logo"
+                width={32}
+                height={32}
+                className="w-5 h-5 object-cover"
+              />
             </div>
             {(mobileOpen || showLabels) && (
               <span className="text-[15px] font-bold text-white tracking-tight whitespace-nowrap">
