@@ -1,4 +1,4 @@
-# Medical Simulation App
+# Diagnostika
 
 **AI-powered clinical case simulations for medical students.**
 
@@ -6,13 +6,13 @@
 >
 > 🇸🇪 The core application (UI, cases, and AI interactions) is in **Swedish**.
 
-🔗 **Live demo:** [medical-app-five-orpin.vercel.app](https://medical-app-five-orpin.vercel.app)
+🔗 **Live:** [diagnostika.se](https://diagnostika.se)
 
 ---
 
-## What is MedSim AI?
+## What is Diagnostika?
 
-MedSim AI lets medical students practice clinical reasoning by interacting with AI-simulated patients. You pick a case, take a history, order tests, and submit a diagnosis — then receive an instant evaluation with feedback on what you did well and what you missed.
+Diagnostika lets medical students practice clinical reasoning by interacting with AI-simulated patients. You pick a case, take a history, order tests, and submit a diagnosis — then receive an instant evaluation with feedback on what you did well and what you missed.
 
 ### Key Features
 
