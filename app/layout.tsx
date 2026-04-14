@@ -16,7 +16,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Diagnostika — Träna kliniskt resonemang med AI-patienter",
+  title: "Diagnostika | Träna kliniskt resonemang med AI-patienter",
   description:
     "AI-driven klinisk träning för nästa generation läkare. Träna på realistiska patientfall, utveckla diagnostiska färdigheter och få omedelbar återkoppling.",
   icons: {
