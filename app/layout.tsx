@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import ToastProvider from "@/components/ToastProvider";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
   subsets: ["latin"],
   display: "swap",
 });
@@ -37,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="sv" className="scroll-smooth">
       <body
-        className={`${jakarta.variable} ${jetbrains.variable} antialiased`}
+        className={`${jakarta.variable} antialiased`}
       >
         <ToastProvider />
         {children}

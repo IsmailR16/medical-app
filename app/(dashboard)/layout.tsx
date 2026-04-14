@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { DashboardShell, MainContent } from "@/components/dashboard/SidebarContext";
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -32,12 +39,14 @@ export default async function DashboardLayout({
 
   return (
     <ClerkProvider>
-      <DashboardShell>
-        <AppSidebar user={sidebarUser} />
-        <MainContent>
-          {children}
-        </MainContent>
-      </DashboardShell>
+      <div className={jetbrains.variable}>
+        <DashboardShell>
+          <AppSidebar user={sidebarUser} />
+          <MainContent>
+            {children}
+          </MainContent>
+        </DashboardShell>
+      </div>
     </ClerkProvider>
   );
 }
