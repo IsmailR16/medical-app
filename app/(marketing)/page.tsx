@@ -8,7 +8,7 @@ import PricingSection from "@/components/marketing/PricingSection";
 import CTASection from "@/components/marketing/CTASection";
 
 export const metadata: Metadata = {
-  title: "Diagnostika — Träna kliniskt resonemang med AI-patienter",
+  title: "Diagnostika | Träna kliniskt resonemang med AI-patienter",
   description:
     "Öva diagnostik, patientintervjuer och behandlingsplanering i en riskfri miljö med realistiska AI-patienter. Få realtidsfeedback.",
 };
