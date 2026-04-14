@@ -9,14 +9,14 @@ const isSignInOrUpRoute = createRouteMatcher([
 function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
-    // Landing page — fast cookie check, no Clerk SDK
-    if (pathname === "/") {
-      const hasSession = req.cookies.has("__session");
-      if (hasSession) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
-      }
-      return NextResponse.next();
-    }
+    // Landing page — disabled to avoid Edge Function cold start on static page
+    // if (pathname === "/") {
+    //   const hasSession = req.cookies.has("__session");
+    //   if (hasSession) {
+    //     return NextResponse.redirect(new URL("/dashboard", req.url));
+    //   }
+    //   return NextResponse.next();
+    // }
 
     // All other matched routes — full Clerk auth
     return clerkMiddleware(async (auth, req) => {
@@ -48,8 +48,7 @@ export default middleware;
 
 export const config = {
   matcher: [
-    // Landing page — lightweight cookie check (no Clerk)
-    "/",
+    // "/", // Landing page — removed to avoid Edge Function cold start on static page
     // Protected by default — exclude: Next.js internals, static files, and public marketing routes
     "/((?!_next|faq$|faq/|pricing$|pricing/|features$|features/|api/webhooks/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).+)",
   ],
