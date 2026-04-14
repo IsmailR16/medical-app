@@ -1,28 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 
-const isPublicRoute = createRouteMatcher ([
-    "/",
-    "/faq",
-    "/pricing",
-    "/features",
-    "/sign-in(.*)",
-    "/sign-up(.*)",
-    "/api/webhooks/stripe(.*)",
-])
-
 const isSignInOrUpRoute = createRouteMatcher([
     "/sign-in(.*)",
     "/sign-up(.*)",
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-    const { pathname, origin } = req.nextUrl;
-
-    // Public marketing routes — skip auth entirely
-    if (isPublicRoute(req)) {
-      return NextResponse.next();
-    }
+    const { origin } = req.nextUrl;
 
     // Signed-in users hitting sign-in/up → redirect to dashboard
     if (isSignInOrUpRoute(req)) {
@@ -47,9 +32,8 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
+    // Exclude: Next.js internals, static files, and public marketing pages (/, /faq, /pricing, /features, /api/webhooks)
+    // Everything else runs through Clerk middleware (protected by default)
+    "/((?!_next|faq|pricing|features|api/webhooks|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).+)",
   ],
 };
