@@ -21,7 +21,7 @@ export function UpgradeCard() {
         </p>
         <div className="pt-2">
           <Button asChild size="sm">
-            <Link href="/pricing">
+            <Link href="/#priser">
               Se prisplaner
               <IconArrowRight className="ml-1 size-4" />
             </Link>

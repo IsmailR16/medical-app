@@ -14,8 +14,39 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Diagnostika",
+    applicationCategory: "EducationalApplication",
+    operatingSystem: "Web",
+    description:
+      "Virtuell patientsimulatör för läkarstudenter att träna diagnostik, anamnestagning och kliniskt resonemang med AI-drivna patienter.",
+    url: "https://diagnostika.se",
+    inLanguage: "sv",
+    offers: [
+      {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "SEK",
+        name: "Gratis",
+      },
+      {
+        "@type": "Offer",
+        price: "71",
+        priceCurrency: "SEK",
+        name: "Pro",
+        billingPeriod: "P1M",
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HeroSection />
       <TrustedBySection />
       <FeaturesSection />

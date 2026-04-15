@@ -10,9 +10,25 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://diagnostika.se"),
   title: "Diagnostika | Träna kliniskt resonemang med AI-patienter",
   description:
     "AI-driven klinisk träning för nästa generation läkare. Träna på realistiska patientfall, utveckla diagnostiska färdigheter och få omedelbar återkoppling.",
+  openGraph: {
+    title: "Diagnostika | Träna kliniskt resonemang med AI-patienter",
+    description:
+      "Öva diagnostik, patientintervjuer och behandlingsplanering i en riskfri miljö med realistiska AI-patienter.",
+    url: "https://diagnostika.se",
+    siteName: "Diagnostika",
+    locale: "sv_SE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Diagnostika | Träna kliniskt resonemang med AI-patienter",
+    description:
+      "Öva diagnostik, patientintervjuer och behandlingsplanering i en riskfri miljö med realistiska AI-patienter.",
+  },
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },

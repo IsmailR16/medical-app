@@ -26,7 +26,7 @@ export function StartCaseCard({ limitReached }: StartCaseCardProps) {
         <div className="pt-2">
           {limitReached ? (
             <Button asChild variant="outline" size="sm">
-              <Link href="/pricing">
+              <Link href="/#priser">
                 Uppgradera för fler fall
               </Link>
             </Button>

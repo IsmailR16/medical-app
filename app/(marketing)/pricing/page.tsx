@@ -1,8 +1,5 @@
-import { cookies } from "next/headers";
-import PricingPage from "./PricingClient";
+import { redirect } from "next/navigation";
 
-export default async function Page() {
-  const cookieStore = await cookies();
-  const isSignedIn = cookieStore.has("__session");
-  return <PricingPage isSignedIn={isSignedIn} />;
+export default function Page() {
+  redirect("/#priser");
 }
