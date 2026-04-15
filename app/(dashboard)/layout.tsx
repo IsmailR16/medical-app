@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { DashboardShell, MainContent } from "@/components/dashboard/SidebarContext";
+import ToastProvider from "@/components/ToastProvider";
 
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
@@ -39,6 +40,7 @@ export default async function DashboardLayout({
 
   return (
     <ClerkProvider>
+      <ToastProvider />
       <div className={jetbrains.variable}>
         <DashboardShell>
           <AppSidebar user={sidebarUser} />
