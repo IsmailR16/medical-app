@@ -4,21 +4,20 @@ import { NextRequest, NextResponse } from 'next/server';
 const isSignInOrUpRoute = createRouteMatcher([
     "/sign-in(.*)",
     "/sign-up(.*)",
-])
+]);
+
+const isProtectedRoute = createRouteMatcher([
+    "/dashboard(.*)",
+    "/cases(.*)",
+    "/sessions(.*)",
+    "/billing(.*)",
+    "/settings(.*)",
+    "/evaluations(.*)",
+    "/api/sessions(.*)",
+    "/api/stripe(.*)",
+]);
 
 function middleware(req: NextRequest) {
-    const { pathname } = req.nextUrl;
-
-    // Landing page — disabled to avoid Edge Function cold start on static page
-    // if (pathname === "/") {
-    //   const hasSession = req.cookies.has("__session");
-    //   if (hasSession) {
-    //     return NextResponse.redirect(new URL("/dashboard", req.url));
-    //   }
-    //   return NextResponse.next();
-    // }
-
-    // All other matched routes — full Clerk auth
     return clerkMiddleware(async (auth, req) => {
       const { origin } = req.nextUrl;
 
@@ -34,10 +33,12 @@ function middleware(req: NextRequest) {
         return NextResponse.next();
       }
 
-      // Everything else (dashboard, api) — require auth
-      const userAuth = await auth();
-      if (!userAuth.userId) {
-        return NextResponse.redirect(new URL("/sign-up", origin));
+      // Protected routes — require auth
+      if (isProtectedRoute(req)) {
+        const userAuth = await auth();
+        if (!userAuth.userId) {
+          return NextResponse.redirect(new URL("/sign-up", origin));
+        }
       }
 
       return NextResponse.next();
@@ -48,8 +49,16 @@ export default middleware;
 
 export const config = {
   matcher: [
-    // "/", // Landing page — removed to avoid Edge Function cold start on static page
-    // Protected by default — exclude: Next.js internals, static files, and public marketing routes
-    "/((?!_next|api/webhooks/|sitemap\\.xml|robots\\.txt|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).+)",
+    // Only run middleware on auth pages and protected routes
+    "/sign-in/:path*",
+    "/sign-up/:path*",
+    "/dashboard/:path*",
+    "/cases/:path*",
+    "/sessions/:path*",
+    "/billing/:path*",
+    "/settings/:path*",
+    "/evaluations/:path*",
+    "/api/sessions/:path*",
+    "/api/stripe/:path*",
   ],
 };
