@@ -50,6 +50,6 @@ export const config = {
   matcher: [
     // "/", // Landing page — removed to avoid Edge Function cold start on static page
     // Protected by default — exclude: Next.js internals, static files, and public marketing routes
-    "/((?!_next|api/webhooks/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).+)",
+    "/((?!_next|api/webhooks/|sitemap\\.xml|robots\\.txt|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).+)",
   ],
 };
