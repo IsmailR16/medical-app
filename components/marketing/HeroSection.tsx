@@ -226,7 +226,7 @@ function ChatMockup() {
       </div>
 
       {/* Floating badge */}
-      <div className="absolute -bottom-3 -right-3 bg-[#e63946] text-white px-3.5 py-2 rounded-xl shadow-[0_4px_16px_-2px_rgba(230,57,70,0.35)]">
+      <div className="absolute -bottom-4 -right-3 bg-[#e63946] text-white px-3.5 py-2 rounded-xl shadow-[0_4px_16px_-2px_rgba(230,57,70,0.35)]">
         <div className="flex items-center gap-2">
           <svg
             width="14"
@@ -260,6 +260,7 @@ function SparkleIcon() {
         viewBox="0 0 24 24"
         stroke="#457b9d"
         strokeWidth="1.5"
+        className="translate-x-[1.8px]"
         aria-hidden="true"
       >
         <path
