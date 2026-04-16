@@ -16,9 +16,9 @@ export default function HeroSection() {
       />
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-16 w-full pt-32 pb-20 md:pt-40 md:pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Copy */}
-          <div className="lg:col-span-5 xl:col-span-5">
+          <div className="lg:col-span-7 xl:col-span-8">
             <div>
               <span className="inline-block rounded-full px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-[#A8DADC]/20 text-[#1D3557] border border-[#A8DADC]/40 mb-6">
                 AI-driven medicinsk träning
@@ -30,7 +30,8 @@ export default function HeroSection() {
               className="text-4xl md:text-5xl xl:text-6xl font-extrabold tracking-[-0.035em] leading-[1.08]"
             >
               Klinisk träning
-              med AI-patienter
+              <br />
+              <span className="whitespace-nowrap">med AI‑patienter</span>
             </h1>
 
             <p className="mt-6 text-base md:text-lg leading-relaxed text-[#64748B] max-w-[52ch]">
@@ -86,7 +87,7 @@ export default function HeroSection() {
           </div>
 
           {/* Chat Mockup */}
-          <div className="lg:col-span-7 xl:col-span-7">
+          <div className="lg:col-span-5 xl:col-span-4">
             <ChatMockup />
           </div>
         </div>
@@ -98,7 +99,7 @@ export default function HeroSection() {
 function ChatMockup() {
   return (
     <div
-      className="relative max-w-[620px] ml-auto"
+      className="relative w-full ml-auto"
     >
       <div
         className="absolute -inset-16 bg-[radial-gradient(circle,rgba(69,123,157,0.07)_0%,rgba(168,218,220,0.09)_40%,transparent_70%)] rounded-[2rem]"
