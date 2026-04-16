@@ -37,35 +37,44 @@ export default function PricingSection() {
           </p>
 
           {/* Billing toggle */}
-          <div className="reveal reveal-d2 flex items-center justify-center gap-3 mt-8">
-            <span className={`text-[13px] font-medium transition-colors duration-300 ${!annual ? "text-[#1d3557]" : "text-[#64748B]"}`}>
-              Månadsvis
-            </span>
+          <div
+            role="radiogroup"
+            aria-label="Faktureringsperiod"
+            className="reveal reveal-d2 inline-flex items-center gap-0.5 rounded-full bg-[#1d3557]/[0.06] p-1 mt-8"
+          >
             <button
-              type="button"
-              role="switch"
-              aria-checked={annual}
-              aria-label="Växla årsbetalning"
-              onClick={() => setAnnual(!annual)}
-              className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-[#1d3557]/10 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#457b9d] focus-visible:ring-offset-2"
+              role="radio"
+              aria-checked={!annual}
+              onClick={() => setAnnual(false)}
+              className={`cursor-pointer rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#457b9d] focus-visible:ring-offset-2 ${
+                !annual
+                  ? "bg-white text-[#1d3557] shadow-sm"
+                  : "text-[#64748B] hover:text-[#1d3557]"
+              }`}
             >
-              <span
-                aria-hidden="true"
-                className={`pointer-events-none block h-4 w-4 rounded-full bg-[#1d3557] shadow-sm ring-0 transition-transform duration-300 ${annual ? "translate-x-5" : "translate-x-0.5"}`}
-              />
+              Månadsvis
             </button>
-            <span className={`text-[13px] font-medium transition-colors duration-300 ${annual ? "text-[#1d3557]" : "text-[#64748B]"}`}>
-              Årsvis{" "}
-              <span className="ml-1 inline-block rounded-full bg-[#e63946]/10 px-2 py-0.5 text-[11px] font-semibold text-[#e63946]">
-                Spara 25%
+            <button
+              role="radio"
+              aria-checked={annual}
+              onClick={() => setAnnual(true)}
+              className={`cursor-pointer rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#457b9d] focus-visible:ring-offset-2 ${
+                annual
+                  ? "bg-white text-[#1d3557] shadow-sm"
+                  : "text-[#64748B] hover:text-[#1d3557]"
+              }`}
+            >
+              Årsvis
+              <span className="ml-1.5 text-[11px] font-semibold text-[#e63946]">
+                -25%
               </span>
-            </span>
+            </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {/* Gratis */}
-          <div className="reveal bg-white rounded-2xl border-2 border-[#1d3557]/[0.06] p-7 hover:border-[#457b9d]/25 hover:shadow-[0_8px_24px_-4px_rgba(29,53,87,0.08)] transition-all duration-300">
+          <div className="reveal flex flex-col bg-white rounded-2xl border-2 border-[#1d3557]/[0.06] p-7 hover:border-[#457b9d]/25 hover:shadow-[0_8px_24px_-4px_rgba(29,53,87,0.08)] transition-all duration-300">
             <h3 className="text-xl font-semibold text-[#1d3557] tracking-tight mb-1">
               Gratis
             </h3>
@@ -75,7 +84,7 @@ export default function PricingSection() {
               </span>
               <span className="text-[14px] text-[#1d3557]/30">/månad</span>
             </div>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-3 mb-8 flex-1">
               <li className="flex items-start gap-2.5">
                 <CheckIcon />
                 <span className="text-[14px] text-[#1d3557]/45">
@@ -104,11 +113,11 @@ export default function PricingSection() {
           </div>
 
           {/* Student (featured) */}
-          <div className="reveal reveal-d1 relative bg-[#1d3557] rounded-2xl p-7 shadow-[0_20px_40px_-15px_rgba(29,53,87,0.3)] md:scale-105">
+          <div className="reveal reveal-d1 relative flex flex-col bg-[#1d3557] rounded-2xl p-7 shadow-[0_20px_40px_-15px_rgba(29,53,87,0.3)] md:scale-105">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#e63946] text-white px-3 py-1 rounded-lg text-[12px] font-semibold tracking-wide shadow-[0_4px_12px_-2px_rgba(230,57,70,0.35)]">
               Populärast
             </div>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col flex-1">
               <h3 className="text-xl font-semibold text-white tracking-tight mb-1">
                 Student
               </h3>
@@ -118,7 +127,7 @@ export default function PricingSection() {
                 </span>
                 <span className="text-[14px] text-white/30">/månad</span>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-1">
                 <li className="flex items-start gap-2.5">
                   <CheckIcon light />
                   <span className="text-[14px] text-white/60">
@@ -154,7 +163,7 @@ export default function PricingSection() {
           </div>
 
           {/* Institution */}
-          <div className="reveal reveal-d2 bg-white rounded-2xl border-2 border-[#1d3557]/[0.06] p-7 hover:border-[#457b9d]/25 hover:shadow-[0_8px_24px_-4px_rgba(29,53,87,0.08)] transition-all duration-300">
+          <div className="reveal reveal-d2 flex flex-col bg-white rounded-2xl border-2 border-[#1d3557]/[0.06] p-7 hover:border-[#457b9d]/25 hover:shadow-[0_8px_24px_-4px_rgba(29,53,87,0.08)] transition-all duration-300">
             <h3 className="text-xl font-semibold text-[#1d3557] tracking-tight mb-1">
               Institution
             </h3>
@@ -164,7 +173,7 @@ export default function PricingSection() {
               </span>
               <span className="text-[14px] text-[#1d3557]/30">/månad</span>
             </div>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-3 mb-8 flex-1">
               <li className="flex items-start gap-2.5">
                 <CheckIcon />
                 <span className="text-[14px] text-[#1d3557]/45">

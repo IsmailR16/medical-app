@@ -64,7 +64,7 @@ export function PlanCards({ isPro }: PlanCardsProps) {
           return (
             <div
               key={plan.key}
-              className={`relative rounded-2xl p-6 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+              className={`relative flex flex-col rounded-2xl p-6 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                 plan.featured
                   ? "bg-[#1d3557] md:scale-105 shadow-[0_12px_40px_-8px_rgba(29,53,87,0.3)]"
                   : "bg-white border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_8px_24px_-8px_rgba(29,53,87,0.1)]"
@@ -132,7 +132,7 @@ export function PlanCards({ isPro }: PlanCardsProps) {
                 )}
               </div>
 
-              <ul className="space-y-3 mb-6">
+              <ul className="space-y-3 mb-6 flex-1">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <div
