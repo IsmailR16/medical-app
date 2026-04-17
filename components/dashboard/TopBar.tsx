@@ -48,17 +48,17 @@ export function TopBar({ title }: TopBarProps) {
   const displayEmail = user?.primaryEmailAddress?.emailAddress ?? "";
 
   return (
-    <header className="sticky top-0 z-30 h-14 md:h-16 bg-[#F9FAFB]/80 backdrop-blur-xl border-b border-[#1d3557]/[0.04] flex items-center justify-between px-4 md:px-8">
-      {/* Mobile hamburger */}
+    <header className="sticky top-0 z-30 h-14 bg-[#F9FAFB]/80 backdrop-blur-xl border-b border-[#1d3557]/[0.04] flex items-center justify-between px-4 md:hidden">
+      {/* Hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] transition-all duration-300"
+        className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] transition-all duration-300"
       >
         <Menu className="w-[18px] h-[18px] text-[#1d3557]" strokeWidth={1.5} />
       </button>
 
-      {/* Mobile brand */}
-      <div className="md:hidden flex items-center gap-2">
+      {/* Brand */}
+      <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-lg bg-[#457b9d] flex items-center justify-center">
           <Stethoscope className="w-4 h-4 text-white" strokeWidth={1.5} />
         </div>
@@ -67,11 +67,8 @@ export function TopBar({ title }: TopBarProps) {
         </span>
       </div>
 
-      {/* Spacer for desktop */}
-      <div className="hidden md:block" />
-
       {/* Right side — bell + profile */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-2">
         <button className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)]">
           <Bell
             className="w-[18px] h-[18px] text-[#64748B]"

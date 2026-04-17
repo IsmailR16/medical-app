@@ -17,6 +17,9 @@ import {
   X,
   LogOut,
   User,
+  Bell,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useSidebarCtx } from "./SidebarContext";
 
@@ -43,6 +46,25 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const { signOut } = useClerk();
   const { mobileOpen, setMobileOpen, collapsed, toggleCollapsed } =
     useSidebarCtx();
+
+  /* Theme state */
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme");
+    const prefersDark =
+      stored === "dark" ||
+      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setDark(prefersDark);
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
+  function toggleTheme() {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+  }
 
   const initials = user.name
     .split(" ")
@@ -96,7 +118,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </div>
 
         {/* Navigation with groups */}
-        <nav className="flex-1 px-3 pt-5 overflow-y-auto space-y-0.5">
+        <nav className="flex-1 px-3 pt-5 overflow-y-auto overflow-x-hidden space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -129,6 +151,43 @@ export function AppSidebar({ user }: AppSidebarProps) {
             );
           })}
         </nav>
+
+        {/* Utility items */}
+        <div className="px-3 pb-3 space-y-0.5">
+          <div className="h-px bg-white/[0.06] mb-2" />
+
+          <button
+            className={`group flex items-center gap-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap w-full text-white/50 hover:bg-white/[0.06] hover:text-white/80 cursor-pointer ${
+              collapsed && !mobileOpen ? "justify-center px-0" : "px-3"
+            }`}
+            aria-label="Notifikationer"
+          >
+            <Bell
+              className="w-[18px] h-[18px] flex-shrink-0"
+              strokeWidth={1.5}
+            />
+            {(mobileOpen || showLabels) && (
+              <span className="text-[13px] font-medium">Notiser</span>
+            )}
+          </button>
+
+          <button
+            onClick={toggleTheme}
+            className={`group flex items-center gap-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap w-full text-white/50 hover:bg-white/[0.06] hover:text-white/80 cursor-pointer ${
+              collapsed && !mobileOpen ? "justify-center px-0" : "px-3"
+            }`}
+            aria-label={dark ? "Byt till ljust läge" : "Byt till mörkt läge"}
+          >
+            {dark ? (
+              <Sun className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+            ) : (
+              <Moon className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
+            )}
+            {(mobileOpen || showLabels) && (
+              <span className="text-[13px] font-medium">Tema</span>
+            )}
+          </button>
+        </div>
 
         {/* User card */}
         <UserCardDropdown
@@ -294,3 +353,4 @@ function UserCardDropdown({
     </div>
   );
 }
+
