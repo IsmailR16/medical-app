@@ -104,39 +104,47 @@
   --sidebar-ring: #457b9d;
 }
 
+/* ─── Dark mode: Diagnostika palette ─── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Semantic tokens */
+  --background: #0a0f1c;
+  --foreground: #e2e8f0;
+  --card: #131a2e;
+  --card-foreground: #e2e8f0;
+  --popover: #131a2e;
+  --popover-foreground: #e2e8f0;
+  --primary: #a8dadc;
+  --primary-foreground: #1d3557;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #1a2238;
+  --muted-foreground: #94a3b8;
+  --accent: #1a2238;
+  --accent-foreground: #a8dadc;
+  --destructive: #e63946;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: transparent;
+  --input-background: #131a2e;
+  --switch-background: #334155;
+  --ring: #a8dadc;
+
+  /* Charts — keep Diagnostika palette, brightened for dark */
+  --chart-1: #8ab4cf;
+  --chart-2: #a8dadc;
+  --chart-3: #e2e8f0;
+  --chart-4: #e63946;
+  --chart-5: #f1faee;
+
+  /* Sidebar — stays darkest surface */
+  --sidebar: #0f1628;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #457b9d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #457b9d;
 }
 
 @layer base {
@@ -146,6 +154,188 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+}
+
+/* ─── Dark mode: overrides for hardcoded hex palette across dashboard ─── */
+/* Page background */
+.dark body,
+.dark .bg-\[\#F9FAFB\],
+.dark .bg-\[\#F9FAFB\]\/80 {
+  background-color: #0a0f1c !important;
+}
+
+/* Cards / panels */
+.dark .bg-white {
+  background-color: #131a2e !important;
+}
+
+/* Hover surfaces that were very-light grey — needs to be bright enough to see */
+.dark .hover\:bg-\[\#F9FAFB\]:hover,
+.dark .hover\:bg-white:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Interactive bg-[#F9FAFB] surfaces (buttons/links) — lift above page bg */
+.dark button.bg-\[\#F9FAFB\],
+.dark a.bg-\[\#F9FAFB\] {
+  background-color: #1a2238 !important;
+}
+.dark button.bg-\[\#F9FAFB\]:hover,
+.dark a.bg-\[\#F9FAFB\]:hover {
+  background-color: #242d4a !important;
+}
+
+/* White CTA buttons with partial-opacity hover (e.g. Uppgradera nu) */
+.dark .hover\:bg-white\/90:hover {
+  background-color: #242d4a !important;
+}
+.dark .hover\:bg-white\/\[0\.1\]:hover {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Steel-blue solid buttons — brighten hover instead of darkening */
+.dark .hover\:bg-\[\#3a6781\]:hover {
+  background-color: #5a93b5 !important;
+}
+.dark .hover\:bg-\[\#5a93b5\]:hover {
+  background-color: #6ba6c7 !important;
+}
+
+/* Red destructive buttons — lighter hover in dark mode */
+.dark .hover\:bg-\[\#d62839\]:hover {
+  background-color: #f04a57 !important;
+}
+
+/* Hover borders — brighter than base border so the change is visible */
+.dark .hover\:border-\[\#1d3557\]\/\[0\.1\]:hover,
+.dark .hover\:border-\[\#1d3557\]\/\[0\.12\]:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Navy foreground text → light */
+.dark .text-\[\#1d3557\] {
+  color: #e2e8f0 !important;
+}
+
+/* Muted text stays mid-grey */
+.dark .text-\[\#94A3B8\],
+.dark .text-\[\#64748B\] {
+  color: #94a3b8 !important;
+}
+
+/* Steel blue accent text — brighten slightly */
+.dark .text-\[\#457b9d\] {
+  color: #8ab4cf !important;
+}
+
+.dark .hover\:text-\[\#3a6781\]:hover {
+  color: #a8dadc !important;
+}
+
+/* Borders built from navy alpha → white alpha */
+.dark .border-\[\#1d3557\]\/\[0\.04\],
+.dark .border-\[\#1d3557\]\/\[0\.06\],
+.dark .border-\[\#1d3557\]\/\[0\.08\],
+.dark .border-\[\#1d3557\]\/\[0\.12\] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Divider lines */
+.dark .divide-\[\#1d3557\]\/\[0\.04\] > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Steel blue tinted surfaces — brighten the tint */
+.dark .bg-\[\#457b9d\]\/\[0\.06\] {
+  background-color: rgba(138, 180, 207, 0.12) !important;
+}
+
+/* Neutral muted backgrounds */
+.dark .bg-zinc-50,
+.dark .bg-slate-50,
+.dark .bg-gray-50 {
+  background-color: #1a2238 !important;
+}
+
+/* Status badge backgrounds — darken but preserve hue */
+.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+.dark .bg-rose-50\/60,
+.dark .hover\:bg-rose-50\/60:hover {
+  background-color: rgba(230, 57, 70, 0.1) !important;
+}
+
+/* Box-shadows — navy-tinted → neutral dark */
+.dark .shadow-\[0_2px_8px_-4px_rgba\(29\,53\,87\,0\.06\)\] {
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.3) !important;
+}
+.dark .hover\:shadow-\[0_8px_24px_-8px_rgba\(29\,53\,87\,0\.1\)\]:hover {
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4) !important;
+}
+.dark .shadow-\[0_2px_8px_-2px_rgba\(29\,53\,87\,0\.08\)\],
+.dark .hover\:shadow-\[0_2px_8px_-2px_rgba\(29\,53\,87\,0\.08\)\]:hover {
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.3) !important;
+}
+.dark .shadow-\[0_2px_8px_-2px_rgba\(29\,53\,87\,0\.15\)\] {
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.4) !important;
+}
+.dark .shadow-\[0_2px_8px_-2px_rgba\(69\,123\,157\,0\.3\)\] {
+  box-shadow: 0 2px 8px -2px rgba(69, 123, 157, 0.2) !important;
+}
+.dark .shadow-\[0_4px_16px_-4px_rgba\(230\,57\,70\,0\.4\)\] {
+  box-shadow: 0 4px 16px -4px rgba(230, 57, 70, 0.3) !important;
+}
+.dark .shadow-\[0_8px_30px_-6px_rgba\(29\,53\,87\,0\.18\)\] {
+  box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.5) !important;
+}
+.dark .shadow-\[0_12px_40px_-8px_rgba\(29\,53\,87\,0\.2\)\,0_0_0_1px_rgba\(29\,53\,87\,0\.04\)\] {
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+.dark .shadow-\[0_2px_8px_-4px_rgba\(230\,57\,70\,0\.06\)\] {
+  box-shadow: 0 2px 8px -4px rgba(230, 57, 70, 0.15) !important;
+}
+.dark .focus\:shadow-\[0_0_0_3px_rgba\(69\,123\,157\,0\.08\)\]:focus {
+  box-shadow: 0 0 0 3px rgba(69, 123, 157, 0.15) !important;
+}
+.dark .shadow-\[0_1px_2px_rgba\(29\,53\,87\,0\.03\)\] {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+}
+.dark .shadow-\[0_1px_4px_-1px_rgba\(29\,53\,87\,0\.12\)\] {
+  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.35) !important;
+}
+.dark .shadow-\[0_2px_8px_-2px_rgba\(69\,123\,157\,0\.25\)\] {
+  box-shadow: 0 2px 8px -2px rgba(69, 123, 157, 0.15) !important;
+}
+.dark .shadow-\[0_2px_12px_-2px_rgba\(69\,123\,157\,0\.4\)\] {
+  box-shadow: 0 2px 12px -2px rgba(69, 123, 157, 0.25) !important;
+}
+.dark .shadow-\[0_4px_12px_-2px_rgba\(230\,57\,70\,0\.4\)\] {
+  box-shadow: 0 4px 12px -2px rgba(230, 57, 70, 0.3) !important;
+}
+.dark .hover\:shadow-\[0_12px_32px_-8px_rgba\(29\,53\,87\,0\.12\)\]:hover {
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4) !important;
+}
+.dark .shadow-\[0_12px_40px_-8px_rgba\(29\,53\,87\,0\.3\)\] {
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Input / textarea surfaces commonly use bg-white via forms */
+.dark input,
+.dark textarea,
+.dark select {
+  color: #e2e8f0;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
 }
 
 /* ─── Diagnostika shared easing ─── */

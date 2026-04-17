@@ -4,6 +4,10 @@ import { useEffect } from "react";
 
 export default function ScrollReveal() {
   useEffect(() => {
+    document.documentElement.classList.remove("dark");
+  }, []);
+
+  useEffect(() => {
     const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

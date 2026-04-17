@@ -40,6 +40,11 @@ export default async function DashboardLayout({
 
   return (
     <ClerkProvider>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+        }}
+      />
       <ToastProvider />
       <div className={jetbrains.variable}>
         <DashboardShell>
