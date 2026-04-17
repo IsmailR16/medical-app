@@ -8,27 +8,18 @@ import type { CaseListItem } from "@/lib/db/dashboard";
 
 /* ------------------------------------------------------------------ */
 
-const difficultyColor: Record<string, string> = {
-  easy: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-  medium: "bg-amber-50 text-amber-700 border-amber-200/50",
-  hard: "bg-rose-50 text-rose-700 border-rose-200/50",
-};
-
-const difficultyLabel: Record<string, string> = {
-  easy: "Lätt",
-  medium: "Medel",
-  hard: "Svår",
-};
-
 interface CaseGridProps {
   cases: CaseListItem[];
   limitReached: boolean;
+  activeCaseIds: string[];
 }
 
-export function CaseGrid({ cases, limitReached }: CaseGridProps) {
+export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) {
   const router = useRouter();
   const [startingId, setStartingId] = useState<string | null>(null);
   const inflightRef = useRef(false);
+
+  const activeSet = useMemo(() => new Set(activeCaseIds), [activeCaseIds]);
 
   /* ---------- Filters ---------- */
   const [search, setSearch] = useState("");
@@ -147,7 +138,7 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
               key={c.id}
               disabled={limitReached || startingId === c.id}
               onClick={() => handleStart(c.id)}
-              className="group text-left bg-white rounded-2xl p-6 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_12px_32px_-8px_rgba(29,53,87,0.12)] hover:border-[#1d3557]/[0.1] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group text-left bg-white rounded-2xl p-6 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_12px_32px_-8px_rgba(29,53,87,0.12)] hover:border-[#1d3557]/[0.1] hover:-translate-y-1 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50 disabled:cursor-not-allowed flex flex-col h-full"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -163,14 +154,16 @@ export function CaseGrid({ cases, limitReached }: CaseGridProps) {
                 </div>
               </div>
 
-              <p className="text-[13px] text-[#64748B] leading-relaxed mb-5 line-clamp-2">
+              <p className="text-[13px] text-[#64748B] leading-relaxed line-clamp-2 flex-1">
                 {c.description}
               </p>
 
-              <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${difficultyColor[c.difficulty] ?? "bg-zinc-50 text-zinc-600 border-zinc-200/50"}`}>
-                  {difficultyLabel[c.difficulty] ?? c.difficulty}
-                </span>
+              <div className="flex items-center gap-2 mt-5 min-h-[22px]">
+                {activeSet.has(c.id) && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-amber-50 text-amber-700 border-amber-200/50">
+                    Pågående
+                  </span>
+                )}
                 {startingId === c.id && (
                   <span className="text-[11px] text-[#94A3B8] font-medium">Startar…</span>
                 )}

@@ -32,17 +32,7 @@ const statusStyle: Record<string, string> = {
   evaluated: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
 };
 
-const difficultyLabel: Record<string, string> = {
-  easy: "Lätt",
-  medium: "Medel",
-  hard: "Svår",
-};
 
-const difficultyStyle: Record<string, string> = {
-  easy: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-  medium: "bg-amber-50 text-amber-700 border-amber-200/50",
-  hard: "bg-rose-50 text-rose-700 border-rose-200/50",
-};
 
 export default async function SessionsPage() {
   const user = await getOrCreateUser();
@@ -171,9 +161,8 @@ export default async function SessionsPage() {
         ) : (
           <div className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)]">
             {/* Table Header */}
-            <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 border-b border-[#1d3557]/[0.04] text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em]">
+            <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-4 px-6 py-3 border-b border-[#1d3557]/[0.04] text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em]">
               <span>Patientfall</span>
-              <span>Svårighetsgrad</span>
               <span>Datum</span>
               <span>Tid</span>
               <span>Poäng</span>
@@ -185,7 +174,7 @@ export default async function SessionsPage() {
               {sessions.map((s) => (
                 <div
                   key={s.id}
-                  className="flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] gap-3 md:gap-4 md:items-center px-4 md:px-6 py-4 hover:bg-[#F9FAFB] transition-colors duration-200"
+                  className="flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-3 md:gap-4 md:items-center px-4 md:px-6 py-4 hover:bg-[#F9FAFB] transition-colors duration-200"
                 >
                   {/* Title + specialty */}
                   <div className="min-w-0">
@@ -195,17 +184,6 @@ export default async function SessionsPage() {
                     <p className="text-[12px] text-[#94A3B8]">
                       {s.case_specialty}
                     </p>
-                  </div>
-
-                  {/* Difficulty */}
-                  <div>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
-                        difficultyStyle[s.case_difficulty] ?? "bg-zinc-50 text-zinc-500 border-zinc-200/50"
-                      }`}
-                    >
-                      {difficultyLabel[s.case_difficulty] ?? s.case_difficulty}
-                    </span>
                   </div>
 
                   {/* Date */}

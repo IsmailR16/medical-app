@@ -167,6 +167,23 @@ export const getPublishedCases = () =>
     { tags: ["cases"], revalidate: 120 }
   )();
 
+/** Return the case IDs where the user has an active (in-progress) session. */
+export const getActiveCaseIds = (userId: string) =>
+  unstable_cache(
+    async (): Promise<string[]> => {
+      const sb = createServiceRoleClient();
+      const { data } = await sb
+        .from("sessions")
+        .select("case_id")
+        .eq("user_id", userId)
+        .eq("status", "active");
+
+      return (data ?? []).map((r) => r.case_id as string);
+    },
+    [`active-cases-${userId}`],
+    { tags: [`sessions-${userId}`], revalidate: 30 }
+  )();
+
 /* ------------------------------------------------------------------ */
 /*  Session + Messages for chat page                                   */
 /* ------------------------------------------------------------------ */
