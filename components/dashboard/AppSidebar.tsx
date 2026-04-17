@@ -20,28 +20,13 @@ import {
 } from "lucide-react";
 import { useSidebarCtx } from "./SidebarContext";
 
-const navGroups = [
-  {
-    label: "HUVUDMENY",
-    items: [
-      { path: "/dashboard", label: "Översikt", icon: LayoutDashboard },
-      { path: "/cases", label: "Fallbibliotek", icon: BookOpen },
-      { path: "/sessions", label: "Historik", icon: History },
-    ],
-  },
-  {
-    label: "ANALYS",
-    items: [
-      { path: "/evaluations", label: "Utvärderingar", icon: ClipboardCheck },
-    ],
-  },
-  {
-    label: "KONTO",
-    items: [
-      { path: "/billing", label: "Fakturering", icon: CreditCard },
-      { path: "/settings", label: "Inställningar", icon: Settings },
-    ],
-  },
+const navItems = [
+  { path: "/dashboard", label: "Översikt", icon: LayoutDashboard },
+  { path: "/cases", label: "Fallbibliotek", icon: BookOpen },
+  { path: "/sessions", label: "Historik", icon: History },
+  { path: "/evaluations", label: "Utvärderingar", icon: ClipboardCheck },
+  { path: "/billing", label: "Fakturering", icon: CreditCard },
+  { path: "/settings", label: "Inställningar", icon: Settings },
 ];
 
 interface AppSidebarProps {
@@ -111,47 +96,38 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </div>
 
         {/* Navigation with groups */}
-        <nav className="flex-1 px-3 pt-5 overflow-y-auto">
-          {navGroups.map((group) => (
-            <div key={group.label} className="mb-5">
-              {(mobileOpen || showLabels) && (
-                <p className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.15em] px-3 mb-2">
-                  {group.label}
-                </p>
-              )}
-              <div className="space-y-0.5">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive =
-                    pathname === item.path ||
-                    (item.path !== "/dashboard" &&
-                      pathname.startsWith(item.path));
+        <nav className="flex-1 px-3 pt-5 overflow-y-auto space-y-0.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              pathname === item.path ||
+              (item.path !== "/dashboard" &&
+                pathname.startsWith(item.path));
 
-                  return (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap ${
-                        isActive
-                          ? "bg-white/[0.1] text-white"
-                          : "text-white/50 hover:bg-white/[0.06] hover:text-white/80"
-                      }`}
-                    >
-                      <Icon
-                        className="w-[18px] h-[18px] flex-shrink-0"
-                        strokeWidth={1.5}
-                      />
-                      {(mobileOpen || showLabels) && (
-                        <span className="text-[13px] font-medium">
-                          {item.label}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`group flex items-center gap-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap ${
+                  collapsed && !mobileOpen ? "justify-center mx-1 px-0" : "px-3"
+                } ${
+                  isActive
+                    ? "bg-white/[0.1] text-white"
+                    : "text-white/50 hover:bg-white/[0.06] hover:text-white/80"
+                }`}
+              >
+                <Icon
+                  className="w-[18px] h-[18px] flex-shrink-0"
+                  strokeWidth={1.5}
+                />
+                {(mobileOpen || showLabels) && (
+                  <span className="text-[13px] font-medium">
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* User card */}
@@ -166,7 +142,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {/* Collapse toggle — desktop only */}
         <button
           onClick={toggleCollapsed}
-          className="hidden md:flex absolute -right-3 top-20 w-6 h-6 bg-white rounded-full border border-[#1d3557]/[0.08] shadow-[0_2px_8px_-2px_rgba(29,53,87,0.15)] items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-110"
+          className="hidden md:flex absolute -right-3 top-20 w-6 h-6 bg-white rounded-full border border-[#1d3557]/[0.08] shadow-[0_2px_8px_-2px_rgba(29,53,87,0.15)] items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-110 cursor-pointer"
         >
           <ChevronLeft
             className={`w-3.5 h-3.5 text-[#1d3557] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
