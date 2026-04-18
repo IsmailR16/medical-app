@@ -8,28 +8,14 @@ interface SessionHeaderProps {
   sessionId: string;
   title: string;
   specialty: string;
-  difficulty: string;
   status: string;
   description: string;
 }
-
-const difficultyLabel: Record<string, string> = {
-  easy: "Lätt",
-  medium: "Medel",
-  hard: "Svår",
-};
-
-const difficultyStyle: Record<string, string> = {
-  easy: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-  medium: "bg-amber-50 text-amber-700 border-amber-200/50",
-  hard: "bg-rose-50 text-rose-700 border-rose-200/50",
-};
 
 export function SessionHeader({
   sessionId,
   title,
   specialty,
-  difficulty,
   status,
   description,
 }: SessionHeaderProps) {
@@ -60,9 +46,6 @@ export function SessionHeader({
               <h1 className="text-xl md:text-2xl font-extrabold text-[#1d3557] tracking-tight truncate">
                 {title}
               </h1>
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${difficultyStyle[difficulty] ?? "bg-zinc-50 text-zinc-500 border-zinc-200/50"}`}>
-                {difficultyLabel[difficulty] ?? difficulty}
-              </span>
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[#1d3557]/[0.06] text-[#94A3B8] bg-[#F9FAFB]">
                 {specialty}
               </span>

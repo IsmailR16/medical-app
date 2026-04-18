@@ -104,15 +104,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-white/[0.06]">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/[0.06] grid place-items-center flex-shrink-0">
-              <Image
-                src="/Logo_white.svg"
-                alt="Logo"
-                width={24}
-                height={24}
-                className="block m-0"
-              />
-            </div>
+            <Image
+              src="/Logo_white.svg"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="block m-0 flex-shrink-0"
+            />
             {(mobileOpen || showLabels) && (
               <span className="text-[15px] font-bold text-white tracking-tight whitespace-nowrap">
                 Diagnostika

@@ -35,7 +35,6 @@ export default async function SessionPage({ params }: SessionPageProps) {
           sessionId={session.id}
           title={session.case_title}
           specialty={session.case_specialty}
-          difficulty={session.case_difficulty}
           status={session.status}
           description={session.case_description}
         />
