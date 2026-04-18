@@ -190,7 +190,7 @@ export default function Navbar({ isSignedIn = false }: { isSignedIn?: boolean })
           ) : (
             <Link
               href="/sign-up"
-              className="hidden md:inline-flex items-center gap-2 bg-[#1D3557] text-white text-[13px] font-semibold rounded-full pl-4 pr-1.5 py-1.5 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#1D3557] active:scale-[0.98] group"
+              className="hidden md:inline-flex items-center gap-2 bg-[#457b9d] text-white text-[13px] font-semibold rounded-full pl-4 pr-1.5 py-1.5 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#1D3557] active:scale-[0.98] group"
             >
               <span>Kom igång</span>
               <span className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105">

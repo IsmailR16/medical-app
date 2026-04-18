@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "motion/react";
-import { Bell, Menu, Stethoscope, Settings, LogOut } from "lucide-react";
+import { Bell, Menu, Settings, LogOut } from "lucide-react";
 import { useSidebarCtx } from "./SidebarContext";
 
 interface TopBarProps {
@@ -58,14 +60,20 @@ export function TopBar({ title }: TopBarProps) {
       </button>
 
       {/* Brand */}
-      <div className="flex items-center gap-2">
-        <div className="w-6 h-6 rounded-lg bg-[#457b9d] flex items-center justify-center">
-          <Stethoscope className="w-4 h-4 text-white" strokeWidth={1.5} />
+      <Link href="/dashboard" className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-xl bg-[#1d3557]/[0.04] border border-[#1d3557]/[0.06] grid place-items-center flex-shrink-0">
+          <Image
+            src="/Logo_col.svg"
+            alt="Logo"
+            width={24}
+            height={24}
+            className="block m-0"
+          />
         </div>
         <span className="text-[14px] font-bold text-[#1d3557] tracking-tight">
           Diagnostika
         </span>
-      </div>
+      </Link>
 
       {/* Right side — bell + profile */}
       <div className="flex items-center gap-2">
