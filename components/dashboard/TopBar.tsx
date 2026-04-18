@@ -19,7 +19,9 @@ export function TopBar({ title }: TopBarProps) {
   const { signOut } = useClerk();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -35,6 +37,18 @@ export function TopBar({ title }: TopBarProps) {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileOpen]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (bellRef.current && !bellRef.current.contains(event.target as Node)) {
+        setBellOpen(false);
+      }
+    }
+    if (bellOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [bellOpen]);
 
   const initials = user
     ? (user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "U")
@@ -77,13 +91,46 @@ export function TopBar({ title }: TopBarProps) {
 
       {/* Right side — bell + profile */}
       <div className="flex items-center gap-2">
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)]">
-          <Bell
-            className="w-[18px] h-[18px] text-[#64748B]"
-            strokeWidth={1.5}
-          />
-          <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#e63946] rounded-full" />
-        </button>
+        <div className="relative" ref={bellRef}>
+          <button
+            onClick={() => setBellOpen((v) => !v)}
+            className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)]"
+          >
+            <Bell
+              className="w-[18px] h-[18px] text-[#64748B]"
+              strokeWidth={1.5}
+            />
+          </button>
+
+          <AnimatePresence>
+            {bellOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+                className="absolute right-0 mt-2 w-[260px] z-50 bg-white rounded-xl border border-[#1d3557]/[0.08] shadow-[0_12px_40px_-8px_rgba(29,53,87,0.2)] overflow-hidden"
+              >
+                <div className="px-4 py-3 border-b border-[#1d3557]/[0.06]">
+                  <p className="text-[13px] font-semibold text-[#1d3557]">
+                    Notiser
+                  </p>
+                </div>
+                <div className="px-4 py-8 flex flex-col items-center text-center">
+                  <div className="w-11 h-11 rounded-2xl bg-[#457b9d]/[0.06] flex items-center justify-center mb-3">
+                    <Bell className="w-5 h-5 text-[#94A3B8]" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-[13px] font-medium text-[#1d3557] mb-1">
+                    Inga notiser just nu
+                  </p>
+                  <p className="text-[11px] text-[#94A3B8]">
+                    Vi meddelar dig när något händer
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Profile avatar + dropdown */}
         <div className="relative" ref={dropdownRef}>

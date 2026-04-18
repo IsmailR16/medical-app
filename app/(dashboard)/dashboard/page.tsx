@@ -20,6 +20,7 @@ import {
 import { FREE_LIMIT } from "@/lib/plans";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { PlanCheckout } from "@/components/dashboard/PlanCheckout";
+import { SurpriseMeButton } from "@/components/dashboard/SurpriseMeButton";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
 
 export const metadata: Metadata = {
@@ -148,12 +149,7 @@ export default async function DashboardPage() {
                     Välj ett fall från biblioteket och börja träna dina diagnostiska färdigheter.
                   </p>
                   <div className="flex gap-3">
-                    <button
-                      className="group inline-flex items-center gap-2 bg-[#e63946] text-white text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#d62839] active:scale-[0.98] shadow-[0_4px_16px_-4px_rgba(230,57,70,0.4)]"
-                    >
-                      Överraska mig
-                      <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={1.5} />
-                    </button>
+                    <SurpriseMeButton />
                     <Link
                       href="/cases"
                       className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/[0.08] text-white text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/[0.1] active:scale-[0.98] backdrop-blur-sm"
