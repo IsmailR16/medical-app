@@ -25,13 +25,15 @@ import { CategoryBars } from "@/components/dashboard/CategoryBars";
 
 function getScoreColor(score: number) {
   if (score >= 90) return "text-emerald-600 bg-emerald-50 border-emerald-200";
-  if (score >= 75) return "text-amber-600 bg-amber-50 border-amber-200";
+  if (score >= 75) return "text-[#457b9d] bg-[#457b9d]/[0.08] border-[#457b9d]/20";
+  if (score >= 60) return "text-amber-600 bg-amber-50 border-amber-200";
   return "text-rose-600 bg-rose-50 border-rose-200";
 }
 
 function getScoreBadgeStyle(score: number) {
   if (score >= 90) return "bg-emerald-50 text-emerald-700 border-emerald-200/50";
-  if (score >= 75) return "bg-amber-50 text-amber-700 border-amber-200/50";
+  if (score >= 75) return "bg-[#457b9d]/[0.08] text-[#457b9d] border-[#457b9d]/20";
+  if (score >= 60) return "bg-amber-50 text-amber-700 border-amber-200/50";
   return "bg-rose-50 text-rose-700 border-rose-200/50";
 }
 

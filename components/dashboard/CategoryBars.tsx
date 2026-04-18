@@ -57,7 +57,7 @@ export function CategoryBars({ categories }: { categories: CategoryData[] }) {
               </span>
             </div>
           </div>
-          <div className="w-full bg-[#F9FAFB] rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-[#1d3557]/[0.04] rounded-full h-2 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${item.score}%` }}

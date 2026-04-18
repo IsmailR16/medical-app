@@ -24,13 +24,15 @@ interface EvaluationPageProps {
 
 function getScoreColor(score: number) {
   if (score >= 90) return "text-emerald-600";
-  if (score >= 75) return "text-amber-600";
+  if (score >= 75) return "text-[#457b9d]";
+  if (score >= 60) return "text-amber-600";
   return "text-rose-600";
 }
 
 function getScoreBadgeStyle(score: number) {
   if (score >= 90) return "bg-emerald-50 text-emerald-700 border-emerald-200/50";
-  if (score >= 75) return "bg-amber-50 text-amber-700 border-amber-200/50";
+  if (score >= 75) return "bg-[#457b9d]/[0.08] text-[#457b9d] border-[#457b9d]/20";
+  if (score >= 60) return "bg-amber-50 text-amber-700 border-amber-200/50";
   return "bg-rose-50 text-rose-700 border-rose-200/50";
 }
 
@@ -41,9 +43,10 @@ function getScoreLabel(score: number) {
   return "Behöver förbättring";
 }
 
-function getBarColor(pct: number) {
-  if (pct >= 80) return "bg-emerald-500";
-  if (pct >= 60) return "bg-amber-500";
+function getBarColor(score: number) {
+  if (score >= 90) return "bg-emerald-500";
+  if (score >= 75) return "bg-[#457b9d]";
+  if (score >= 60) return "bg-amber-500";
   return "bg-rose-500";
 }
 
@@ -117,31 +120,28 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
             Detaljerad bedömning
           </h2>
           <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {scores.map((item) => {
-              const pct = Math.round((item.score / 100) * 100);
-              return (
-                <StaggerItem
-                  key={item.category}
-                  className="bg-white rounded-2xl p-5 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)]"
-                >
-                  <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-2">
-                    {item.category}
-                  </p>
-                  <div className="flex items-baseline justify-between mb-2">
-                    <span className={`text-2xl font-extrabold font-mono ${getScoreColor(item.score)}`}>
-                      {item.score}
-                    </span>
-                    <span className="text-[13px] text-[#94A3B8]">/ 100</span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1d3557]/[0.04]">
-                    <div
-                      className={`h-full rounded-full transition-all ${getBarColor(pct)}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </StaggerItem>
-              );
-            })}
+            {scores.map((item) => (
+              <StaggerItem
+                key={item.category}
+                className="bg-white rounded-2xl p-5 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)]"
+              >
+                <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-2">
+                  {item.category}
+                </p>
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className={`text-2xl font-extrabold font-mono ${getScoreColor(item.score)}`}>
+                    {item.score}
+                  </span>
+                  <span className="text-[13px] text-[#94A3B8]">/ 100</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1d3557]/[0.04]">
+                  <div
+                    className={`h-full rounded-full transition-all ${getBarColor(item.score)}`}
+                    style={{ width: `${item.score}%` }}
+                  />
+                </div>
+              </StaggerItem>
+            ))}
           </Stagger>
         </FadeUp>
 
