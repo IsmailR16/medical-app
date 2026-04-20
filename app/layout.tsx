@@ -10,6 +10,9 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://diagnostika.se"),
+  alternates: {
+    canonical: "/",
+  },
   title: "Diagnostika | Träna kliniskt resonemang med AI-patienter",
   description:
     "AI-driven klinisk träning för nästa generation läkare. Träna på realistiska patientfall, utveckla diagnostiska färdigheter och få omedelbar återkoppling.",
