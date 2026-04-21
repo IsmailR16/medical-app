@@ -19,18 +19,7 @@ import { getOrCreateUser } from "@/lib/auth/user";
 import { getAllSessions } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
-
-const statusLabel: Record<string, string> = {
-  active: "Pågående",
-  submitted: "Inskickad",
-  evaluated: "Avslutad",
-};
-
-const statusStyle: Record<string, string> = {
-  active: "bg-amber-50 text-amber-700 border-amber-200/50",
-  submitted: "bg-blue-50 text-blue-700 border-blue-200/50",
-  evaluated: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-};
+import { SessionStatusBadge } from "@/components/dashboard/SessionStatusBadge";
 
 
 
@@ -211,19 +200,7 @@ export default async function SessionsPage() {
 
                   {/* Status */}
                   <div>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
-                        statusStyle[s.status] ?? "bg-zinc-50 text-zinc-500 border-zinc-200/50"
-                      }`}
-                    >
-                      {s.status === "active" && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
-                      )}
-                      {s.status === "evaluated" && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
-                      )}
-                      {statusLabel[s.status] ?? s.status}
-                    </span>
+                    <SessionStatusBadge status={s.status} />
                   </div>
 
                   {/* Action */}

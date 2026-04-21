@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { DiagnosisModal } from "@/components/dashboard/DiagnosisModal";
+import { SessionStatusBadge } from "@/components/dashboard/SessionStatusBadge";
 import { FileText } from "lucide-react";
 
 interface SessionHeaderProps {
@@ -23,20 +24,6 @@ export function SessionHeader({
 
   const isActive = status === "active";
 
-  const statusLabel =
-    status === "active"
-      ? "Pågående"
-      : status === "submitted"
-        ? "Inskickad"
-        : "Utvärderad";
-
-  const statusStyle =
-    status === "active"
-      ? "bg-amber-50 text-amber-700 border-amber-200/50"
-      : status === "submitted"
-        ? "bg-blue-50 text-blue-700 border-blue-200/50"
-        : "bg-emerald-50 text-emerald-700 border-emerald-200/50";
-
   return (
     <>
       <div className="mb-6 pb-5 border-b border-[#1d3557]/[0.04]">
@@ -49,12 +36,7 @@ export function SessionHeader({
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[#1d3557]/[0.06] text-[#94A3B8] bg-[#F9FAFB]">
                 {specialty}
               </span>
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${statusStyle}`}>
-                {status === "active" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
-                )}
-                {statusLabel}
-              </span>
+              <SessionStatusBadge status={status} variant="detail" />
             </div>
             <p className="text-[13px] text-[#94A3B8] line-clamp-2 leading-relaxed">
               {description}

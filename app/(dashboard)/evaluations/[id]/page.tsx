@@ -17,37 +17,15 @@ import { getOrCreateUser } from "@/lib/auth/user";
 import { getEvaluationBySession } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
+import {
+  getScoreBadgeStyle,
+  getScoreBarColor,
+  getScoreLabel,
+  getScoreTextColor,
+} from "@/lib/ui/scores";
 
 interface EvaluationPageProps {
   params: Promise<{ id: string }>;
-}
-
-function getScoreColor(score: number) {
-  if (score >= 90) return "text-emerald-600";
-  if (score >= 75) return "text-[#457b9d]";
-  if (score >= 60) return "text-amber-600";
-  return "text-rose-600";
-}
-
-function getScoreBadgeStyle(score: number) {
-  if (score >= 90) return "bg-emerald-50 text-emerald-700 border-emerald-200/50";
-  if (score >= 75) return "bg-[#457b9d]/[0.08] text-[#457b9d] border-[#457b9d]/20";
-  if (score >= 60) return "bg-amber-50 text-amber-700 border-amber-200/50";
-  return "bg-rose-50 text-rose-700 border-rose-200/50";
-}
-
-function getScoreLabel(score: number) {
-  if (score >= 90) return "Utmärkt";
-  if (score >= 75) return "Bra";
-  if (score >= 60) return "Godkänt";
-  return "Behöver förbättring";
-}
-
-function getBarColor(score: number) {
-  if (score >= 90) return "bg-emerald-500";
-  if (score >= 75) return "bg-[#457b9d]";
-  if (score >= 60) return "bg-amber-500";
-  return "bg-rose-500";
 }
 
 export default async function EvaluationPage({ params }: EvaluationPageProps) {
@@ -102,7 +80,7 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
             <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-2">
               Totalpoäng
             </p>
-            <div className={`text-6xl md:text-7xl font-extrabold font-mono mb-3 ${getScoreColor(ev.overall_score)}`}>
+            <div className={`text-6xl md:text-7xl font-extrabold font-mono mb-3 ${getScoreTextColor(ev.overall_score)}`}>
               {ev.overall_score}
             </div>
             <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[12px] font-semibold border ${getScoreBadgeStyle(ev.overall_score)}`}>
@@ -129,14 +107,14 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
                   {item.category}
                 </p>
                 <div className="flex items-baseline justify-between mb-2">
-                  <span className={`text-2xl font-extrabold font-mono ${getScoreColor(item.score)}`}>
+                  <span className={`text-2xl font-extrabold font-mono ${getScoreTextColor(item.score)}`}>
                     {item.score}
                   </span>
                   <span className="text-[13px] text-[#94A3B8]">/ 100</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1d3557]/[0.04]">
                   <div
-                    className={`h-full rounded-full transition-all ${getBarColor(item.score)}`}
+                    className={`h-full rounded-full transition-all ${getScoreBarColor(item.score)}`}
                     style={{ width: `${item.score}%` }}
                   />
                 </div>
