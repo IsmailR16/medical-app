@@ -75,6 +75,12 @@ create index idx_inst_members_inst on public.institution_members (institution_id
 
 -- 4. CASES
 -- The patient case library — the core content of the platform.
+--
+-- Structure: split into two JSONB blocks.
+--   simulation  → everything the AI-patient needs to roleplay the chat
+--                 (patient, opening_message, persona, clinical_data)
+--   evaluation  → OSCE-style rubric used AFTER submission
+--                 (hidden_diagnosis, rubric with 5 areas, pass_threshold, max_points)
 -- -----------------------------------------------------------------------------
 create table public.cases (
   id uuid not null default gen_random_uuid(),
@@ -83,27 +89,16 @@ create table public.cases (
   -- Public-facing metadata (shown in case library)
   title text not null,                                -- e.g. "45-årig man med bröstsmärta"
   description text not null,                          -- Short intro shown in case card
-  specialty text not null,                            -- e.g. "Kardiologi", "Neurologi"
-  difficulty text not null default 'medium',          -- easy | medium | hard
+  specialty text not null,                            -- See cases_specialty_check (24 enum)
+  clinical_setting text not null default 'akutmottagning',
 
-  -- Hidden from student — used by AI to roleplay the patient
-  patient_name text not null,
-  patient_age integer not null,
-  patient_gender text not null,                       -- male | female
-  patient_background text not null,                   -- Social/medical history for AI context
-  presenting_complaint text not null,                 -- What the patient says initially
-  hidden_diagnosis text not null,                     -- The correct primary diagnosis
-  differential_diagnoses text[] not null default '{}',-- Other acceptable diagnoses
+  -- Core content — see structure note above
+  simulation jsonb not null default '{}'::jsonb,
+  evaluation jsonb not null default '{}'::jsonb,
 
-  -- Clinical data the AI can reveal when the student asks
-  vitals jsonb not null default '{}',                 -- {"bp": "140/90", "hr": 88, "temp": 37.2, ...}
-  lab_results jsonb not null default '{}',            -- {"hb": "13.2", "wbc": "11.0", ...}
-  imaging jsonb not null default '{}',                -- {"chest_xray": "description...", ...}
-  physical_exam jsonb not null default '{}',          -- {"heart": "S3 gallop", "lungs": "bibasal crackles"}
-  medications text[] not null default '{}',           -- Current medications
-
-  -- Optional extra AI instructions for this specific case
-  system_prompt_extra text null,
+  -- Provenance
+  source_type text not null default 'ai_generated',   -- ai_generated | human_created | human_edited
+  generated_by text null,                             -- Model name (e.g. gpt-5.4) when ai_generated
 
   -- Visibility / access control
   is_published boolean not null default false,        -- Only published cases show in library
@@ -118,13 +113,26 @@ create table public.cases (
     references public.users (user_id) on delete restrict,
   constraint cases_institution_fkey foreign key (institution_id)
     references public.institutions (id) on delete set null,
-  constraint cases_difficulty_check check (difficulty in ('easy', 'medium', 'hard')),
-  constraint cases_gender_check check (patient_gender in ('male', 'female')),
-  constraint cases_age_check check (patient_age between 0 and 150)
+  constraint cases_specialty_check check (specialty in (
+    'internmedicin', 'infektion', 'allmänmedicin', 'akutmedicin',
+    'geriatrik', 'psykiatri', 'kirurgi', 'pediatrik',
+    'neurologi', 'obstetrik', 'gynekologi', 'ortopedi',
+    'gastroenterologi', 'lungmedicin', 'kardiologi', 'endokrinologi',
+    'urologi', 'ögonsjukdomar', 'öron-näsa-hals', 'dermatologi',
+    'reumatologi', 'nefrologi', 'hematologi', 'onkologi'
+  )),
+  constraint cases_clinical_setting_check check (clinical_setting in (
+    'akutmottagning', 'vårdcentral', 'vårdavdelning', 'mottagning',
+    'förlossning', 'barnakut', 'psykakut'
+  )),
+  constraint cases_source_type_check check (source_type in (
+    'ai_generated', 'human_created', 'human_edited'
+  ))
 );
 
 create index idx_cases_specialty on public.cases (specialty);
-create index idx_cases_difficulty on public.cases (difficulty);
+create index idx_cases_clinical_setting on public.cases (clinical_setting);
+create index idx_cases_source_type on public.cases (source_type);
 create index idx_cases_published on public.cases (is_published) where is_published = true;
 create index idx_cases_created_by on public.cases (created_by);
 create index idx_cases_institution on public.cases (institution_id) where institution_id is not null;
