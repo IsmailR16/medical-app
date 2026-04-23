@@ -152,7 +152,14 @@ create table public.sessions (
   submitted_at timestamptz null,                      -- When student submitted diagnosis
   evaluated_at timestamptz null,                      -- When AI evaluation completed
 
-  -- Which clinical data has been revealed during this session
+  -- Which clinical data items the student has ordered during this session.
+  -- Item key scheme:
+  --   "vitals"                     — whole vitals block
+  --   "labs"                       — whole lab panel
+  --   "imaging:<test>"             — e.g. "imaging:ekg"
+  --   "physical_exam:<subsystem>"  — e.g. "physical_exam:cor"
+  revealed_items text[] not null default '{}',
+  -- Legacy per-category booleans (no longer used — see revealed_items).
   revealed_vitals boolean not null default false,
   revealed_labs boolean not null default false,
   revealed_imaging boolean not null default false,

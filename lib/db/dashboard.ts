@@ -148,7 +148,7 @@ export interface CaseListItem {
   title: string;
   description: string;
   specialty: string;
-  difficulty: string;
+  clinical_setting: string;
 }
 
 export const getPublishedCases = () =>
@@ -157,7 +157,7 @@ export const getPublishedCases = () =>
       const sb = createServiceRoleClient();
       const { data } = await sb
         .from("cases")
-        .select("id, title, description, specialty, difficulty")
+        .select("id, title, description, specialty, clinical_setting")
         .eq("is_published", true)
         .order("title", { ascending: true });
 
@@ -188,9 +188,20 @@ export const getActiveCaseIds = (userId: string) =>
 /*  Session + Messages for chat page                                   */
 /* ------------------------------------------------------------------ */
 
-export interface ClinicalDataSection {
-  title: string;
-  items: { label: string; value: string }[];
+export type OrderableSection = "vitals" | "labs" | "imaging" | "physical_exam";
+
+export interface OrderableItem {
+  /** Unique key matching the order API (e.g. "vitals", "imaging:ekg"). */
+  key: string;
+  section: OrderableSection;
+  /** Human-readable label shown on the order button. */
+  label: string;
+  /** True if the student has already ordered it in this session. */
+  revealed: boolean;
+  /** Single string value (for imaging / physical_exam items). */
+  value?: string;
+  /** For panel-style items (vitals, labs) — the list of sub-values. */
+  sub_items?: { label: string; value: string }[];
 }
 
 export interface SessionDetail {
@@ -201,17 +212,13 @@ export interface SessionDetail {
   started_at: string;
   submitted_at: string | null;
   evaluated_at: string | null;
-  revealed_vitals: boolean;
-  revealed_labs: boolean;
-  revealed_imaging: boolean;
-  revealed_physical_exam: boolean;
+  revealed_items: string[];
   primary_diagnosis: string | null;
   case_title: string;
   case_description: string;
   case_specialty: string;
-  case_difficulty: string;
-  presenting_complaint: string;
-  clinical_data: ClinicalDataSection[];
+  case_clinical_setting: string;
+  orderables: OrderableItem[];
 }
 
 export interface MessageRow {
@@ -239,7 +246,7 @@ export async function getSessionWithMessages(
 
   const { data: caseRow } = await sb
     .from("cases")
-    .select("title, description, specialty, difficulty, presenting_complaint, vitals, lab_results, imaging, physical_exam")
+    .select("title, description, specialty, clinical_setting, simulation")
     .eq("id", session.case_id)
     .single();
 
@@ -249,22 +256,89 @@ export async function getSessionWithMessages(
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true });
 
-  // Build clinical data sections from the case JSONB columns
-  function jsonToItems(obj: Record<string, unknown>): { label: string; value: string }[] {
-    return Object.entries(obj ?? {})
-      .filter(([, val]) => val != null && String(val).trim() !== "")
-      .map(([key, val]) => ({
-        label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        value: String(val),
+  // Build orderable items from simulation.clinical_data JSONB
+  function prettify(k: string): string {
+    const s = k.replace(/_/g, " ");
+    return s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+  }
+
+  function dictToList(obj: Record<string, unknown> | undefined): { label: string; value: string }[] {
+    if (!obj) return [];
+    return Object.entries(obj)
+      .filter(([k, v]) => !k.startsWith("_") && v != null && String(v).trim() !== "")
+      .map(([k, v]) => ({
+        label: prettify(k),
+        value: typeof v === "object" ? JSON.stringify(v) : String(v),
       }));
   }
 
-  const clinicalData: ClinicalDataSection[] = [
-    { title: "Vitala parametrar", items: jsonToItems(caseRow?.vitals as Record<string, unknown> ?? {}) },
-    { title: "Laboratorieprover", items: jsonToItems(caseRow?.lab_results as Record<string, unknown> ?? {}) },
-    { title: "Bilddiagnostik", items: jsonToItems(caseRow?.imaging as Record<string, unknown> ?? {}) },
-    { title: "Fysikaliska fynd", items: jsonToItems(caseRow?.physical_exam as Record<string, unknown> ?? {}) },
-  ].filter((s) => s.items.length > 0);
+  const sim = (caseRow?.simulation ?? {}) as {
+    clinical_data?: {
+      vitals?: Record<string, unknown>;
+      lab_results?: Record<string, unknown>;
+      imaging?: Record<string, unknown>;
+      physical_exam?: Record<string, unknown>;
+    };
+  };
+  const cd = sim.clinical_data ?? {};
+  const revealedItems = (session.revealed_items as string[] | null) ?? [];
+  const revealedSet = new Set(revealedItems);
+
+  const orderables: OrderableItem[] = [];
+
+  // vitals (panel)
+  const vitalsList = dictToList(cd.vitals);
+  if (vitalsList.length > 0) {
+    const revealed = revealedSet.has("vitals");
+    orderables.push({
+      key: "vitals",
+      section: "vitals",
+      label: "Vitalparametrar",
+      revealed,
+      sub_items: revealed ? vitalsList : undefined,
+    });
+  }
+
+  // labs (panel)
+  const labsList = dictToList(cd.lab_results);
+  if (labsList.length > 0) {
+    const revealed = revealedSet.has("labs");
+    orderables.push({
+      key: "labs",
+      section: "labs",
+      label: `Basal labpanel (${labsList.length} prover)`,
+      revealed,
+      sub_items: revealed ? labsList : undefined,
+    });
+  }
+
+  // imaging (per item)
+  for (const [k, v] of Object.entries(cd.imaging ?? {})) {
+    if (k.startsWith("_") || v == null || String(v).trim() === "") continue;
+    const key = `imaging:${k}`;
+    const revealed = revealedSet.has(key);
+    orderables.push({
+      key,
+      section: "imaging",
+      label: prettify(k),
+      revealed,
+      value: revealed ? (typeof v === "object" ? JSON.stringify(v) : String(v)) : undefined,
+    });
+  }
+
+  // physical_exam (per subsystem)
+  for (const [k, v] of Object.entries(cd.physical_exam ?? {})) {
+    if (k.startsWith("_") || v == null || String(v).trim() === "") continue;
+    const key = `physical_exam:${k}`;
+    const revealed = revealedSet.has(key);
+    orderables.push({
+      key,
+      section: "physical_exam",
+      label: prettify(k),
+      revealed,
+      value: revealed ? (typeof v === "object" ? JSON.stringify(v) : String(v)) : undefined,
+    });
+  }
 
   return {
     session: {
@@ -275,17 +349,13 @@ export async function getSessionWithMessages(
       started_at: session.started_at,
       submitted_at: session.submitted_at,
       evaluated_at: session.evaluated_at,
-      revealed_vitals: session.revealed_vitals,
-      revealed_labs: session.revealed_labs,
-      revealed_imaging: session.revealed_imaging,
-      revealed_physical_exam: session.revealed_physical_exam,
+      revealed_items: revealedItems,
       primary_diagnosis: session.primary_diagnosis,
       case_title: caseRow?.title ?? "Okänt fall",
       case_description: caseRow?.description ?? "",
       case_specialty: caseRow?.specialty ?? "",
-      case_difficulty: caseRow?.difficulty ?? "medium",
-      presenting_complaint: caseRow?.presenting_complaint ?? "",
-      clinical_data: clinicalData,
+      case_clinical_setting: caseRow?.clinical_setting ?? "",
+      orderables,
     },
     messages: (messages as MessageRow[]) ?? [],
   };
@@ -303,7 +373,7 @@ export interface SessionListItem {
   evaluated_at: string | null;
   case_title: string;
   case_specialty: string;
-  case_difficulty: string;
+  case_clinical_setting: string;
   overall_score: number | null;
 }
 
@@ -324,10 +394,10 @@ export const getAllSessions = (userId: string) =>
   const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
   const { data: cases } = await sb
     .from("cases")
-    .select("id, title, specialty, difficulty")
+    .select("id, title, specialty, clinical_setting")
     .in("id", caseIds);
   const caseMap = new Map(
-    (cases ?? []).map((c: { id: string; title: string; specialty: string; difficulty: string }) => [
+    (cases ?? []).map((c: { id: string; title: string; specialty: string; clinical_setting: string }) => [
       c.id,
       c,
     ])
@@ -356,7 +426,7 @@ export const getAllSessions = (userId: string) =>
       evaluated_at: (s.evaluated_at as string) ?? null,
       case_title: c?.title ?? "Okänt fall",
       case_specialty: c?.specialty ?? "",
-      case_difficulty: c?.difficulty ?? "medium",
+      case_clinical_setting: c?.clinical_setting ?? "",
       overall_score: evalMap.get(s.id as string) ?? null,
     };
   });
@@ -486,7 +556,7 @@ export interface EvaluationDetail {
   created_at: string;
   case_title: string;
   case_specialty: string;
-  case_difficulty: string;
+  case_clinical_setting: string;
   hidden_diagnosis: string;
 }
 
@@ -513,9 +583,12 @@ export const getEvaluationBySession = (sessionId: string, userId: string) =>
 
       const { data: caseRow } = await sb
         .from("cases")
-        .select("title, specialty, difficulty, hidden_diagnosis")
+        .select("title, specialty, clinical_setting, evaluation")
         .eq("id", session.case_id)
         .single();
+
+      const hiddenDx =
+        (caseRow?.evaluation as { hidden_diagnosis?: string } | null)?.hidden_diagnosis ?? "";
 
       return {
         id: ev.id,
@@ -534,8 +607,8 @@ export const getEvaluationBySession = (sessionId: string, userId: string) =>
         created_at: ev.created_at,
         case_title: caseRow?.title ?? "Okänt fall",
         case_specialty: caseRow?.specialty ?? "",
-        case_difficulty: caseRow?.difficulty ?? "medium",
-        hidden_diagnosis: caseRow?.hidden_diagnosis ?? "",
+        case_clinical_setting: caseRow?.clinical_setting ?? "",
+        hidden_diagnosis: hiddenDx,
       };
     },
     [`evaluation-${sessionId}`],

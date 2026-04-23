@@ -1,7 +1,6 @@
 "use client";
 
-import { ClinicalDataPanel } from "@/components/dashboard/ClinicalDataPanel";
-import type { ClinicalDataSection } from "@/lib/db/dashboard";
+import { ClinicalDataPanel, type ClinicalDataSection } from "@/components/dashboard/ClinicalDataPanel";
 
 interface ClinicalDataSidebarProps {
   sections: ClinicalDataSection[];

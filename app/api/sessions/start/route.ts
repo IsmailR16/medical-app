@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   /* ---- Verify case exists and is published ---- */
   const { data: caseRow } = await sb
     .from("cases")
-    .select("id, presenting_complaint")
+    .select("id, simulation")
     .eq("id", caseId)
     .eq("is_published", true)
     .single();
@@ -43,6 +43,9 @@ export async function POST(request: Request) {
       { status: 404 }
     );
   }
+
+  const openingMessage =
+    (caseRow.simulation as { opening_message?: string } | null)?.opening_message ?? "";
 
   /* ---- Fetch user row ---- */
   const { data: userRow } = await sb
@@ -108,12 +111,14 @@ export async function POST(request: Request) {
     );
   }
 
-  /* ---- Insert system message with presenting complaint ---- */
-  await sb.from("messages").insert({
-    session_id: session.id,
-    role: "assistant",
-    content: caseRow.presenting_complaint,
-  });
+  /* ---- Insert the patient's opening message in the chat ---- */
+  if (openingMessage) {
+    await sb.from("messages").insert({
+      session_id: session.id,
+      role: "assistant",
+      content: openingMessage,
+    });
+  }
 
   /* ---- Invalidate cached data ---- */
   revalidateTag(`sessions-${userId}`, "default");

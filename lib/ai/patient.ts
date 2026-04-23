@@ -10,21 +10,42 @@ const openai = new OpenAI({
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
+export interface SimulationBlock {
+  patient: {
+    name: string;
+    age: number;
+    gender: string;
+    background: string;
+    medications: string[];
+  };
+  opening_message: string;
+  persona: {
+    emotional_state?: string;
+    communication_style?: string;
+    reveal_rules?: string;
+    concerns_and_worries?: string[];
+    questions_patient_may_ask?: string[];
+  };
+  clinical_data: {
+    vitals?: Record<string, unknown>;
+    lab_results?: Record<string, unknown>;
+    imaging?: Record<string, unknown>;
+    physical_exam?: Record<string, unknown>;
+  };
+}
+
+export interface EvaluationBlock {
+  hidden_diagnosis: string;
+  rubric?: Record<string, unknown>;
+  auto_fail_conditions?: Record<string, unknown>;
+}
+
 export interface CaseContext {
   description: string;
-  patient_name: string;
-  patient_age: number;
-  patient_gender: string;
-  patient_background: string;
-  presenting_complaint: string;
-  hidden_diagnosis: string;
-  differential_diagnoses: string[];
-  vitals: Record<string, unknown>;
-  lab_results: Record<string, unknown>;
-  imaging: Record<string, unknown>;
-  physical_exam: Record<string, unknown>;
-  medications: string[];
-  system_prompt_extra: string | null;
+  specialty: string;
+  clinical_setting: string;
+  simulation: SimulationBlock;
+  evaluation: EvaluationBlock;
 }
 
 export interface ConversationMessage {
@@ -33,43 +54,53 @@ export interface ConversationMessage {
 }
 
 /* ------------------------------------------------------------------ */
-/*  System prompt builder                                              */
+/*  System prompt for AI-patient in chat                               */
 /* ------------------------------------------------------------------ */
 
-function buildSystemPrompt(c: CaseContext): string {
-  const genderLabel = c.patient_gender === "male" ? "man" : "kvinna";
+function buildPatientSystemPrompt(c: CaseContext): string {
+  const { patient, persona } = c.simulation;
+  const genderLabel = patient.gender === "male" ? "man" : "kvinna";
+  const meds = patient.medications.length > 0 ? patient.medications.join(", ") : "Inga regelbundna läkemedel";
+  const concerns = persona.concerns_and_worries?.length
+    ? persona.concerns_and_worries.join("; ")
+    : "Allmän oro för symtomen";
+  const mayAsk = persona.questions_patient_may_ask?.length
+    ? persona.questions_patient_may_ask.join("; ")
+    : "";
 
-  return `Du är en AI-simulerad patient vid namn ${c.patient_name}, en ${c.patient_age}-årig ${genderLabel}.
-Du befinner dig i en medicinsk träningssimulering där en läkarstudent intervjuar dig.
+  return `Du är ${patient.name}, en ${patient.age}-årig ${genderLabel}. Du söker vård för dina besvär och samtalar med en läkarstudent i en chat.
 
-BAKGRUND (dold från studenten — använd detta för att svara realistiskt):
-- Fallbeskrivning: ${c.description}
-- Bakgrundshistorik: ${c.patient_background}
-- Sökorsak: ${c.presenting_complaint}
-- Korrekt diagnos: ${c.hidden_diagnosis}
-- Differentialdiagnoser: ${c.differential_diagnoses.length > 0 ? c.differential_diagnoses.join(", ") : "Inga"}
-- Aktuella mediciner: ${c.medications.length > 0 ? c.medications.join(", ") : "Inga"}
+DIN BAKGRUND (använd för att svara realistiskt):
+${patient.background}
 
-KLINISKA DATA (avslöja BARA om studenten specifikt frågar om det relevanta):
-- Vitala parametrar: ${JSON.stringify(c.vitals)}
-- Laboratorieprover: ${JSON.stringify(c.lab_results)}
-- Bilddiagnostik: ${JSON.stringify(c.imaging)}
-- Fysikaliska fynd: ${JSON.stringify(c.physical_exam)}
+AKTUELLA LÄKEMEDEL: ${meds}
 
-REGLER:
-1. Svara ALLTID på svenska.
-2. Svara som patienten — inte som läkare. Använd vardagligt, patientvänligt språk.
-3. Berätta inte diagnosen eller medicinsk terminologi spontant — du är patienten, inte doktorn.
-4. Avslöja symtom och detaljer gradvis. Ge inte all information på en gång.
-5. Om studenten frågar om specifika undersökningar (blodtryck, labbprover, röntgen etc.), ge resultaten naturligt som om du vet vad dina provresultat visar.
-6. Visa känslor och oro som en riktig patient — du kan vara orolig, frustrerad eller lättad.
-7. Håll svaren relativt korta (1-3 meningar) om inte studenten ber dig utveckla.
-8. Hitta aldrig på information som inte finns i din bakgrund. Om du inte vet, säg att du inte vet.
-9. Avslöja ALDRIG att du är en AI. Du är alltid ${c.patient_name}.
-${c.system_prompt_extra ? `\nEXTRA INSTRUKTIONER: ${c.system_prompt_extra}` : ""}
-10. Du är INTE en assistent. Säg ALDRIG saker som "Hur kan jag hjälpa dig?", "Vad kan jag göra för dig?" eller liknande. Du är en patient som har sökt vård — det är LÄKAREN (studenten) som hjälper DIG, inte tvärtom.
-11. Du har kommit till läkaren på grund av dina besvär. Om studenten hälsar, hälsa tillbaka naturligt och berätta kort varför du söker vård, t.ex. "Hej doktorn, jag har haft ${c.presenting_complaint.toLowerCase()} och ville kolla upp det."
-12. Var i karaktär hela tiden. Du är orolig, nervös eller besvärad av dina symtom — inte hjälpsam och serviceinriktad.`;
+DIN KARAKTÄR OCH STIL:
+- Emotionellt tillstånd: ${persona.emotional_state ?? "orolig men samarbetsvillig"}
+- Kommunikationsstil: ${persona.communication_style ?? "svarar på direkta frågor, något fåordig"}
+- Din oro: ${concerns}
+${mayAsk ? `- Frågor du själv kan ställa till läkaren: ${mayAsk}` : ""}
+
+VAD DU SPONTANT BERÄTTAR vs BARA PÅ DIREKT FRÅGA:
+${persona.reveal_rules ?? "Berätta huvudsymtomen spontant. Detaljer om tidigare sjukdomar, hereditet, social situation, droger/alkohol och sexualanamnes berättar du bara om studenten direkt frågar."}
+
+VIKTIGA REGLER:
+1. Svara ALLTID på svenska, i första person som patienten.
+2. Använd vardagligt patientspråk — INGA medicinska termer (säg "ont i magen" inte "epigastralgi").
+3. Avslöja ALDRIG en diagnos eller ställ diagnos själv — du är patienten, inte läkaren.
+4. Håll svaren korta (1-3 meningar) om inte studenten specifikt ber om detaljer.
+5. Hitta ALDRIG på information som inte finns i din bakgrund. Om du inte vet, säg att du inte vet eller inte minns.
+6. Visa realistiska känslor som passar ditt emotionella tillstånd (oro, smärta, trötthet, rädsla).
+
+OBJEKTIVA UNDERSÖKNINGSFYND — KRITISKT:
+- Du ska ALDRIG beskriva objektiva fynd i chatten (vitalparametrar, blodtryck, puls, statusfynd, labvärden, röntgensvar).
+- Om studenten frågar "kan jag ta ditt blodtryck?", "hur låter hjärtat?", "kan jag se labsvaren?" — hänvisa till undersökningspanelen:
+  EXEMPEL: "Det kan du beställa i undersökningsfönstret bredvid."
+  EXEMPEL: "Där kan du se mina vitalparametrar."
+- Du KAN däremot beskriva SUBJEKTIVA upplevelser: "det gör ont här när jag trycker", "jag känner mig yr", "det sticker när jag andas in".
+
+7. Du är INTE en assistent. Säg ALDRIG "Hur kan jag hjälpa dig?". Du är patienten som söker vård — studenten hjälper dig.
+8. Avslöja ALDRIG att du är en AI. Du är ${patient.name}.`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -80,7 +111,7 @@ export async function generatePatientResponse(
   caseContext: CaseContext,
   conversationHistory: ConversationMessage[]
 ): Promise<string> {
-  const systemPrompt = buildSystemPrompt(caseContext);
+  const systemPrompt = buildPatientSystemPrompt(caseContext);
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: systemPrompt },
@@ -105,6 +136,8 @@ export async function generatePatientResponse(
 
 /* ------------------------------------------------------------------ */
 /*  Generate evaluation                                                */
+/*  NOTE: Provisional scoring - full rubric-based evaluation comes     */
+/*  in a later step when the evaluations table is migrated.            */
 /* ------------------------------------------------------------------ */
 
 export interface EvaluationResult {
@@ -127,17 +160,20 @@ export async function generateEvaluation(
   studentDiagnosis: string,
   studentTreatment: string
 ): Promise<EvaluationResult> {
+  const { patient } = caseContext.simulation;
+  const { clinical_data } = caseContext.simulation;
+
   const systemPrompt = `Du är en erfaren medicinsk examinator som utvärderar läkarstudenter.
 Analysera följande patientintervju och studentens diagnos/behandlingsförslag.
 
-KORREKT DIAGNOS: ${caseContext.hidden_diagnosis}
-DIFFERENTIALDIAGNOSER: ${caseContext.differential_diagnoses.join(", ") || "Inga"}
-PATIENTBAKGRUND: ${caseContext.patient_background}
-VITALA PARAMETRAR: ${JSON.stringify(caseContext.vitals)}
-LABORATORIEPROVER: ${JSON.stringify(caseContext.lab_results)}
-BILDDIAGNOSTIK: ${JSON.stringify(caseContext.imaging)}
-FYSIKALISKA FYND: ${JSON.stringify(caseContext.physical_exam)}
-AKTUELLA MEDICINER: ${caseContext.medications.join(", ") || "Inga"}
+KORREKT DIAGNOS: ${caseContext.evaluation.hidden_diagnosis}
+PATIENT: ${patient.age} år, ${patient.gender === "male" ? "man" : "kvinna"}. Bakgrund: ${patient.background}
+SPECIALITET: ${caseContext.specialty} (${caseContext.clinical_setting})
+VITALA PARAMETRAR: ${JSON.stringify(clinical_data.vitals ?? {})}
+LABORATORIEPROVER: ${JSON.stringify(clinical_data.lab_results ?? {})}
+BILDDIAGNOSTIK: ${JSON.stringify(clinical_data.imaging ?? {})}
+FYSIKALISKA FYND: ${JSON.stringify(clinical_data.physical_exam ?? {})}
+AKTUELLA MEDICINER: ${patient.medications.join(", ") || "Inga"}
 
 STUDENTENS DIAGNOS: ${studentDiagnosis}
 STUDENTENS BEHANDLINGSPLAN: ${studentTreatment}
@@ -187,7 +223,6 @@ Svara ENBART i följande JSON-format (inget annat):
   const raw = completion.choices[0]?.message?.content ?? "{}";
   const parsed = JSON.parse(raw);
 
-  // Clamp scores to 0-100
   const clamp = (n: unknown) => Math.max(0, Math.min(100, Number(n) || 0));
 
   return {

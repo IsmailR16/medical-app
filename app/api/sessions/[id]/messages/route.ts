@@ -103,9 +103,7 @@ export async function POST(
   /* ---- Fetch full case data for AI context ---- */
   const { data: caseRow } = await sb
     .from("cases")
-    .select(
-      "description, patient_name, patient_age, patient_gender, patient_background, presenting_complaint, hidden_diagnosis, differential_diagnoses, vitals, lab_results, imaging, physical_exam, medications, system_prompt_extra"
-    )
+    .select("description, specialty, clinical_setting, simulation, evaluation")
     .eq("id", session.case_id)
     .single();
 
@@ -118,19 +116,10 @@ export async function POST(
 
   const caseContext: CaseContext = {
     description: caseRow.description,
-    patient_name: caseRow.patient_name,
-    patient_age: caseRow.patient_age,
-    patient_gender: caseRow.patient_gender,
-    patient_background: caseRow.patient_background,
-    presenting_complaint: caseRow.presenting_complaint,
-    hidden_diagnosis: caseRow.hidden_diagnosis,
-    differential_diagnoses: caseRow.differential_diagnoses ?? [],
-    vitals: (caseRow.vitals as Record<string, unknown>) ?? {},
-    lab_results: (caseRow.lab_results as Record<string, unknown>) ?? {},
-    imaging: (caseRow.imaging as Record<string, unknown>) ?? {},
-    physical_exam: (caseRow.physical_exam as Record<string, unknown>) ?? {},
-    medications: caseRow.medications ?? [],
-    system_prompt_extra: caseRow.system_prompt_extra ?? null,
+    specialty: caseRow.specialty,
+    clinical_setting: caseRow.clinical_setting,
+    simulation: caseRow.simulation as CaseContext["simulation"],
+    evaluation: caseRow.evaluation as CaseContext["evaluation"],
   };
 
   /* ---- Save user message ---- */

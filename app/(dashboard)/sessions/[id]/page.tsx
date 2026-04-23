@@ -5,7 +5,7 @@ import { getSessionWithMessages } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { ChatComposer } from "@/components/dashboard/ChatComposer";
 import { SessionHeader } from "@/components/dashboard/SessionHeader";
-import { ClinicalDataSidebar } from "@/components/dashboard/ClinicalDataSidebar";
+import { InvestigationPanel } from "@/components/dashboard/InvestigationPanel";
 
 export const metadata: Metadata = {
   title: "Session",
@@ -50,9 +50,13 @@ export default async function SessionPage({ params }: SessionPageProps) {
             />
           </div>
 
-          {/* Clinical Data Sidebar */}
+          {/* Investigation Panel */}
           <div className="space-y-4">
-            <ClinicalDataSidebar sections={session.clinical_data} />
+            <InvestigationPanel
+              sessionId={session.id}
+              orderables={session.orderables}
+              sessionActive={session.status === "active"}
+            />
           </div>
         </div>
       </div>
