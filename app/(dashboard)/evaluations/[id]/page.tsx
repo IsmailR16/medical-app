@@ -36,13 +36,19 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
   const ev = await getEvaluationBySession(sessionId, user.user_id);
   if (!ev) notFound();
 
-  const scores = [
-    { category: "Anamnesupptagning", score: ev.history_taking_score },
-    { category: "Fysikalisk undersökning", score: ev.physical_exam_score },
-    { category: "Diagnos", score: ev.diagnosis_score },
-    { category: "Behandlingsplan", score: ev.treatment_score },
-    { category: "Kliniskt resonemang", score: ev.reasoning_score },
-  ];
+  const AREA_LABELS: Record<string, string> = {
+    anamnes: "Anamnes",
+    undersokningar: "Undersökningar",
+    kommunikation: "Kommunikation",
+    klinisk_resonemang: "Kliniskt resonemang",
+    bedomning_och_atgard: "Bedömning & åtgärd",
+  };
+  const scores = ev.rubric_scores.map((a) => ({
+    category: AREA_LABELS[a.area] ?? a.area,
+    score: Math.round(a.raw_score * 100),
+    weight: a.weight,
+  }));
+  const totalPct = Math.round(ev.total_score * 100);
 
   return (
     <>
@@ -80,11 +86,11 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
             <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-2">
               Totalpoäng
             </p>
-            <div className={`text-6xl md:text-7xl font-extrabold font-mono mb-3 ${getScoreTextColor(ev.overall_score)}`}>
-              {ev.overall_score}
+            <div className={`text-6xl md:text-7xl font-extrabold font-mono mb-3 ${getScoreTextColor(totalPct)}`}>
+              {totalPct}
             </div>
-            <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[12px] font-semibold border ${getScoreBadgeStyle(ev.overall_score)}`}>
-              {getScoreLabel(ev.overall_score)}
+            <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[12px] font-semibold border ${getScoreBadgeStyle(totalPct)}`}>
+              {ev.grade}
             </span>
             <div className="mt-5 text-[13px] text-[#94A3B8]">
               Genomförd: {new Date(ev.created_at).toLocaleDateString("sv-SE")}
@@ -173,20 +179,30 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
           </FadeUp>
         )}
 
-        {/* Missed Findings */}
-        {ev.missed_findings.length > 0 && (
-          <FadeUp delay={0.44} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] p-6">
+        {/* Auto-fail triggers (säkerhetskritiska brister som forcerade Clear Fail) */}
+        {ev.auto_fail_triggered.length > 0 && (
+          <FadeUp delay={0.44} className="bg-white rounded-2xl border border-rose-200/50 shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] p-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center">
                 <AlertCircle className="w-4 h-4 text-rose-600" strokeWidth={1.5} />
               </div>
-              <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">Missade fynd</h2>
+              <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
+                Säkerhetskritiska brister (auto-fail)
+              </h2>
             </div>
+            <p className="text-[13px] text-[#94A3B8] mb-4">
+              Dessa brister forcerade betyget till &quot;Clear Fail&quot; oavsett rubric-poäng.
+            </p>
             <ul className="space-y-3">
-              {ev.missed_findings.map((finding: string, i: number) => (
+              {ev.auto_fail_triggered.map((m, i) => (
                 <li key={i} className="flex gap-3">
                   <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <span className="text-[14px] text-[#1d3557]/80">{finding}</span>
+                  <div>
+                    <p className="text-[12px] text-rose-700 font-semibold uppercase tracking-wide mb-0.5">
+                      {m.category.replace(/_/g, " ")}
+                    </p>
+                    <span className="text-[14px] text-[#1d3557]/80">{m.description}</span>
+                  </div>
                 </li>
               ))}
             </ul>

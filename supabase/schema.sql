@@ -216,7 +216,14 @@ create table public.messages (
 create index idx_messages_session on public.messages (session_id, created_at asc);
 
 -- 7. EVALUATIONS
--- AI-generated scores + feedback for a completed session.
+-- AI-generated rubric scoring + 5-band OSCE grade for a completed session.
+--
+-- total_score          numeric(0-1)    — weighted sum of rubric areas
+-- grade                text            — one of 5 OSCE bands (global mapping from total_score,
+--                                        forced to "Clear Fail" if any auto_fail_triggered)
+-- rubric_scores        jsonb           — per-area + per-item scoring (anamnes, undersokningar,
+--                                        kommunikation, klinisk_resonemang, bedomning_och_atgard)
+-- auto_fail_triggered  jsonb (array)   — { category, description }[] if patient-safety brister
 -- -----------------------------------------------------------------------------
 create table public.evaluations (
   id uuid not null default gen_random_uuid(),
@@ -224,19 +231,16 @@ create table public.evaluations (
   user_id text not null,                              -- Denormalized for quick lookups
   case_id uuid not null,                              -- Denormalized for analytics
 
-  -- Scores (0–100 scale)
-  overall_score integer not null,
-  history_taking_score integer not null,
-  physical_exam_score integer not null,
-  diagnosis_score integer not null,
-  treatment_score integer not null,
-  reasoning_score integer not null,
+  -- Scoring
+  total_score numeric(4,3) not null default 0,       -- 0.000 – 1.000
+  grade text not null default 'Clear Fail',
+  rubric_scores jsonb not null default '{}'::jsonb,
+  auto_fail_triggered jsonb not null default '[]'::jsonb,
 
-  -- Detailed feedback
-  summary text not null,                              -- Overall feedback paragraph
+  -- Qualitative feedback
+  summary text not null,
   strengths text[] not null default '{}',
   improvements text[] not null default '{}',
-  missed_findings text[] not null default '{}',
 
   -- Was the primary diagnosis correct?
   diagnosis_correct boolean not null,
@@ -254,19 +258,16 @@ create table public.evaluations (
   constraint evaluations_session_fkey foreign key (session_id)
     references public.sessions (id) on delete cascade,
   constraint evaluations_session_key unique (session_id),         -- One evaluation per session
-  constraint evaluations_score_range check (
-    overall_score between 0 and 100
-    and history_taking_score between 0 and 100
-    and physical_exam_score between 0 and 100
-    and diagnosis_score between 0 and 100
-    and treatment_score between 0 and 100
-    and reasoning_score between 0 and 100
-  )
+  constraint evaluations_total_score_check check (total_score between 0 and 1),
+  constraint evaluations_grade_check check (grade in (
+    'Excellent', 'Good Pass', 'Clear Pass', 'Borderline', 'Clear Fail'
+  ))
 );
 
 create index idx_evaluations_user on public.evaluations (user_id);
 create index idx_evaluations_case on public.evaluations (case_id);
-create index idx_evaluations_user_score on public.evaluations (user_id, overall_score desc);
+create index idx_evaluations_grade on public.evaluations (grade);
+create index idx_evaluations_user_score on public.evaluations (user_id, total_score desc);
 
 -- 8. USAGE
 -- Monthly usage tracking — enforces free-tier limit (3 cases/month).

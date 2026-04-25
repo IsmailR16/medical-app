@@ -9,6 +9,9 @@ import {
   type ConversationMessage,
 } from "@/lib/ai/patient";
 
+// Allow long-running evaluation calls on Vercel (Pro plan = up to 300s).
+export const maxDuration = 150;
+
 const MAX_MESSAGE_LENGTH = 2000;
 
 // Simple in-memory rate limiter: max 10 messages per user per 60s
@@ -55,14 +58,46 @@ export async function POST(
   /* ---- Body ---- */
   let content: string;
   let submitDiagnosis = false;
+  let submission: {
+    primary_diagnosis: string;
+    differential_diagnoses: string[];
+    treatment_plan: string;
+    reasoning?: string;
+  } | null = null;
+
   try {
     const body = await request.json();
-    content = String(body.content ?? "").trim();
     submitDiagnosis = body.submitDiagnosis === true;
-    if (!content) throw new Error();
+
+    if (submitDiagnosis) {
+      submission = {
+        primary_diagnosis: String(body.primary_diagnosis ?? "").trim(),
+        differential_diagnoses: Array.isArray(body.differential_diagnoses)
+          ? body.differential_diagnoses.map((d: unknown) => String(d).trim()).filter(Boolean)
+          : [],
+        treatment_plan: String(body.treatment_plan ?? "").trim(),
+        reasoning: body.reasoning ? String(body.reasoning).trim() : undefined,
+      };
+      if (!submission.primary_diagnosis || !submission.treatment_plan) {
+        throw new Error();
+      }
+      // Build a chat-displayable rendering of the submission
+      const diffsLine =
+        submission.differential_diagnoses.length > 0
+          ? submission.differential_diagnoses.map((d) => `- ${d}`).join("\n")
+          : "(inga angivna)";
+      content =
+        `DIAGNOS: ${submission.primary_diagnosis}\n\n` +
+        `DIFFERENTIALDIAGNOSER:\n${diffsLine}\n\n` +
+        `HANDLÄGGNINGSPLAN: ${submission.treatment_plan}` +
+        (submission.reasoning ? `\n\nRESONEMANG: ${submission.reasoning}` : "");
+    } else {
+      content = String(body.content ?? "").trim();
+      if (!content) throw new Error();
+    }
   } catch {
     return NextResponse.json(
-      { error: "Meddelande krävs." },
+      { error: submitDiagnosis ? "Diagnos och plan krävs." : "Meddelande krävs." },
       { status: 400 }
     );
   }
@@ -81,7 +116,7 @@ export async function POST(
   /* ---- Verify session belongs to user and is active ---- */
   const { data: session } = await sb
     .from("sessions")
-    .select("id, case_id, status")
+    .select("id, case_id, status, revealed_items")
     .eq("id", sessionId)
     .eq("user_id", userId)
     .single();
@@ -138,21 +173,17 @@ export async function POST(
   }
 
   /* ---- Handle diagnosis submission ---- */
-  if (submitDiagnosis) {
-    // Parse diagnosis and treatment from the formatted content
-    const diagnosisMatch = content.match(/DIAGNOS:\s*([\s\S]*?)(?:\n\nBEHANDLINGSPLAN:|$)/);
-    const treatmentMatch = content.match(/BEHANDLINGSPLAN:\s*([\s\S]*?)$/);
-    const studentDiagnosis = diagnosisMatch?.[1]?.trim() ?? content;
-    const studentTreatment = treatmentMatch?.[1]?.trim() ?? "";
-
-    // Update session status to submitted
+  if (submitDiagnosis && submission) {
+    // Update session status to submitted (also stores the structured submission)
     await sb
       .from("sessions")
       .update({
         status: "submitted",
         submitted_at: new Date().toISOString(),
-        primary_diagnosis: studentDiagnosis,
-        treatment_plan: studentTreatment,
+        primary_diagnosis: submission.primary_diagnosis,
+        differential_diagnoses: submission.differential_diagnoses,
+        treatment_plan: submission.treatment_plan,
+        reasoning: submission.reasoning ?? null,
       })
       .eq("id", sessionId);
 
@@ -170,13 +201,15 @@ export async function POST(
       })
     );
 
+    const orderedItems: string[] = (session.revealed_items as string[] | null) ?? [];
+
     // Generate AI evaluation
     try {
       const evaluation = await generateEvaluation(
         caseContext,
         conversationHistory,
-        studentDiagnosis,
-        studentTreatment
+        orderedItems,
+        submission
       );
 
       // Save evaluation
@@ -184,16 +217,13 @@ export async function POST(
         session_id: sessionId,
         user_id: userId,
         case_id: session.case_id,
-        overall_score: evaluation.overall_score,
-        history_taking_score: evaluation.history_taking_score,
-        physical_exam_score: evaluation.physical_exam_score,
-        diagnosis_score: evaluation.diagnosis_score,
-        treatment_score: evaluation.treatment_score,
-        reasoning_score: evaluation.reasoning_score,
+        total_score: evaluation.total_score,
+        grade: evaluation.grade,
+        rubric_scores: evaluation.rubric_scores,
+        auto_fail_triggered: evaluation.auto_fail_triggered,
         summary: evaluation.summary,
         strengths: evaluation.strengths,
         improvements: evaluation.improvements,
-        missed_findings: evaluation.missed_findings,
         diagnosis_correct: evaluation.diagnosis_correct,
         raw_response: evaluation,
       });
@@ -208,7 +238,8 @@ export async function POST(
         .eq("id", sessionId);
 
       // Save a system message confirming evaluation
-      const evalSummaryContent = `Utvärdering klar! Poäng: ${evaluation.overall_score}/100\n\n${evaluation.summary}`;
+      const pct = Math.round(evaluation.total_score * 100);
+      const evalSummaryContent = `Utvärdering klar! Betyg: ${evaluation.grade} (${pct}%)\n\n${evaluation.summary}`;
 
       const { data: evalMsg } = await sb
         .from("messages")
@@ -232,7 +263,8 @@ export async function POST(
           created_at: evalMsg?.created_at ?? new Date().toISOString(),
         },
         evaluated: true,
-        score: evaluation.overall_score,
+        grade: evaluation.grade,
+        total_score: evaluation.total_score,
       });
     } catch (evalErr) {
       console.error("Evaluation failed:", evalErr);

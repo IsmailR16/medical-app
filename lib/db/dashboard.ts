@@ -2,6 +2,11 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import type {
+  Grade,
+  RubricAreaScore,
+  AutoFailMatch,
+} from "@/lib/ai/patient";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -23,7 +28,8 @@ export interface RecentSession {
 
 export interface LatestEvaluation {
   id: string;
-  overall_score: number;
+  total_score: number;
+  grade: Grade;
   diagnosis_correct: boolean;
   created_at: string;
   case_title: string;
@@ -110,7 +116,7 @@ export const getLatestEvaluations = (userId: string) =>
       const sb = createServiceRoleClient();
       const { data } = await sb
         .from("evaluations")
-        .select("id, overall_score, diagnosis_correct, created_at, case_id")
+        .select("id, total_score, grade, diagnosis_correct, created_at, case_id")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(5);
@@ -129,7 +135,8 @@ export const getLatestEvaluations = (userId: string) =>
 
       return data.map((e) => ({
         id: e.id as string,
-        overall_score: e.overall_score as number,
+        total_score: Number(e.total_score) || 0,
+        grade: e.grade as Grade,
         diagnosis_correct: e.diagnosis_correct as boolean,
         created_at: e.created_at as string,
         case_title: titleMap.get(e.case_id as string) ?? "Okänt fall",
@@ -374,7 +381,8 @@ export interface SessionListItem {
   case_title: string;
   case_specialty: string;
   case_clinical_setting: string;
-  overall_score: number | null;
+  total_score: number | null;
+  grade: Grade | null;
 }
 
 export const getAllSessions = (userId: string) =>
@@ -407,17 +415,18 @@ export const getAllSessions = (userId: string) =>
   const sessionIds = sessions.map((s) => s.id as string);
   const { data: evals } = await sb
     .from("evaluations")
-    .select("session_id, overall_score")
+    .select("session_id, total_score, grade")
     .in("session_id", sessionIds);
   const evalMap = new Map(
-    (evals ?? []).map((e: { session_id: string; overall_score: number }) => [
+    (evals ?? []).map((e: { session_id: string; total_score: number; grade: string }) => [
       e.session_id,
-      e.overall_score,
+      { total_score: Number(e.total_score) || 0, grade: e.grade as Grade },
     ])
   );
 
   return sessions.map((s) => {
     const c = caseMap.get(s.case_id as string);
+    const ev = evalMap.get(s.id as string);
     return {
       id: s.id as string,
       status: s.status as string,
@@ -427,7 +436,8 @@ export const getAllSessions = (userId: string) =>
       case_title: c?.title ?? "Okänt fall",
       case_specialty: c?.specialty ?? "",
       case_clinical_setting: c?.clinical_setting ?? "",
-      overall_score: evalMap.get(s.id as string) ?? null,
+      total_score: ev?.total_score ?? null,
+      grade: ev?.grade ?? null,
     };
   });
     },
@@ -444,11 +454,10 @@ export interface EvaluationListItem {
   session_id: string;
   case_title: string;
   case_specialty: string;
-  overall_score: number;
-  history_taking_score: number;
-  physical_exam_score: number;
-  diagnosis_score: number;
-  treatment_score: number;
+  total_score: number;
+  grade: Grade;
+  rubric_scores: RubricAreaScore[];
+  diagnosis_correct: boolean;
   created_at: string;
   started_at: string;
   duration_min: number | null;
@@ -475,19 +484,16 @@ export const getEvaluatedSessions = (userId: string) =>
   // Fetch evaluations
   const { data: evals } = await sb
     .from("evaluations")
-    .select(
-      "id, session_id, overall_score, history_taking_score, physical_exam_score, diagnosis_score, treatment_score, created_at"
-    )
+    .select("id, session_id, total_score, grade, rubric_scores, diagnosis_correct, created_at")
     .in("session_id", sessionIds);
 
   type EvalRow = {
     id: string;
     session_id: string;
-    overall_score: number;
-    history_taking_score: number;
-    physical_exam_score: number;
-    diagnosis_score: number;
-    treatment_score: number;
+    total_score: number;
+    grade: string;
+    rubric_scores: RubricAreaScore[];
+    diagnosis_correct: boolean;
     created_at: string;
   };
 
@@ -524,11 +530,10 @@ export const getEvaluatedSessions = (userId: string) =>
         session_id: s.id as string,
         case_title: c?.title ?? "Okänt fall",
         case_specialty: c?.specialty ?? "",
-        overall_score: ev.overall_score,
-        history_taking_score: ev.history_taking_score,
-        physical_exam_score: ev.physical_exam_score,
-        diagnosis_score: ev.diagnosis_score,
-        treatment_score: ev.treatment_score,
+        total_score: Number(ev.total_score) || 0,
+        grade: ev.grade as Grade,
+        rubric_scores: Array.isArray(ev.rubric_scores) ? ev.rubric_scores : [],
+        diagnosis_correct: ev.diagnosis_correct,
         created_at: ev.created_at,
         started_at: s.started_at as string,
         duration_min: durationMin,
@@ -542,16 +547,13 @@ export const getEvaluatedSessions = (userId: string) =>
 export interface EvaluationDetail {
   id: string;
   session_id: string;
-  overall_score: number;
-  history_taking_score: number;
-  physical_exam_score: number;
-  diagnosis_score: number;
-  treatment_score: number;
-  reasoning_score: number;
+  total_score: number;
+  grade: Grade;
+  rubric_scores: RubricAreaScore[];
+  auto_fail_triggered: AutoFailMatch[];
   summary: string;
   strengths: string[];
   improvements: string[];
-  missed_findings: string[];
   diagnosis_correct: boolean;
   created_at: string;
   case_title: string;
@@ -593,16 +595,13 @@ export const getEvaluationBySession = (sessionId: string, userId: string) =>
       return {
         id: ev.id,
         session_id: ev.session_id,
-        overall_score: ev.overall_score,
-        history_taking_score: ev.history_taking_score,
-        physical_exam_score: ev.physical_exam_score,
-        diagnosis_score: ev.diagnosis_score,
-        treatment_score: ev.treatment_score,
-        reasoning_score: ev.reasoning_score,
+        total_score: Number(ev.total_score) || 0,
+        grade: ev.grade as Grade,
+        rubric_scores: Array.isArray(ev.rubric_scores) ? ev.rubric_scores : [],
+        auto_fail_triggered: Array.isArray(ev.auto_fail_triggered) ? ev.auto_fail_triggered : [],
         summary: ev.summary,
         strengths: ev.strengths ?? [],
         improvements: ev.improvements ?? [],
-        missed_findings: ev.missed_findings ?? [],
         diagnosis_correct: ev.diagnosis_correct,
         created_at: ev.created_at,
         case_title: caseRow?.title ?? "Okänt fall",
@@ -619,7 +618,7 @@ export const getEvaluationBySession = (sessionId: string, userId: string) =>
 /*  Dashboard overview stats                                           */
 /* ------------------------------------------------------------------ */
 
-/** Average overall_score across all user evaluations. */
+/** Average total_score across all user evaluations, returned as 0-100 percentage. */
 export const getAverageScore = (userId: string) =>
   unstable_cache(
     async (): Promise<number> => {
@@ -627,16 +626,16 @@ export const getAverageScore = (userId: string) =>
 
       const { data } = await sb
         .from("evaluations")
-        .select("overall_score")
+        .select("total_score")
         .eq("user_id", userId);
 
       if (!data || data.length === 0) return 0;
 
       const sum = data.reduce(
-        (acc, e) => acc + (e.overall_score as number),
+        (acc, e) => acc + (Number(e.total_score) || 0),
         0
       );
-      return Math.round(sum / data.length);
+      return Math.round((sum / data.length) * 100);
     },
     [`avg-score-${userId}`],
     { tags: [`evaluations-${userId}`], revalidate: 60 }

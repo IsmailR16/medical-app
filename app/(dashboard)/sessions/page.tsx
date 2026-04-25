@@ -35,12 +35,12 @@ export default async function SessionsPage() {
     (s) => s.status === "evaluated" || s.status === "submitted"
   ).length;
   const inProgress = sessions.filter((s) => s.status === "active").length;
-  const scored = sessions.filter((s) => s.overall_score !== null);
+  const scored = sessions.filter((s) => s.total_score !== null);
   const avgScore =
     scored.length > 0
       ? Math.round(
-          scored.reduce((sum, s) => sum + (s.overall_score ?? 0), 0) /
-            scored.length
+          (scored.reduce((sum, s) => sum + (s.total_score ?? 0), 0) /
+            scored.length) * 100
         )
       : 0;
 
@@ -187,12 +187,17 @@ export default async function SessionsPage() {
                     {formatDuration(s.started_at, s.submitted_at ?? s.evaluated_at)}
                   </div>
 
-                  {/* Score */}
-                  <div>
-                    {s.overall_score !== null ? (
-                      <span className="text-lg font-extrabold text-[#1d3557] font-mono">
-                        {s.overall_score}
-                      </span>
+                  {/* Grade + score */}
+                  <div className="flex flex-col">
+                    {s.grade !== null ? (
+                      <>
+                        <span className="text-[13px] font-bold text-[#1d3557]">
+                          {s.grade}
+                        </span>
+                        <span className="text-[11px] text-[#94A3B8] font-mono">
+                          {Math.round((s.total_score ?? 0) * 100)}%
+                        </span>
+                      </>
                     ) : (
                       <span className="text-[#94A3B8]">—</span>
                     )}

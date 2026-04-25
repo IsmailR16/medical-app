@@ -16,26 +16,27 @@ export const metadata: Metadata = {
 };
 
 import { getOrCreateUser } from "@/lib/auth/user";
-import { getEvaluatedSessions } from "@/lib/db/dashboard";
+import { getEvaluatedSessions, type EvaluationListItem } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
 import { CategoryBars } from "@/components/dashboard/CategoryBars";
 import {
   getScoreBadgeStyle,
   getScoreCircleStyle,
-  getScoreLabel,
 } from "@/lib/ui/scores";
 
-function bestCategory(evaluations: { history_taking_score: number; physical_exam_score: number; diagnosis_score: number; treatment_score: number }[]): string {
-  if (evaluations.length === 0) return "-";
-  const totals = { Anamnesupptagning: 0, Undersökning: 0, Diagnos: 0, Behandling: 0 };
-  for (const ev of evaluations) {
-    totals.Anamnesupptagning += ev.history_taking_score;
-    totals.Undersökning += ev.physical_exam_score;
-    totals.Diagnos += ev.diagnosis_score;
-    totals.Behandling += ev.treatment_score;
-  }
-  return Object.entries(totals).sort((a, b) => b[1] - a[1])[0][0];
+const RUBRIC_AREAS = [
+  { key: "anamnes", label: "Anamnes" },
+  { key: "undersokningar", label: "Undersökningar" },
+  { key: "kommunikation", label: "Kommunikation" },
+  { key: "klinisk_resonemang", label: "Kliniskt resonemang" },
+  { key: "bedomning_och_atgard", label: "Bedömning & åtgärd" },
+] as const;
+
+/** Extract a 0-100 score per rubric-area for one evaluation, or 0 if missing. */
+function areaScore(ev: EvaluationListItem, areaKey: string): number {
+  const a = ev.rubric_scores.find((x) => x.area === areaKey);
+  return a ? Math.round(a.raw_score * 100) : 0;
 }
 
 export default async function EvaluationsPage() {
@@ -46,38 +47,24 @@ export default async function EvaluationsPage() {
 
   /* ---- Stats ---- */
   const totalCases = evaluations.length;
-  const averageScore =
+  const averagePct =
     totalCases > 0
-      ? (
-          evaluations.reduce((sum, e) => sum + e.overall_score, 0) / totalCases
-        ).toFixed(1)
-      : "0";
+      ? Math.round(
+          (evaluations.reduce((sum, e) => sum + e.total_score, 0) / totalCases) * 100
+        )
+      : 0;
   const totalMinutes = evaluations.reduce(
     (sum, e) => sum + (e.duration_min ?? 0),
     0
   );
   const totalHours = (totalMinutes / 60).toFixed(1);
-  const best = bestCategory(evaluations);
 
-  const stats = [
-    { label: "Genomförda fall", value: totalCases, icon: Target, iconBg: "bg-[#457b9d]/[0.06]", iconColor: "text-[#457b9d]", suffix: "totalt" },
-    { label: "Genomsnitt", value: averageScore, icon: BarChart3, iconBg: "bg-emerald-50", iconColor: "text-emerald-600", suffix: "/ 100" },
-    { label: "Övningstid", value: `${totalHours}h`, icon: Clock, iconBg: "bg-[#457b9d]/[0.06]", iconColor: "text-[#457b9d]", suffix: "totalt" },
-    { label: "Bästa område", value: best, icon: Award, iconBg: "bg-amber-50", iconColor: "text-amber-600", suffix: "högst poäng", isText: true },
-  ];
-
-  /* ---- Category averages & trends ---- */
-  const categoryKeys = [
-    { key: "history_taking_score" as const, label: "Anamnesupptagning" },
-    { key: "physical_exam_score" as const, label: "Fysisk undersökning" },
-    { key: "diagnosis_score" as const, label: "Diagnos" },
-    { key: "treatment_score" as const, label: "Behandlingsplan" },
-  ];
-
-  const categoryData = categoryKeys.map(({ key, label }) => {
-    const avg = totalCases > 0
-      ? Math.round(evaluations.reduce((s, e) => s + e[key], 0) / totalCases)
-      : 0;
+  /* ---- Category averages from rubric_scores ---- */
+  const categoryData = RUBRIC_AREAS.map(({ key, label }) => {
+    const avg =
+      totalCases > 0
+        ? Math.round(evaluations.reduce((s, e) => s + areaScore(e, key), 0) / totalCases)
+        : 0;
 
     let trend: string | null = null;
     let trendUp = true;
@@ -86,8 +73,8 @@ export default async function EvaluationsPage() {
       const half = Math.floor(totalCases / 2);
       const older = evaluations.slice(half);
       const newer = evaluations.slice(0, half);
-      const olderAvg = older.reduce((s, e) => s + e[key], 0) / older.length;
-      const newerAvg = newer.reduce((s, e) => s + e[key], 0) / newer.length;
+      const olderAvg = older.reduce((s, e) => s + areaScore(e, key), 0) / older.length;
+      const newerAvg = newer.reduce((s, e) => s + areaScore(e, key), 0) / newer.length;
       const diff = Math.round(newerAvg - olderAvg);
       trend = diff >= 0 ? `+${diff}` : `${diff}`;
       trendUp = diff >= 0;
@@ -95,6 +82,18 @@ export default async function EvaluationsPage() {
 
     return { category: label, score: avg, trend, trendUp };
   });
+
+  const best =
+    totalCases > 0
+      ? [...categoryData].sort((a, b) => b.score - a.score)[0].category
+      : "-";
+
+  const stats = [
+    { label: "Genomförda fall", value: totalCases, icon: Target, iconBg: "bg-[#457b9d]/[0.06]", iconColor: "text-[#457b9d]", suffix: "totalt" },
+    { label: "Genomsnitt", value: averagePct, icon: BarChart3, iconBg: "bg-emerald-50", iconColor: "text-emerald-600", suffix: "%" },
+    { label: "Övningstid", value: `${totalHours}h`, icon: Clock, iconBg: "bg-[#457b9d]/[0.06]", iconColor: "text-[#457b9d]", suffix: "totalt" },
+    { label: "Bästa område", value: best, icon: Award, iconBg: "bg-amber-50", iconColor: "text-amber-600", suffix: "högst poäng", isText: true },
+  ];
 
   /* ---- Recommendations ---- */
   const sorted = [...categoryData].sort((a, b) => a.score - b.score);
@@ -158,9 +157,9 @@ export default async function EvaluationsPage() {
                     </div>
                     <div className="flex items-baseline gap-2 mb-2">
                       <span className="text-5xl font-extrabold text-white tracking-tight font-mono">
-                        {averageScore}
+                        {averagePct}
                       </span>
-                      <span className="text-xl text-white/30 font-medium">/ 100</span>
+                      <span className="text-xl text-white/30 font-medium">%</span>
                     </div>
                     <p className="text-[14px] text-white/40">Genomsnitt över alla kategorier</p>
                   </div>
@@ -236,10 +235,10 @@ export default async function EvaluationsPage() {
                     {/* Score Circle */}
                     <div className="flex-shrink-0">
                       <div
-                        className={`h-16 w-16 rounded-2xl border-2 flex items-center justify-center ${getScoreCircleStyle(ev.overall_score)}`}
+                        className={`h-16 w-16 rounded-2xl border-2 flex items-center justify-center ${getScoreCircleStyle(Math.round(ev.total_score * 100))}`}
                       >
-                        <span className="text-2xl font-extrabold font-mono">
-                          {ev.overall_score}
+                        <span className="text-xl font-extrabold font-mono">
+                          {Math.round(ev.total_score * 100)}
                         </span>
                       </div>
                     </div>
@@ -268,23 +267,20 @@ export default async function EvaluationsPage() {
                           </div>
                         </div>
                         <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border whitespace-nowrap ${getScoreBadgeStyle(ev.overall_score)}`}
+                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border whitespace-nowrap ${getScoreBadgeStyle(Math.round(ev.total_score * 100))}`}
                         >
-                          {getScoreLabel(ev.overall_score)}
+                          {ev.grade}
                         </span>
                       </div>
 
-                      {/* Mini Score Breakdown */}
+                      {/* Mini Score Breakdown — top 4 rubric areas */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {[
-                          { label: "Anamnes", value: ev.history_taking_score },
-                          { label: "Undersökning", value: ev.physical_exam_score },
-                          { label: "Diagnos", value: ev.diagnosis_score },
-                          { label: "Behandling", value: ev.treatment_score },
-                        ].map((cat) => (
-                          <div key={cat.label}>
-                            <p className="text-[11px] text-[#94A3B8] mb-0.5">{cat.label}</p>
-                            <p className="text-[14px] font-bold text-[#1d3557] font-mono">{cat.value}</p>
+                        {RUBRIC_AREAS.slice(0, 4).map(({ key, label }) => (
+                          <div key={key}>
+                            <p className="text-[11px] text-[#94A3B8] mb-0.5">{label}</p>
+                            <p className="text-[14px] font-bold text-[#1d3557] font-mono">
+                              {areaScore(ev, key)}
+                            </p>
                           </div>
                         ))}
                       </div>

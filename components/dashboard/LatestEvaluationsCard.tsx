@@ -52,13 +52,11 @@ export function LatestEvaluationsCard({
                 </p>
               </div>
               <div className="ml-4 flex items-center gap-2">
-                <Badge
-                  variant={e.diagnosis_correct ? "default" : "secondary"}
-                >
-                  {e.diagnosis_correct ? "Korrekt" : "Inkorrekt"}
+                <Badge variant={e.diagnosis_correct ? "default" : "secondary"}>
+                  {e.grade}
                 </Badge>
                 <span className="text-sm font-semibold tabular-nums">
-                  {e.overall_score}%
+                  {Math.round(e.total_score * 100)}%
                 </span>
               </div>
             </li>
