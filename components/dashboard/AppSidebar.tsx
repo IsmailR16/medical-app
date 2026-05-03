@@ -47,6 +47,14 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const { mobileOpen, setMobileOpen, collapsed, toggleCollapsed } =
     useSidebarCtx();
 
+  /* Optimistic active path — highlights the clicked nav item instantly,
+     before the navigation actually completes. Resets when pathname catches up. */
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  useEffect(() => {
+    setPendingPath(null);
+  }, [pathname]);
+  const effectivePath = pendingPath ?? pathname;
+
   /* Theme state */
   const [dark, setDark] = useState(false);
 
@@ -130,14 +138,29 @@ export function AppSidebar({ user }: AppSidebarProps) {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              pathname === item.path ||
+              effectivePath === item.path ||
               (item.path !== "/dashboard" &&
-                pathname.startsWith(item.path));
+                effectivePath.startsWith(item.path));
 
             return (
               <Link
                 key={item.path}
                 href={item.path}
+                onClick={(e) => {
+                  // Skip modifier-key clicks (cmd/ctrl/shift/alt or non-left-button) —
+                  // those open in new tab/window and don't navigate THIS tab.
+                  if (
+                    e.button !== 0 ||
+                    e.metaKey ||
+                    e.ctrlKey ||
+                    e.shiftKey ||
+                    e.altKey
+                  ) {
+                    return;
+                  }
+                  if (effectivePath !== item.path) setPendingPath(item.path);
+                  if (mobileOpen) setMobileOpen(false);
+                }}
                 className={`group flex items-center gap-3 py-2.5 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap ${
                   collapsed && !mobileOpen ? "justify-center mx-1 px-0" : "px-3"
                 } ${
