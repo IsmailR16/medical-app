@@ -11,7 +11,7 @@ export default function CasesLoading() {
           <Skeleton className="h-4 w-72 rounded-lg" />
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="bg-white rounded-2xl border border-[#1d3557]/[0.04] p-6 space-y-4">
               <div className="flex items-center gap-2">
