@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import NextTopLoader from "nextjs-toploader";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { DashboardShell, MainContent } from "@/components/dashboard/SidebarContext";
@@ -44,6 +45,14 @@ export default async function DashboardLayout({
         dangerouslySetInnerHTML={{
           __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
         }}
+      />
+      <NextTopLoader
+        color="#457b9d"
+        height={2.5}
+        showSpinner={false}
+        easing="ease"
+        speed={250}
+        shadow="0 0 10px #457b9d, 0 0 5px #457b9d"
       />
       <ToastProvider />
       <div className={jetbrains.variable}>
