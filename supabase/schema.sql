@@ -100,7 +100,9 @@ create index idx_inst_members_inst on public.institution_members (institution_id
 -- -----------------------------------------------------------------------------
 create table public.cases (
   id uuid not null default gen_random_uuid(),
-  created_by text not null,                           -- Clerk user_id of creator
+  -- Clerk user_id of creator. NULL for AI-generated cases (use source_type
+  -- to distinguish). No FK so admin-deleted users don't cascade-restrict cases.
+  created_by text null,
 
   -- Public-facing metadata (shown in case library)
   title text not null,                                -- e.g. "45-årig man med bröstsmärta"
@@ -125,8 +127,6 @@ create table public.cases (
   updated_at timestamptz not null default now(),
 
   constraint cases_pkey primary key (id),
-  constraint cases_created_by_fkey foreign key (created_by)
-    references public.users (user_id) on delete restrict,
   constraint cases_institution_fkey foreign key (institution_id)
     references public.institutions (id) on delete set null,
   constraint cases_specialty_check check (specialty in (
