@@ -225,7 +225,6 @@ export async function POST(
         strengths: evaluation.strengths,
         improvements: evaluation.improvements,
         diagnosis_correct: evaluation.diagnosis_correct,
-        raw_response: evaluation,
       });
 
       // Update session to evaluated

@@ -245,9 +245,6 @@ create table public.evaluations (
   -- Was the primary diagnosis correct?
   diagnosis_correct boolean not null,
 
-  -- Raw AI response for debugging / auditing
-  raw_response jsonb null,
-
   created_at timestamptz not null default now(),
 
   constraint evaluations_pkey primary key (id),
