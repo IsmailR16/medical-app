@@ -7,6 +7,10 @@ import { getOrCreateUser } from "@/lib/auth/user";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { DashboardShell, MainContent } from "@/components/dashboard/SidebarContext";
 import ToastProvider from "@/components/ToastProvider";
+import {
+  TERMS_VERSION,
+  PRIVACY_POLICY_VERSION,
+} from "@/lib/legal/versions";
 
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
@@ -30,6 +34,19 @@ export default async function DashboardLayout({
 
   if (!user) {
     redirect("/sign-in");
+  }
+
+  // Gate: must have accepted current versions of Terms + Privacy +
+  // "no real patient data" before accessing the dashboard.
+  const hasAcceptedAll =
+    user.terms_accepted_at &&
+    user.terms_version === TERMS_VERSION &&
+    user.privacy_policy_accepted_at &&
+    user.privacy_policy_version === PRIVACY_POLICY_VERSION &&
+    user.no_real_patient_data_acknowledged_at;
+
+  if (!hasAcceptedAll) {
+    redirect("/accept-terms");
   }
 
   const sidebarUser = {

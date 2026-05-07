@@ -95,13 +95,13 @@ Använd detta som källa för: Privacy Policy, retention-policy, DPIA, sub-proce
 
 | Fält | Innehåll | Var lagras | Rättslig grund |
 |---|---|---|---|
-| Terms-acceptans | timestamp + version | Supabase `users.terms_accepted_at` *(att lägga till)* | Avtal |
-| Privacy-acceptans | timestamp + version | Supabase `users.privacy_policy_accepted_at` *(att lägga till)* | Avtal |
-| "Inga riktiga patientuppgifter"-ack | timestamp | Supabase `users.no_real_patient_data_acknowledged_at` *(att lägga till)* | Bevis på upplyst samtycke |
-| Marketing-samtycke | boolean | Supabase `users.marketing_consent` *(att lägga till)* | Samtycke (Art. 6.1.a) |
-| Modell-träning-opt-in | boolean | Supabase `users.model_training_opt_in` *(att lägga till)* | Samtycke |
+| Terms-acceptans | timestamp + version | Supabase `users.terms_accepted_at` + `terms_version` | Avtal |
+| Privacy-acceptans | timestamp + version | Supabase `users.privacy_policy_accepted_at` + `privacy_policy_version` | Avtal |
+| "Inga riktiga patientuppgifter"-ack | timestamp | Supabase `users.no_real_patient_data_acknowledged_at` | Bevis på upplyst samtycke |
+| Marketing-samtycke | boolean | Supabase `users.marketing_consent` | Samtycke (Art. 6.1.a) |
+| Senaste login | timestamp | Supabase `users.last_login_at` | Berättigat intresse (säkerhet + retention) |
 
-> **Status:** Dessa kolumner finns **inte än** — läggs till i kommande migration när vi bygger acceptansflödet.
+> **Status:** Lades till i migration 005. Gating mot dashboard finns i `(dashboard)/layout.tsx` — användare som inte accepterat omdirigeras till `/accept-terms`.
 
 ### 2.7 Institutionell data (framtida — inaktivt nu)
 

@@ -16,6 +16,15 @@ export interface AppUser {
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
+  // Consent tracking
+  terms_accepted_at: string | null;
+  terms_version: string | null;
+  privacy_policy_accepted_at: string | null;
+  privacy_policy_version: string | null;
+  no_real_patient_data_acknowledged_at: string | null;
+  marketing_consent: boolean;
+  // Login tracking (for inactivity-based deletion)
+  last_login_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -49,21 +58,33 @@ export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
     .single();
 
   if (existingUser) {
-    // Update profile fields if they changed in Clerk
-    const needsUpdate =
+    // Update profile fields + last_login_at on every call.
+    // last_login_at is only updated if it's been > 1 hour since the last update,
+    // to avoid hammering the DB on every navigation.
+    const profileChanged =
       existingUser.email !== email ||
       existingUser.full_name !== fullName ||
       existingUser.avatar_url !== avatarUrl;
+    const lastLogin = existingUser.last_login_at
+      ? new Date(existingUser.last_login_at as string).getTime()
+      : 0;
+    const loginStale = Date.now() - lastLogin > 60 * 60 * 1000; // 1 hour
 
-    if (needsUpdate) {
+    if (profileChanged || loginStale) {
+      const update: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (profileChanged) {
+        update.email = email;
+        update.full_name = fullName;
+        update.avatar_url = avatarUrl;
+      }
+      if (loginStale) {
+        update.last_login_at = new Date().toISOString();
+      }
       const { data: updatedUser } = await supabase
         .from("users")
-        .update({
-          email,
-          full_name: fullName,
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString(),
-        })
+        .update(update)
         .eq("user_id", clerkUser.id)
         .select("*")
         .single();
@@ -74,7 +95,8 @@ export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
     return existingUser as AppUser;
   }
 
-  // User doesn't exist — create with free-tier defaults
+  // User doesn't exist — create with free-tier defaults.
+  // Consent fields stay null until user goes through /accept-terms.
   const { data: newUser, error } = await supabase
     .from("users")
     .insert({
@@ -85,6 +107,7 @@ export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
       plan: "free",
       subscription_status: "inactive",
       cancel_at_period_end: false,
+      last_login_at: new Date().toISOString(),
     })
     .select("*")
     .single();

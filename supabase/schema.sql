@@ -18,6 +18,20 @@ create table public.users (
   current_period_start timestamptz null,
   current_period_end timestamptz null,
   cancel_at_period_end boolean null default false,
+
+  -- GDPR-compliant consent tracking (set when user accepts Terms+Privacy
+  -- in the post-signup acceptance flow at /accept-terms).
+  terms_accepted_at timestamptz null,
+  terms_version text null,
+  privacy_policy_accepted_at timestamptz null,
+  privacy_policy_version text null,
+  no_real_patient_data_acknowledged_at timestamptz null,
+  marketing_consent boolean not null default false,
+
+  -- Updated on every login. Used for the 24-month-inactivity auto-deletion
+  -- job (see docs/legal/retention-policy.md).
+  last_login_at timestamptz null,
+
   created_at timestamptz null default now(),
   updated_at timestamptz null default now(),
 
@@ -31,6 +45,8 @@ create table public.users (
     subscription_status in ('active', 'inactive', 'canceled', 'past_due', 'trialing', 'incomplete')
   )
 );
+
+create index if not exists idx_users_last_login_at on public.users (last_login_at);
 
 -- 2. INSTITUTIONS
 -- For the Institution plan — teams / universities / teaching hospitals.
