@@ -1,7 +1,7 @@
 # Diagnostika — Intended Use Statement
 
 **Status:** Source-of-truth för hur Diagnostika ska beskrivas i alla användartexter (landing, signup, Terms, Privacy Policy, in-app disclaimers, marknadsföring).
-**Senast uppdaterad:** 2026-05-03
+**Senast uppdaterad:** 2026-05-07
 **Version:** 1.0
 
 ---

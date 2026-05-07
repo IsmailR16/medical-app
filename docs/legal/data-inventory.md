@@ -1,7 +1,7 @@
 # Diagnostika — Datakarta
 
 **Status:** Internt dokument — beskriver all personuppgiftsbehandling i Diagnostika.
-**Senast uppdaterad:** 2026-05-03
+**Senast uppdaterad:** 2026-05-07
 **Version:** 1.0
 
 Använd detta som källa för: Privacy Policy, retention-policy, DPIA, sub-processor-lista, frågor från IMY/användare.
@@ -76,7 +76,7 @@ Använd detta som källa för: Privacy Policy, retention-policy, DPIA, sub-proce
 | Sammanfattning | Övergripande feedback | Supabase `evaluations.summary` | Avtal |
 | Styrkor / förbättringar | Listor med text | Supabase `evaluations` | Avtal |
 
-> **Tidigare lagrades hela LLM-output i `evaluations.raw_response`. Borttagen i migration 004 (2026-05-03)** för dataminimering — ingen del av appen läste från fältet, så det utgjorde redundant data + ökad blast radius vid läcka. Strukturerade fält ovan täcker alla behov.
+> **Tidigare lagrades hela LLM-output i `evaluations.raw_response`. Borttagen i migration 004 (2026-05-07)** för dataminimering — ingen del av appen läste från fältet, så det utgjorde redundant data + ökad blast radius vid läcka. Strukturerade fält ovan täcker alla behov.
 
 ### 2.5 Betalnings-data
 
@@ -250,4 +250,4 @@ Vercel handler → Supabase (uppdatera plan)
 
 | Version | Datum | Ändring |
 |---|---|---|
-| 1.0 | 2026-05-03 | Initial datakarta före beta-launch |
+| 1.0 | 2026-05-07 | Initial datakarta före beta-launch |
