@@ -90,20 +90,20 @@ export default function Footer() {
             </p>
             <ul className="space-y-2.5">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/integritetspolicy"
                   className="text-[13px] hover:text-white transition-colors duration-300"
                 >
                   Integritetspolicy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/anvandarvillkor"
                   className="text-[13px] hover:text-white transition-colors duration-300"
                 >
-                  Villkor
-                </a>
+                  Användarvillkor
+                </Link>
               </li>
             </ul>
           </div>
