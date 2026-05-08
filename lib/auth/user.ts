@@ -97,6 +97,10 @@ export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
 
   // User doesn't exist — create with free-tier defaults.
   // Consent fields stay null until user goes through /accept-terms.
+  //
+  // Race-safe: the Clerk user.created webhook may insert this row in parallel
+  // with this request. If INSERT hits a duplicate (Postgres error 23505),
+  // re-fetch the existing row instead of returning null.
   const { data: newUser, error } = await supabase
     .from("users")
     .insert({
@@ -113,6 +117,15 @@ export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
     .single();
 
   if (error) {
+    if (error.code === "23505") {
+      // Webhook beat us to it — fetch the row that was just inserted.
+      const { data: racedUser } = await supabase
+        .from("users")
+        .select("*")
+        .eq("user_id", clerkUser.id)
+        .single();
+      if (racedUser) return racedUser as AppUser;
+    }
     console.error("Failed to create user in Supabase:", error);
     return null;
   }

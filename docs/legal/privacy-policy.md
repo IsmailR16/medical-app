@@ -136,9 +136,9 @@ Enligt GDPR har du rätt att:
 
 ### Hur du utnyttjar dina rättigheter
 
-- **Radera enskild session:** klicka på "Radera"-knappen i `/sessions` *(under utveckling — tills dess: mejla privacy@diagnostika.se)*
-- **Radera hela kontot:** under `/settings` → "Radera mitt konto" *(under utveckling — tills dess: mejla privacy@diagnostika.se)*
-- **Exportera mina data:** under `/settings` → "Exportera data" *(under utveckling — tills dess: mejla privacy@diagnostika.se)*
+- **Radera enskild session:** klicka på papperskorgs-ikonen i `/sessions`-listan
+- **Radera hela kontot:** under `/settings` → "Radera mitt konto" (kräver bekräftelse)
+- **Exportera mina data:** mejla privacy@diagnostika.se så får du dina data i JSON-format inom 30 dagar
 - **Övriga frågor och förfrågningar:** privacy@diagnostika.se
 
 Vi besvarar förfrågningar inom **30 dagar** (i komplexa fall kan svar dröja upp till 90 dagar enligt artikel 12.3 — du informeras då).

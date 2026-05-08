@@ -20,6 +20,7 @@ import { getAllSessions } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
 import { SessionStatusBadge } from "@/components/dashboard/SessionStatusBadge";
+import { DeleteSessionButton } from "@/components/dashboard/DeleteSessionButton";
 
 
 
@@ -209,7 +210,7 @@ export default async function SessionsPage() {
                   </div>
 
                   {/* Action */}
-                  <div>
+                  <div className="flex items-center gap-1">
                     <Link
                       href={
                         s.status === "evaluated"
@@ -221,6 +222,7 @@ export default async function SessionsPage() {
                       {s.status === "evaluated" ? "Visa" : "Fortsätt"}
                       <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
                     </Link>
+                    <DeleteSessionButton sessionId={s.id} caseTitle={s.case_title} />
                   </div>
                 </div>
               ))}
