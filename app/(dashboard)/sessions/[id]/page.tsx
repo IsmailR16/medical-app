@@ -6,6 +6,7 @@ import { TopBar } from "@/components/dashboard/TopBar";
 import { ChatComposer } from "@/components/dashboard/ChatComposer";
 import { SessionHeader } from "@/components/dashboard/SessionHeader";
 import { InvestigationPanel } from "@/components/dashboard/InvestigationPanel";
+import { CaseDisclaimerModal } from "@/components/dashboard/CaseDisclaimerModal";
 
 export const metadata: Metadata = {
   title: "Session",
@@ -28,6 +29,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
 
   return (
     <>
+      <CaseDisclaimerModal />
       <TopBar title={session.case_title} />
       <div className="w-full max-w-[1600px] mx-auto p-6 md:p-10">
         {/* Header with title, badges, and submit button */}
