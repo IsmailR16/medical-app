@@ -8,6 +8,10 @@ import {
   type CaseContext,
   type ConversationMessage,
 } from "@/lib/ai/patient";
+import {
+  detectRealPatientData,
+  SAFETY_WARNING,
+} from "@/lib/safety/real-patient-detection";
 
 // Allow long-running evaluation calls on Vercel (Pro plan = up to 300s).
 export const maxDuration = 150;
@@ -157,6 +161,34 @@ export async function POST(
     evaluation: caseRow.evaluation as CaseContext["evaluation"],
   };
 
+  /* ---- Real-patient-data safety check (only for chat, not for submission) ---- */
+  const detection = !submitDiagnosis ? detectRealPatientData(content) : { level: "none" as const, reason: null };
+
+  if (detection.level === "strong") {
+    // Block: user message is NOT saved. Insert a system warning instead and
+    // return it as if it were the assistant's response.
+    const warningContent = SAFETY_WARNING.strong(detection.reason ?? "Identifierande information upptäckt");
+    const { data: warnMsg } = await sb
+      .from("messages")
+      .insert({
+        session_id: sessionId,
+        role: "system",
+        content: warningContent,
+      })
+      .select("id, role, content, created_at")
+      .single();
+
+    return NextResponse.json({
+      message: {
+        id: warnMsg?.id ?? "blocked",
+        role: "system",
+        content: warningContent,
+        created_at: warnMsg?.created_at ?? new Date().toISOString(),
+      },
+      blocked: true,
+    });
+  }
+
   /* ---- Save user message ---- */
   const { error: userMsgError } = await sb.from("messages").insert({
     session_id: sessionId,
@@ -170,6 +202,33 @@ export async function POST(
       { error: "Kunde inte spara meddelandet." },
       { status: 500 }
     );
+  }
+
+  // Weak detection: insert system warning AFTER user message so it appears
+  // between user input and AI response. Returned in response so client can
+  // display it without a re-fetch.
+  let weakSystemMessage: { id: string; role: string; content: string; created_at: string } | null = null;
+  if (detection.level === "weak") {
+    const warningContent = SAFETY_WARNING.weak(
+      detection.reason ?? "Möjlig referens till verklig person"
+    );
+    const { data: warnMsg } = await sb
+      .from("messages")
+      .insert({
+        session_id: sessionId,
+        role: "system",
+        content: warningContent,
+      })
+      .select("id, role, content, created_at")
+      .single();
+    if (warnMsg) {
+      weakSystemMessage = {
+        id: warnMsg.id,
+        role: warnMsg.role,
+        content: warnMsg.content,
+        created_at: warnMsg.created_at,
+      };
+    }
   }
 
   /* ---- Handle diagnosis submission ---- */
@@ -349,5 +408,6 @@ export async function POST(
       content: assistantMsg.content,
       created_at: assistantMsg.created_at,
     },
+    systemMessage: weakSystemMessage,
   });
 }

@@ -64,18 +64,43 @@ export function ChatComposer({
         throw new Error(body?.error ?? "Något gick fel.");
       }
 
-      const { message: assistantMsg } = await res.json();
+      const data = await res.json();
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: assistantMsg.id,
-          role: assistantMsg.role,
-          content: assistantMsg.content,
+      if (data.blocked) {
+        // Strong-block: user message was rejected. Remove our optimistic
+        // user bubble and append the system warning instead.
+        setMessages((prev) =>
+          prev
+            .filter((m) => m.id !== tempId)
+            .concat({
+              id: data.message.id,
+              role: data.message.role,
+              content: data.message.content,
+              clinical_data_type: null,
+              created_at: data.message.created_at,
+            })
+        );
+      } else {
+        // Weak detection or none: append system warning (if any) + assistant.
+        const newMessages: MessageRow[] = [];
+        if (data.systemMessage) {
+          newMessages.push({
+            id: data.systemMessage.id,
+            role: data.systemMessage.role,
+            content: data.systemMessage.content,
+            clinical_data_type: null,
+            created_at: data.systemMessage.created_at,
+          });
+        }
+        newMessages.push({
+          id: data.message.id,
+          role: data.message.role,
+          content: data.message.content,
           clinical_data_type: null,
-          created_at: assistantMsg.created_at,
-        },
-      ]);
+          created_at: data.message.created_at,
+        });
+        setMessages((prev) => [...prev, ...newMessages]);
+      }
     } catch (err) {
       // Remove optimistic message on failure
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
