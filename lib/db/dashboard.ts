@@ -610,7 +610,7 @@ export const getEvaluationBySession = (sessionId: string, userId: string) =>
         hidden_diagnosis: hiddenDx,
       };
     },
-    [`evaluation-${sessionId}`],
+    [`evaluation-${userId}-${sessionId}`],
     { tags: [`evaluations-${userId}`, `evaluation-${sessionId}`], revalidate: 300 }
   )();
 
