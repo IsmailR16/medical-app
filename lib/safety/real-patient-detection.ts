@@ -81,7 +81,7 @@ export function detectRealPatientData(text: string): DetectionResult {
  */
 export const SAFETY_WARNING = {
   strong: (reason: string) =>
-    `⚠️ Ditt meddelande blockerades. ${reason}. Diagnostika är endast för fiktiva patientfall — skriv aldrig in personnummer eller andra uppgifter som identifierar en verklig person. Ditt meddelande har inte skickats. Skriv om det utan identifierande information.`,
+    `⚠️ Ditt meddelande blockerades. ${reason}. Diagnostika är endast för fiktiva patientfall — skriv aldrig in personnummer eller andra uppgifter som identifierar en verklig person. Ditt meddelande har inte skickats. Skriv om det utan identifierande information.\n\nDiagnostika ger aldrig medicinska råd och får inte användas för verkliga patienter.`,
   weak: (reason: string) =>
-    `⚠️ ${reason}. Diagnostika är endast en simulering med fiktiva fall. Använd aldrig riktiga patient- eller personuppgifter. Ditt meddelande har skickats men påminn dig om att hålla all information fiktiv.`,
+    `⚠️ ${reason}. Diagnostika är endast en simulering med fiktiva fall. Använd aldrig riktiga patient- eller personuppgifter. Ditt meddelande har skickats men påminn dig om att hålla all information fiktiv.\n\nDiagnostika ger aldrig medicinska råd och får inte användas för verkliga patienter.`,
 };
