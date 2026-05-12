@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { splitLabValue } from "@/lib/utils/clinical-format";
 
 type ClinicalData = {
   vitals?: Record<string, unknown>;
@@ -18,11 +19,14 @@ function resolveValue(cd: ClinicalData, itemKey: string):
     const items = dictToList(cd.vitals);
     return items.length > 0 ? { kind: "panel", sub_items: items } : null;
   }
-  if (itemKey === "labs") {
-    const items = dictToList(cd.lab_results);
-    return items.length > 0 ? { kind: "panel", sub_items: items } : null;
-  }
   const [section, subKey] = itemKey.split(":");
+  if (section === "lab" && subKey) {
+    const val = cd.lab_results?.[subKey];
+    if (val == null) return null;
+    // Strip reference range — it's already in the label (e.g. "Hb (ref 117-153)")
+    const { value: cleanValue } = splitLabValue(String(val));
+    return { kind: "single", value: cleanValue };
+  }
   if (section === "imaging" && subKey) {
     const val = cd.imaging?.[subKey];
     return val != null ? { kind: "single", value: String(val) } : null;
@@ -72,7 +76,7 @@ export async function POST(
   // Section prefix whitelist + any non-colon chars in the subkey (max 80).
   // This allows unicode letters (å/ä/ö), spaces, digits, punctuation in item
   // names like "DT thorax", "Lungröntgen", "övrigt".
-  if (!/^(vitals|labs|(imaging|physical_exam):[^:\n\r]{1,80})$/u.test(itemKey)) {
+  if (!/^(vitals|(lab|imaging|physical_exam):[^:\n\r]{1,80})$/u.test(itemKey)) {
     return NextResponse.json({ error: "Ogiltig itemKey." }, { status: 400 });
   }
 

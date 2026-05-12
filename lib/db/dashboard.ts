@@ -7,6 +7,7 @@ import type {
   RubricAreaScore,
   AutoFailMatch,
 } from "@/lib/ai/patient";
+import { splitLabValue, labLabelWithReference } from "@/lib/utils/clinical-format";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -306,16 +307,21 @@ export async function getSessionWithMessages(
     });
   }
 
-  // labs (panel)
-  const labsList = dictToList(cd.lab_results);
-  if (labsList.length > 0) {
-    const revealed = revealedSet.has("labs");
+  // lab_results (per item — student orders individual tests).
+  // Reference range is pulled out of the value and appended to the label so
+  // the UI shows e.g. "Hb (ref 117-153)" with just "129 g/L" as the value.
+  for (const [k, v] of Object.entries(cd.lab_results ?? {})) {
+    if (k.startsWith("_") || v == null || String(v).trim() === "") continue;
+    const rawValue = typeof v === "object" ? JSON.stringify(v) : String(v);
+    const { value: cleanValue, reference } = splitLabValue(rawValue);
+    const key = `lab:${k}`;
+    const revealed = revealedSet.has(key);
     orderables.push({
-      key: "labs",
+      key,
       section: "labs",
-      label: `Basal labpanel (${labsList.length} prover)`,
+      label: labLabelWithReference(prettify(k), reference),
       revealed,
-      sub_items: revealed ? labsList : undefined,
+      value: revealed ? cleanValue : undefined,
     });
   }
 

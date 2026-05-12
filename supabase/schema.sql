@@ -173,10 +173,10 @@ create table public.sessions (
 
   -- Which clinical data items the student has ordered during this session.
   -- Item key scheme:
-  --   "vitals"                     — whole vitals block
-  --   "labs"                       — whole lab panel
-  --   "imaging:<test>"             — e.g. "imaging:ekg"
-  --   "physical_exam:<subsystem>"  — e.g. "physical_exam:cor"
+  --   "vitals"                     — whole vitals block (ordered as one)
+  --   "lab:<test>"                 — single lab test (e.g. "lab:CRP")
+  --   "imaging:<test>"             — single imaging test (e.g. "imaging:EKG")
+  --   "physical_exam:<subsystem>"  — single subsystem (e.g. "physical_exam:cor")
   revealed_items text[] not null default '{}',
   -- Legacy per-category booleans (no longer used — see revealed_items).
   revealed_vitals boolean not null default false,
