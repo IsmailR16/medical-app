@@ -208,8 +208,10 @@ export interface OrderableItem {
   revealed: boolean;
   /** Single string value (for imaging / physical_exam items). */
   value?: string;
-  /** For panel-style items (vitals, labs) — the list of sub-values. */
+  /** For panel-style items (vitals) — the list of sub-values. */
   sub_items?: { label: string; value: string }[];
+  /** Lab-specific: raw reference range like "ref 117-153" for out-of-range checks. */
+  reference?: string | null;
 }
 
 export interface SessionDetail {
@@ -322,6 +324,7 @@ export async function getSessionWithMessages(
       label: labLabelWithReference(prettify(k), reference),
       revealed,
       value: revealed ? cleanValue : undefined,
+      reference,
     });
   }
 

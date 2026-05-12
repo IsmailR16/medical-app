@@ -13,6 +13,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import type { OrderableItem, OrderableSection } from "@/lib/db/dashboard";
+import { isLabValueOutOfRange } from "@/lib/utils/clinical-format";
 
 interface InvestigationPanelProps {
   sessionId: string;
@@ -210,7 +211,14 @@ function OrderableRow({
         </div>
       )}
       {!item.sub_items && item.value && (
-        <p className="text-[12px] text-[#1d3557] font-mono leading-relaxed whitespace-pre-wrap">
+        <p
+          className={`text-[12px] font-mono leading-relaxed whitespace-pre-wrap ${
+            item.section === "labs" &&
+            isLabValueOutOfRange(item.value, item.reference ?? null)
+              ? "text-rose-600 font-semibold"
+              : "text-[#1d3557]"
+          }`}
+        >
           {item.value}
         </p>
       )}
