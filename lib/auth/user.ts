@@ -81,6 +81,10 @@ export const getOrCreateUser = cache(async (): Promise<AppUser | null> => {
       }
       if (loginStale) {
         update.last_login_at = new Date().toISOString();
+        // Reset inactivity-warning flags so the next 2-year cycle can fire
+        // warnings again if the user goes inactive again.
+        update.warning_30d_sent_at = null;
+        update.warning_7d_sent_at = null;
       }
       const { data: updatedUser } = await supabase
         .from("users")

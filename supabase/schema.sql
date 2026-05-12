@@ -31,6 +31,9 @@ create table public.users (
   -- Updated on every login. Used for the 24-month-inactivity auto-deletion
   -- job (see docs/legal/retention-policy.md).
   last_login_at timestamptz null,
+  -- Set when the 30-day / 7-day warning mails are dispatched.
+  warning_30d_sent_at timestamptz null,
+  warning_7d_sent_at timestamptz null,
 
   created_at timestamptz null default now(),
   updated_at timestamptz null default now(),
