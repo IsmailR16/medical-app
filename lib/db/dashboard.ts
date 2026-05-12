@@ -342,15 +342,34 @@ export async function getSessionWithMessages(
     });
   }
 
-  // physical_exam (per subsystem)
-  for (const [k, v] of Object.entries(cd.physical_exam ?? {})) {
-    if (k.startsWith("_") || v == null || String(v).trim() === "") continue;
+  // physical_exam (per subsystem) — fixed display order + Swedish labels.
+  const PHYSICAL_EXAM_ORDER = ["allmän", "cor", "pulm", "buk", "neuro", "övrigt"];
+  const PHYSICAL_EXAM_LABELS: Record<string, string> = {
+    allmän: "Allmäntillstånd",
+    cor: "Cor",
+    pulm: "Pulm",
+    buk: "Buk",
+    neuro: "Neuro",
+    övrigt: "Övrigt",
+  };
+  const peEntries = Object.entries(cd.physical_exam ?? {})
+    .filter(([k, v]) => !k.startsWith("_") && v != null && String(v).trim() !== "")
+    .sort(([a], [b]) => {
+      const ai = PHYSICAL_EXAM_ORDER.indexOf(a.toLowerCase());
+      const bi = PHYSICAL_EXAM_ORDER.indexOf(b.toLowerCase());
+      // Known keys → ordered position; unknown keys → after, alphabetically
+      if (ai === -1 && bi === -1) return a.localeCompare(b);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+  for (const [k, v] of peEntries) {
     const key = `physical_exam:${k}`;
     const revealed = revealedSet.has(key);
     orderables.push({
       key,
       section: "physical_exam",
-      label: prettify(k),
+      label: PHYSICAL_EXAM_LABELS[k.toLowerCase()] ?? prettify(k),
       revealed,
       value: revealed ? (typeof v === "object" ? JSON.stringify(v) : String(v)) : undefined,
     });
