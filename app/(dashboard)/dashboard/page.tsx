@@ -147,11 +147,6 @@ export default async function DashboardPage() {
                     </Link>
                   </div>
                 </div>
-                <div className="hidden lg:flex items-center justify-center ml-8">
-                  <div className="w-36 h-36 bg-white/[0.04] rounded-full border border-white/[0.06] flex items-center justify-center">
-                    <Stethoscope className="w-16 h-16 text-white/10" strokeWidth={1} />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
