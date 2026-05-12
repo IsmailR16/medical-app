@@ -3,7 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 
-import { Send, AlertTriangle } from "lucide-react";
+import { Send } from "lucide-react";
 import { ChatBubble } from "@/components/dashboard/ChatBubble";
 import type { MessageRow } from "@/lib/db/dashboard";
 
@@ -184,15 +184,11 @@ export function ChatComposer({
                 <Send className="w-3.5 h-3.5" strokeWidth={1.5} />
               </button>
             </div>
-            <div className="mt-2 flex items-start justify-between gap-3">
-              <p className="text-[11px] text-[#94A3B8]">
-                Ställ öppna frågor för att samla anamnes
-              </p>
-              <p className="text-[11px] text-amber-700 flex items-center gap-1 flex-shrink-0">
-                <AlertTriangle className="w-3 h-3" strokeWidth={2} />
-                Endast fiktiva fall — inga riktiga patientuppgifter
-              </p>
-            </div>
+            <p className="mt-2 text-[11px] text-[#94A3B8] text-center">
+              Diagnostika bör ej användas för medicinska råd. Dela aldrig känsliga
+              uppgifter i chatten. Diagnostika kan göra misstag, dubbelkolla
+              informationen.
+            </p>
           </div>
         ) : (
           <div className="border-t border-[#1d3557]/[0.04] p-4 text-center text-[13px] text-[#94A3B8]">
