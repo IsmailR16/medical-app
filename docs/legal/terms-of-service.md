@@ -29,7 +29,7 @@ Diagnostika **är inte** ett medicintekniskt instrument, ett kliniskt beslutsst�
 
 För att registrera konto behöver du:
 
-- Vara minst **18 år** (eller ha vårdnadshavares samtycke om mellan 13-17)
+- Vara minst **18 år**
 - Tillhandahålla korrekta uppgifter vid registrering
 - Hålla dina inloggningsuppgifter säkra
 - Inte dela ditt konto med någon annan
@@ -134,8 +134,7 @@ Betalning hanteras av Stripe. Du auktoriserar oss att debitera ditt betalmedel e
 Prenumerationer förnyas automatiskt vid varje period (månad eller år). Du kan säga upp när som helst — uppsägningen gäller från slutet av innevarande period.
 
 ### 7.4 Återbetalning
-- **Free → Pro-uppgradering:** Inom 14 dagar har du ångerrätt enligt distansavtalslagen (om du är konsument). Tjänsten anses påbörjad så snart du genomfört ditt första patientfall efter uppgradering.
-- **Pro:** Inga återbetalningar för redan påbörjade perioder. Vid faktureringsfel återbetalas felaktigt belopp.
+- Inom 14 dagar från och med köpdatumet har du ångerrätt enligt distansavtalslagen. Detta gäller både nyköp av en betald plan och uppgradering från en gratis till en betald plan. Tjänsten anses påbörjad från och med köpdatumet. Efter ångerrättsperioden utförs inga återbetalningar för redan påbörjade perioder. Vid faktureringsfel återbetalas felaktigt belopp.
 - **Institution:** Enligt separat avtal.
 
 ### 7.5 Free-tier-gräns
@@ -196,7 +195,7 @@ Diagnostika lanseras initialt som **beta-version**. Detta innebär:
 
 ---
 
-## 11. Medicinsk friskrivning ⚠️
+## 11. Medicinsk friskrivning
 
 **Diagnostika är inte medicinsk rådgivning.**
 

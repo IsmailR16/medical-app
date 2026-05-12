@@ -15,7 +15,7 @@ Den här policyn beskriver hur Diagnostika behandlar dina personuppgifter när d
 - **Adress:** [TBD]
 - **Privacy-kontakt:** privacy@diagnostika.se
 
-> *Bolaget registreras före publik launch. Tills dess hanteras frågor av grundarna direkt.*
+> *Bolaget registreras före offentlig lansering. Tills dess hanteras frågor av grundarna direkt.*
 
 ---
 
@@ -41,7 +41,7 @@ Diagnostika **är inte** ett medicintekniskt instrument, ett kliniskt beslutsst�
 - Den feedback (poäng, betyg, sammanfattning) som genereras efter inlämning
 
 ### 3.3 När du betalar
-- Stripe-identifierare (customer-id, subscription-id), aktuell plan och prenumerationsstatus
+- Stripe-identifierare (kund-id, prenumeration-id), aktuell plan och prenumerationsstatus
 - **Vi lagrar aldrig själva betalkortuppgifter** — det hanteras enbart av Stripe.
 
 ### 3.4 Tekniskt
@@ -58,7 +58,7 @@ Diagnostika **är inte** ett medicintekniskt instrument, ett kliniskt beslutsst�
 
 | Ändamål | Vilken data | Rättslig grund |
 |---|---|---|
-| Tillhandahålla tjänsten (konto, sessioner, feedback) | Konto-data, session-data, chat, evaluations | **Avtal** — för att uppfylla användaravtalet |
+| Tillhandahålla tjänsten (konto, sessioner, feedback) | Konto-data, session-data, chat, utvärderingar | **Avtal** — för att uppfylla användaravtalet |
 | Hantera betalning och abonnemang | Stripe-IDs, plan, betalningsstatus | **Avtal** + **rättslig skyldighet** (Bokföringslagen) |
 | Säkerhet och felsökning | Tekniska loggar | **Berättigat intresse** — att skydda tjänsten |
 | Markandsföringsmail (om du valt det) | E-post + samtycke | **Samtycke** — kan när som helst återkallas |
@@ -72,12 +72,12 @@ Vi använder **inte** dina chattar eller inlämningar för att träna AI-modelle
 Diagnostika är endast avsett för **fiktiva** patientfall. Trots våra varningar i tjänsten kan en användare av misstag skriva in information som rör verkliga personer. Vi behandlar därför chattinnehåll **internt som potentiellt känsliga uppgifter** och tillämpar förstärkta skyddsåtgärder:
 
 - Åtkomst sker endast via krypterade serveranslutningar
-- Inga interna medarbetare har slumpmässig åtkomst till enskilda chattar
+- Inga interna medarbetare har onödig åtkomst till enskilda chattar
 - Du kan när som helst radera enskilda sessioner eller hela ditt konto
 
 Du **får inte** skriva in:
 - Namn, personnummer eller andra identifierande uppgifter om verkliga personer
-- Information från riktiga journaler eller VFU-patienter
+- Information från riktiga journaler eller patienter
 - Hälsouppgifter om dig själv eller anhöriga
 
 Att göra det bryter mot våra användarvillkor och kan leda till att kontot stängs av.
@@ -98,7 +98,7 @@ För att leverera tjänsten anlitar vi följande personuppgiftsbiträden (sub-pr
 
 Med samtliga leverantörer har vi personuppgiftsbiträdesavtal (DPA) som säkerställer att de behandlar uppgifterna i enlighet med GDPR.
 
-OpenAI har bekräftat att data som skickas via deras API **inte används för att träna deras modeller** (default-inställning som vi använder).
+Enligt de villkor och inställningar vi använder för OpenAI:s API **används kunddata inte för att träna OpenAI:s modeller.**
 
 ---
 
@@ -113,7 +113,7 @@ Eftersom flera av våra leverantörer är USA-baserade förekommer överföring 
 | Datatyp | Lagringstid |
 |---|---|
 | Konto | Tills du raderar kontot, eller efter **24 månaders inaktivitet** (du får varningsmail innan radering) |
-| Sessioner, chattar, feedback | Hängs på kontot — raderas när konto eller enskild session raderas |
+| Sessioner, chattar, feedback | kopplas på kontot — raderas när konto eller enskild session raderas |
 | Betalningshistorik (hos Stripe) | **7 år** — krävs enligt Bokföringslagen, kan inte raderas tidigare |
 | Tekniska loggar | 30-90 dagar (auto-rotation hos Vercel) |
 | Acceptansloggar (att du accepterat villkor) | Tills kontot raderas |
@@ -136,7 +136,7 @@ Enligt GDPR har du rätt att:
 
 ### Hur du utnyttjar dina rättigheter
 
-- **Radera enskild session:** klicka på papperskorgs-ikonen i `/sessions`-listan
+- **Radera enskild session:** klicka på papperskorgikonen i `/sessions`-listan
 - **Radera hela kontot:** under `/settings` → "Radera mitt konto" (kräver bekräftelse)
 - **Exportera mina data:** mejla privacy@diagnostika.se så får du dina data i JSON-format inom 30 dagar
 - **Övriga frågor och förfrågningar:** privacy@diagnostika.se
