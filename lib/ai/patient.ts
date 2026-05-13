@@ -330,7 +330,7 @@ ${submissionText}`;
         { role: "user", content: userPrompt },
       ],
       max_completion_tokens: 6000,
-      temperature: 0.2,
+      //temperature: 0.2,
       response_format: { type: "json_object" },
     },
     { timeout: 120_000 }
