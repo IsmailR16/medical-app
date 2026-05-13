@@ -329,7 +329,7 @@ ${submissionText}`;
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      max_tokens: 3000,
+      max_completion_tokens: 6000,
       temperature: 0.2,
       response_format: { type: "json_object" },
     },
