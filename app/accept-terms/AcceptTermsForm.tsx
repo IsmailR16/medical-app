@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertTriangle, Loader2 } from "lucide-react";
 
-export function AcceptTermsForm() {
+interface AcceptTermsFormProps {
+  /** Where to navigate after successful acceptance (defaults to /dashboard).
+   *  Used to preserve a `?plan=X` query param from the sign-up flow so the
+   *  PlanCheckout component on the dashboard can pick it up and start Stripe. */
+  redirectTo?: string;
+}
+
+export function AcceptTermsForm({ redirectTo = "/dashboard" }: AcceptTermsFormProps) {
   const router = useRouter();
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
@@ -39,7 +46,7 @@ export function AcceptTermsForm() {
         throw new Error(body?.error ?? "Kunde inte spara acceptansen.");
       }
       toast.success("Tack! Välkommen till Diagnostika.", { id: toastId });
-      router.push("/dashboard");
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Något gick fel.", {

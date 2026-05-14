@@ -11,7 +11,14 @@ export const metadata: Metadata = {
   title: "Acceptera villkor",
 };
 
-export default async function AcceptTermsPage() {
+export default async function AcceptTermsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string }>;
+}) {
+  const { plan } = await searchParams;
+  const dashboardRedirect = plan ? `/dashboard?plan=${plan}` : "/dashboard";
+
   const user = await getOrCreateUser();
   if (!user) redirect("/sign-in");
 
@@ -23,7 +30,7 @@ export default async function AcceptTermsPage() {
     user.privacy_policy_version === PRIVACY_POLICY_VERSION &&
     user.no_real_patient_data_acknowledged_at;
 
-  if (alreadyAccepted) redirect("/dashboard");
+  if (alreadyAccepted) redirect(dashboardRedirect);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F9FAFB] to-white flex items-center justify-center p-6">
@@ -39,7 +46,7 @@ export default async function AcceptTermsPage() {
           </p>
         </div>
 
-        <AcceptTermsForm />
+        <AcceptTermsForm redirectTo={dashboardRedirect} />
       </div>
     </div>
   );
