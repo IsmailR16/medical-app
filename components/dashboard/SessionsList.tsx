@@ -77,7 +77,7 @@ export function SessionsList({ initialSessions, initialNextCursor }: SessionsLis
           {sessions.map((s) => (
             <div
               key={s.id}
-              className="flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-3 md:gap-4 md:items-center px-4 md:px-6 py-4 hover:bg-[#F9FAFB] transition-colors duration-200"
+              className="flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr_1fr_150px] gap-3 md:gap-4 md:items-center px-4 md:px-6 py-4 hover:bg-[#F9FAFB] transition-colors duration-200"
             >
               {/* Title + specialty */}
               <div className="min-w-0">
@@ -119,7 +119,7 @@ export function SessionsList({ initialSessions, initialNextCursor }: SessionsLis
               </div>
 
               {/* Action */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center justify-between gap-1">
                 <Link
                   href={s.status === "evaluated" ? `/evaluations/${s.id}` : `/sessions/${s.id}`}
                   className="px-3 md:px-4 py-2 bg-[#F9FAFB] border border-[#1d3557]/[0.06] text-[#1d3557] text-[12px] font-semibold rounded-xl hover:border-[#1d3557]/[0.12] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap inline-flex items-center gap-1.5"
