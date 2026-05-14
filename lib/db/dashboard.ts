@@ -8,6 +8,7 @@ import type {
   AutoFailMatch,
 } from "@/lib/ai/patient";
 import { splitLabValue, labLabelWithReference } from "@/lib/utils/clinical-format";
+import { computeSessionDurationMin } from "@/lib/utils/session-duration";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -646,11 +647,7 @@ export const getEvaluationsPage = (userId: string, cursor: string | null) =>
           const ev = evalMap.get(s.id as string)!;
           const c = caseMap.get(s.case_id as string);
           const endTime = (s.submitted_at ?? s.evaluated_at) as string | null;
-          const durationMin = endTime
-            ? Math.round(
-                (new Date(endTime).getTime() - new Date(s.started_at as string).getTime()) / 60000
-              )
-            : null;
+          const durationMin = computeSessionDurationMin(s.started_at as string, endTime);
 
           return {
             id: ev.id,
@@ -745,9 +742,8 @@ export const getEvaluationAggregates = (userId: string) =>
       const totalMinutes = evals.reduce((sum, e) => {
         const s = sessionMap.get(e.session_id as string);
         if (!s) return sum;
-        const endTime = s.submitted_at ?? s.evaluated_at;
-        if (!endTime) return sum;
-        return sum + Math.round((new Date(endTime).getTime() - new Date(s.started_at).getTime()) / 60000);
+        const min = computeSessionDurationMin(s.started_at, s.submitted_at ?? s.evaluated_at);
+        return sum + (min ?? 0);
       }, 0);
 
       // Per-category aggregates + newer-vs-older trend

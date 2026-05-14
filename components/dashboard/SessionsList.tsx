@@ -8,18 +8,12 @@ import toast from "react-hot-toast";
 import type { SessionListItem } from "@/lib/db/dashboard";
 import { SessionStatusBadge } from "@/components/dashboard/SessionStatusBadge";
 import { DeleteSessionButton } from "@/components/dashboard/DeleteSessionButton";
+import { formatSessionDuration } from "@/lib/utils/session-duration";
 import { loadMoreSessions } from "@/app/(dashboard)/sessions/actions";
 
 interface SessionsListProps {
   initialSessions: SessionListItem[];
   initialNextCursor: string | null;
-}
-
-function formatDuration(startedAt: string, endAt: string | null): string {
-  if (!endAt) return "Pågående";
-  const ms = new Date(endAt).getTime() - new Date(startedAt).getTime();
-  const mins = Math.round(ms / 60000);
-  return `${mins} min`;
 }
 
 export function SessionsList({ initialSessions, initialNextCursor }: SessionsListProps) {
@@ -96,7 +90,7 @@ export function SessionsList({ initialSessions, initialNextCursor }: SessionsLis
               {/* Duration */}
               <div className="flex items-center gap-1.5 text-[13px] text-[#94A3B8]">
                 <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-                {formatDuration(s.started_at, s.submitted_at ?? s.evaluated_at)}
+                {formatSessionDuration(s.started_at, s.submitted_at ?? s.evaluated_at)}
               </div>
 
               {/* Grade + score */}
