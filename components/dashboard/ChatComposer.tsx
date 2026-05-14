@@ -123,7 +123,7 @@ export function ChatComposer({
   return (
     <div className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] h-[700px] flex flex-col overflow-hidden">
       <div className="border-b border-[#1d3557]/[0.04] px-6 py-4">
-        <h2 className="text-[15px] font-bold text-[#1d3557] tracking-tight">Patient-intervju</h2>
+        <h2 className="text-[15px] font-bold text-[#1d3557] tracking-tight">Intervju</h2>
       </div>
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Messages */}
