@@ -68,9 +68,9 @@ export function DiagnosisModal({
 
       if (data.evaluated) {
         const pct = Math.round((data.total_score ?? 0) * 100);
-        toast.success(`Utvärderad! ${data.grade} (${pct}%) ✅`, { id: toastId });
+        toast.success(`Utvärderad! ${data.grade} (${pct}%)`, { id: toastId });
       } else {
-        toast.success("Inlämning mottagen ✅", { id: toastId });
+        toast.success("Inlämning mottagen", { id: toastId });
       }
 
       onOpenChange(false);

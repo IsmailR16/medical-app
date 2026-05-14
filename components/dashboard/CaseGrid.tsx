@@ -71,7 +71,7 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
         }
 
         const { sessionId } = await res.json();
-        toast.success("Session startad ✅", { id: toastId });
+        toast.success("Session startad", { id: toastId });
         router.push(`/sessions/${sessionId}`);
       } catch (err) {
         toast.error(

@@ -23,7 +23,7 @@ export function SurpriseMeButton() {
         throw new Error(body?.error ?? "Kunde inte starta sessionen.");
       }
       const { sessionId } = await res.json();
-      toast.success("Session startad ✅", { id: toastId });
+      toast.success("Session startad", { id: toastId });
       router.push(`/sessions/${sessionId}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Något gick fel.", {
