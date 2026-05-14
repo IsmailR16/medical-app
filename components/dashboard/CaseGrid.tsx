@@ -11,15 +11,15 @@ import type { CaseListItem } from "@/lib/db/dashboard";
 interface CaseGridProps {
   cases: CaseListItem[];
   limitReached: boolean;
-  activeCaseIds: string[];
+  /** Map of case_id → existing active session_id, so clicking a case with an
+   *  in-progress session resumes it instead of consuming a new usage credit. */
+  activeSessions: Record<string, string>;
 }
 
-export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) {
+export function CaseGrid({ cases, limitReached, activeSessions }: CaseGridProps) {
   const router = useRouter();
   const [startingId, setStartingId] = useState<string | null>(null);
   const inflightRef = useRef(false);
-
-  const activeSet = useMemo(() => new Set(activeCaseIds), [activeCaseIds]);
 
   /* ---------- Filters ---------- */
   const [search, setSearch] = useState("");
@@ -47,10 +47,19 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
     setSpecialty("all");
   };
 
-  /* ---------- Start session ---------- */
+  /* ---------- Start or resume session ---------- */
   const handleStart = useCallback(
     async (caseId: string) => {
       if (inflightRef.current) return;
+
+      // If user already has an active session for this case, resume it
+      // instead of creating a new one (would consume a usage credit).
+      const existingSessionId = activeSessions[caseId];
+      if (existingSessionId) {
+        router.push(`/sessions/${existingSessionId}`);
+        return;
+      }
+
       inflightRef.current = true;
       setStartingId(caseId);
 
@@ -82,7 +91,7 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
         setStartingId(null);
       }
     },
-    [router]
+    [router, activeSessions]
   );
 
   /* ---------- Render ---------- */
@@ -136,7 +145,7 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
           {filtered.map((c) => (
             <button
               key={c.id}
-              disabled={limitReached || startingId === c.id}
+              disabled={(limitReached && !activeSessions[c.id]) || startingId === c.id}
               onClick={() => handleStart(c.id)}
               className="group text-left bg-white rounded-2xl p-6 border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_12px_32px_-8px_rgba(29,53,87,0.12)] hover:border-[#1d3557]/[0.1] hover:-translate-y-1 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50 disabled:cursor-not-allowed flex flex-col h-full"
             >
@@ -159,7 +168,7 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
               </p>
 
               <div className="flex items-center gap-2 mt-5 min-h-[22px]">
-                {activeSet.has(c.id) && (
+                {activeSessions[c.id] && (
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-amber-50 text-amber-700 border-amber-200/50">
                     Pågående
                   </span>

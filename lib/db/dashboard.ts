@@ -175,20 +175,30 @@ export const getPublishedCases = () =>
     { tags: ["cases"], revalidate: 120 }
   )();
 
-/** Return the case IDs where the user has an active (in-progress) session. */
-export const getActiveCaseIds = (userId: string) =>
+/**
+ * Return a map of case_id → session_id for the user's active (in-progress)
+ * sessions. Used by the case library to let users resume an in-progress
+ * session instead of starting a new one (which would consume a usage credit).
+ */
+export const getActiveSessionsByCase = (userId: string) =>
   unstable_cache(
-    async (): Promise<string[]> => {
+    async (): Promise<Record<string, string>> => {
       const sb = createServiceRoleClient();
       const { data } = await sb
         .from("sessions")
-        .select("case_id")
+        .select("id, case_id")
         .eq("user_id", userId)
         .eq("status", "active");
 
-      return (data ?? []).map((r) => r.case_id as string);
+      const map: Record<string, string> = {};
+      for (const row of data ?? []) {
+        // If somehow more than one active session exists per case, the last
+        // one wins. Shouldn't happen in normal flow but harmless.
+        map[row.case_id as string] = row.id as string;
+      }
+      return map;
     },
-    [`active-cases-${userId}`],
+    [`active-sessions-${userId}`],
     { tags: [`sessions-${userId}`], revalidate: 30 }
   )();
 

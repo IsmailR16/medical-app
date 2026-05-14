@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getOrCreateUser } from "@/lib/auth/user";
-import { getPublishedCases, getMonthlyUsage, getActiveCaseIds } from "@/lib/db/dashboard";
+import { getPublishedCases, getMonthlyUsage, getActiveSessionsByCase } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { CaseGrid } from "@/components/dashboard/CaseGrid";
 import { FREE_LIMIT } from "@/lib/plans";
@@ -15,10 +15,10 @@ export default async function CasesPage() {
   const user = await getOrCreateUser();
   if (!user) redirect("/sign-in");
 
-  const [cases, usage, activeCaseIds] = await Promise.all([
+  const [cases, usage, activeSessions] = await Promise.all([
     getPublishedCases(),
     getMonthlyUsage(user.user_id),
-    getActiveCaseIds(user.user_id),
+    getActiveSessionsByCase(user.user_id),
   ]);
 
   const sessionsUsed = usage?.sessions_started ?? 0;
@@ -44,7 +44,7 @@ export default async function CasesPage() {
         </FadeUp>
 
         <FadeUp delay={0.15}>
-          <CaseGrid cases={cases} limitReached={limitReached} activeCaseIds={activeCaseIds} />
+          <CaseGrid cases={cases} limitReached={limitReached} activeSessions={activeSessions} />
         </FadeUp>
       </div>
     </>
