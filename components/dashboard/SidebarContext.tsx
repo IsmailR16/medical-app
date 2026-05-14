@@ -28,6 +28,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setMobileOpen(false);
   }, [pathname]);
 
+  // Scroll to top on route change. Next.js's default scroll-to-top can miss
+  // when the destination page has heavy motion animations or staggered
+  // hydration (e.g. /evaluations with multiple FadeUp wrappers + CategoryBars
+  // recharts mount) — the framework's scroll fires before the page settles
+  // and then layout shifts push the scroll position back down.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
+
   const toggleCollapsed = useCallback(() => setCollapsed((c) => !c), []);
 
   return (
@@ -48,9 +57,11 @@ export function MainContent({ children }: { children: React.ReactNode }) {
     <div
       className={`flex-1 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ml-0 ${desktopMargin}`}
     >
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      {/* No overflow-auto here on purpose: a nested scroll container
+          would trap navigation scroll-to-top (Next.js scrolls window,
+          not arbitrary descendants). Sidebar is `fixed` so body-level
+          scrolling is fine. */}
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
