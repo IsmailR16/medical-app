@@ -17,6 +17,7 @@ const isProtectedRoute = createRouteMatcher([
     "/api/sessions(.*)",
     "/api/stripe(.*)",
     "/api/users(.*)",
+    "/api/feedback(.*)",
 ]);
 
 function middleware(req: NextRequest) {
@@ -64,5 +65,6 @@ export const config = {
     "/api/sessions/:path*",
     "/api/stripe/:path*",
     "/api/users/:path*",
+    "/api/feedback/:path*",
   ],
 };

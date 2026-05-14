@@ -22,6 +22,7 @@ import {
   Moon,
 } from "lucide-react";
 import { useSidebarCtx } from "./SidebarContext";
+import { FeedbackButton } from "./FeedbackButton";
 
 const navItems = [
   { path: "/dashboard", label: "Översikt", icon: LayoutDashboard },
@@ -202,6 +203,8 @@ export function AppSidebar({ user }: AppSidebarProps) {
               <span className="text-[13px] font-medium">Notiser</span>
             )}
           </button>
+
+          <FeedbackButton collapsed={collapsed} mobileOpen={mobileOpen} />
 
           <button
             onClick={toggleTheme}
