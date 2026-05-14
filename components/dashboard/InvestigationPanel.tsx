@@ -97,7 +97,7 @@ export function InvestigationPanel({ sessionId, orderables, sessionActive }: Inv
   }
 
   return (
-    <div className="sticky top-6 max-h-[700px] overflow-y-auto space-y-4 pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1d3557]/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#1d3557]/20">
+    <div className="sticky top-6 max-h-[700px] overflow-y-auto overscroll-contain [transform:translateZ(0)] space-y-4 pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1d3557]/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-[#1d3557]/20">
       <div>
         <h2 className="text-[14px] font-bold text-[#1d3557]">Undersökningar</h2>
         <p className="text-[12px] text-[#94A3B8] mt-1">
