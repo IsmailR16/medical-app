@@ -3,8 +3,15 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Search, ChevronDown, ArrowUpRight } from "lucide-react";
+import { Search, ArrowUpRight, X } from "lucide-react";
 import type { CaseListItem } from "@/lib/db/dashboard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /* ------------------------------------------------------------------ */
 
@@ -100,28 +107,54 @@ export function CaseGrid({ cases, limitReached, activeSessions }: CaseGridProps)
       {/* Search + Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#94A3B8]" strokeWidth={1.5} />
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#94A3B8] pointer-events-none"
+            strokeWidth={1.5}
+          />
           <input
             type="text"
             placeholder="Sök fall efter titel, kategori eller nyckelord..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-[#1d3557]/[0.06] rounded-xl text-[13px] text-[#1d3557] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-all duration-300"
+            className="w-full h-12 pl-11 pr-10 bg-white border border-[#1d3557]/[0.06] rounded-xl text-[13px] text-[#1d3557] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-all duration-300"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              aria-label="Rensa sökning"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#1d3557] hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" strokeWidth={1.5} />
+            </button>
+          )}
         </div>
-        <div className="relative">
-          <select
-            value={specialty}
-            onChange={(e) => setSpecialty(e.target.value)}
-            className="px-4 pr-10 py-3 bg-white border border-[#1d3557]/[0.06] rounded-xl text-[13px] font-medium text-[#1d3557] cursor-pointer focus:outline-none focus:border-[#457b9d]/40 appearance-none transition-all duration-300"
+        <Select value={specialty} onValueChange={setSpecialty}>
+          <SelectTrigger className="!h-12 w-full sm:w-[220px] bg-white border-[#1d3557]/[0.06] rounded-xl text-[13px] font-medium text-[#1d3557] px-4 hover:border-[#1d3557]/[0.12] focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-all duration-300 cursor-pointer shadow-none data-[placeholder]:text-[#94A3B8]">
+            <SelectValue placeholder="Alla specialiteter" />
+          </SelectTrigger>
+          <SelectContent
+            position="popper"
+            sideOffset={6}
+            className="rounded-xl border-[#1d3557]/[0.08] shadow-[0_8px_30px_-6px_rgba(29,53,87,0.18)] max-h-[320px]"
           >
-            <option value="all">Alla specialiteter</option>
+            <SelectItem
+              value="all"
+              className="text-[13px] text-[#1d3557] focus:bg-[#F9FAFB] cursor-pointer"
+            >
+              Alla specialiteter
+            </SelectItem>
             {specialties.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <SelectItem
+                key={s}
+                value={s}
+                className="text-[13px] text-[#1d3557] focus:bg-[#F9FAFB] capitalize cursor-pointer"
+              >
+                {s}
+              </SelectItem>
             ))}
-          </select>
-          <ChevronDown className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" strokeWidth={1.5} />
-        </div>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Results count */}
