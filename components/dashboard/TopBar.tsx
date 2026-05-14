@@ -68,7 +68,7 @@ export function TopBar({ title }: TopBarProps) {
       {/* Hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] transition-all duration-300"
+        className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] transition-all duration-300 cursor-pointer"
       >
         <Menu className="w-[18px] h-[18px] text-[#1d3557]" strokeWidth={1.5} />
       </button>
@@ -94,7 +94,7 @@ export function TopBar({ title }: TopBarProps) {
         <div className="relative" ref={bellRef}>
           <button
             onClick={() => setBellOpen((v) => !v)}
-            className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)]"
+            className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white border border-transparent hover:border-[#1d3557]/[0.06] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] cursor-pointer"
           >
             <Bell
               className="w-[18px] h-[18px] text-[#64748B]"
@@ -136,7 +136,7 @@ export function TopBar({ title }: TopBarProps) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="w-8 h-8 rounded-lg bg-[#457b9d] flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#5a93b5] hover:shadow-[0_2px_12px_-2px_rgba(69,123,157,0.4)]"
+            className="w-8 h-8 rounded-lg bg-[#457b9d] flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#5a93b5] hover:shadow-[0_2px_12px_-2px_rgba(69,123,157,0.4)] cursor-pointer"
           >
             <span className="text-white text-[11px] font-semibold">
               {initials}
@@ -177,7 +177,7 @@ export function TopBar({ title }: TopBarProps) {
                       setProfileOpen(false);
                       router.push("/settings");
                     }}
-                    className="w-full px-4 py-2.5 text-left text-[13px] text-[#1d3557] hover:bg-[#F9FAFB] transition-colors duration-200 flex items-center gap-2.5"
+                    className="w-full px-4 py-2.5 text-left text-[13px] text-[#1d3557] hover:bg-[#F9FAFB] transition-colors duration-200 flex items-center gap-2.5 cursor-pointer"
                   >
                     <Settings
                       className="w-4 h-4 text-[#94A3B8]"
@@ -190,7 +190,7 @@ export function TopBar({ title }: TopBarProps) {
                       setProfileOpen(false);
                       signOut();
                     }}
-                    className="w-full px-4 py-2.5 text-left text-[13px] text-[#1d3557] hover:bg-[#F9FAFB] transition-colors duration-200 flex items-center gap-2.5 border-t border-[#1d3557]/[0.04]"
+                    className="w-full px-4 py-2.5 text-left text-[13px] text-[#1d3557] hover:bg-[#F9FAFB] transition-colors duration-200 flex items-center gap-2.5 border-t border-[#1d3557]/[0.04] cursor-pointer"
                   >
                     <LogOut
                       className="w-4 h-4 text-[#94A3B8]"

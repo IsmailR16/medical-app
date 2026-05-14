@@ -186,7 +186,7 @@ export function FeedbackButton({ collapsed, mobileOpen }: FeedbackButtonProps) {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || message.trim().length === 0}
-                    className="w-full mt-4 inline-flex items-center justify-center gap-2 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl px-6 py-3 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_-4px_rgba(69,123,157,0.4)]"
+                    className="w-full mt-4 inline-flex items-center justify-center gap-2 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl px-6 py-3 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_-4px_rgba(69,123,157,0.4)] cursor-pointer"
                   >
                     {submitting ? (
                       <>

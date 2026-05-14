@@ -178,7 +178,7 @@ export function ChatComposer({
                 onClick={sendMessage}
                 disabled={sending || !input.trim()}
                 aria-label="Skicka"
-                className="px-4 py-2.5 bg-[#457b9d] text-white rounded-xl text-[13px] font-semibold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_2px_8px_-2px_rgba(69,123,157,0.3)] flex items-center gap-1.5"
+                className="px-4 py-2.5 bg-[#457b9d] text-white rounded-xl text-[13px] font-semibold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_2px_8px_-2px_rgba(69,123,157,0.3)] flex items-center gap-1.5 cursor-pointer"
               >
                 Skicka
                 <Send className="w-3.5 h-3.5" strokeWidth={1.5} />

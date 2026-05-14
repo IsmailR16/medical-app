@@ -214,7 +214,7 @@ export default function Navbar({ isSignedIn = false }: { isSignedIn?: boolean })
           {/* Mobile hamburger */}
           <button
             ref={hamburgerRef}
-            className="md:hidden flex items-center justify-center ham-btn"
+            className="md:hidden flex items-center justify-center ham-btn cursor-pointer"
             aria-label="Meny"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"

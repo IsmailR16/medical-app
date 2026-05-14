@@ -123,7 +123,7 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="text-[13px] font-medium text-[#457b9d] hover:text-[#3a6781] transition-colors duration-200"
+            className="text-[13px] font-medium text-[#457b9d] hover:text-[#3a6781] transition-colors duration-200 cursor-pointer"
           >
             Rensa filter
           </button>
@@ -181,7 +181,7 @@ export function CaseGrid({ cases, limitReached, activeCaseIds }: CaseGridProps) 
           </p>
           <button
             onClick={clearFilters}
-            className="px-5 py-2.5 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98]"
+            className="px-5 py-2.5 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#3a6781] active:scale-[0.98] cursor-pointer"
           >
             Rensa filter
           </button>

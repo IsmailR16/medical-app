@@ -119,7 +119,7 @@ export function InvestigationPanel({ sessionId, orderables, sessionActive }: Inv
             <button
               type="button"
               onClick={() => toggleSection(section)}
-              className="w-full px-4 py-3 flex items-center gap-2 hover:bg-[#F9FAFB] transition-colors duration-200"
+              className="w-full px-4 py-3 flex items-center gap-2 hover:bg-[#F9FAFB] transition-colors duration-200 cursor-pointer"
             >
               <Icon className="w-4 h-4 text-[#457b9d] shrink-0" strokeWidth={1.5} />
               <h3 className="text-[13px] font-semibold text-[#1d3557] flex-1 text-left">
@@ -172,7 +172,7 @@ function OrderableRow({
         <button
           onClick={onOrder}
           disabled={disabled || loading}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-[#457b9d] text-white hover:bg-[#3a6781] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-[#457b9d] text-white hover:bg-[#3a6781] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
           {loading ? (
             <>

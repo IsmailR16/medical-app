@@ -128,7 +128,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </Link>
           <button
             onClick={() => setMobileOpen(false)}
-            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors"
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" strokeWidth={1.5} />
           </button>
@@ -418,7 +418,7 @@ function UserCardDropdown({
                 setOpen(false);
                 signOut();
               }}
-              className="flex items-center gap-2.5 px-4 py-2 w-full text-[13px] font-medium text-[#e63946] hover:bg-rose-50/60 transition-colors duration-150"
+              className="flex items-center gap-2.5 px-4 py-2 w-full text-[13px] font-medium text-[#e63946] hover:bg-rose-50/60 transition-colors duration-150 cursor-pointer"
             >
               <LogOut className="w-4 h-4" strokeWidth={1.5} />
               Logga ut

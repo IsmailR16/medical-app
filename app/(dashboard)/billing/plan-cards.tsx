@@ -190,7 +190,7 @@ export function PlanCards({ isPro }: PlanCardsProps) {
                 </button>
               )}
               {plan.key === "institution" && (
-                <button className="w-full py-2.5 rounded-xl text-[13px] font-semibold bg-[#F9FAFB] border border-[#1d3557]/[0.06] text-[#1d3557] hover:border-[#1d3557]/[0.12] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]">
+                <button className="w-full py-2.5 rounded-xl text-[13px] font-semibold bg-[#F9FAFB] border border-[#1d3557]/[0.06] text-[#1d3557] hover:border-[#1d3557]/[0.12] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] cursor-pointer">
                   Kontakta försäljning
                 </button>
               )}

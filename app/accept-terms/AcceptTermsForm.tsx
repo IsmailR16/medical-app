@@ -134,7 +134,7 @@ export function AcceptTermsForm() {
       <button
         onClick={onSubmit}
         disabled={!allRequiredAccepted || submitting}
-        className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#457b9d] text-white font-semibold rounded-xl px-6 py-3.5 text-[14px] transition-all duration-300 hover:bg-[#3a6781] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_-4px_rgba(69,123,157,0.4)]"
+        className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#457b9d] text-white font-semibold rounded-xl px-6 py-3.5 text-[14px] transition-all duration-300 hover:bg-[#3a6781] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_-4px_rgba(69,123,157,0.4)] cursor-pointer"
       >
         {submitting ? (
           <>

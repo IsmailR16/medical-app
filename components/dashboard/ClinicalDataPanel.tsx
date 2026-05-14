@@ -33,7 +33,7 @@ export function ClinicalDataPanel({ section, onReveal }: ClinicalDataPanelProps)
     <div className="bg-white rounded-xl border border-[#1d3557]/[0.06] overflow-hidden">
       <button
         onClick={toggle}
-        className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-[#F9FAFB] transition-colors duration-200"
+        className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-[#F9FAFB] transition-colors duration-200 cursor-pointer"
       >
         <h3 className="text-[13px] font-semibold text-[#1d3557]">{section.title}</h3>
         {isRevealed ? (

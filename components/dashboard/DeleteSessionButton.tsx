@@ -57,7 +57,7 @@ export function DeleteSessionButton({ sessionId, caseTitle }: DeleteSessionButto
         <button
           aria-label="Radera session"
           disabled={deleting}
-          className="p-2 rounded-xl text-[#94A3B8] hover:text-rose-600 hover:bg-rose-50 transition-colors duration-200 disabled:opacity-50"
+          className="p-2 rounded-xl text-[#94A3B8] hover:text-rose-600 hover:bg-rose-50 transition-colors duration-200 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
           {deleting ? (
             <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />

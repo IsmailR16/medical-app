@@ -45,7 +45,7 @@ export function SessionHeader({
           {isActive && (
             <button
               onClick={() => setShowDiagnosis(true)}
-              className="shrink-0 inline-flex items-center gap-2 bg-[#e63946] text-white text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#d62839] active:scale-[0.98] shadow-[0_4px_16px_-4px_rgba(230,57,70,0.4)]"
+              className="shrink-0 inline-flex items-center gap-2 bg-[#e63946] text-white text-[13px] font-semibold rounded-xl px-5 py-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#d62839] active:scale-[0.98] shadow-[0_4px_16px_-4px_rgba(230,57,70,0.4)] cursor-pointer"
             >
               <FileText className="w-4 h-4" strokeWidth={1.5} />
               Lämna in diagnos
