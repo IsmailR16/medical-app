@@ -4,8 +4,6 @@ import { redirect } from "next/navigation";
 import {
   Award,
   BarChart3,
-  Calendar,
-  ChevronRight,
   Clock,
   Target,
   TrendingUp,
@@ -16,72 +14,39 @@ export const metadata: Metadata = {
 };
 
 import { getOrCreateUser } from "@/lib/auth/user";
-import { getEvaluatedSessions, type EvaluationListItem } from "@/lib/db/dashboard";
+import { getEvaluationAggregates, getEvaluationsPage } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
 import { CategoryBars } from "@/components/dashboard/CategoryBars";
-import {
-  getScoreBadgeStyle,
-  getScoreCircleStyle,
-} from "@/lib/ui/scores";
+import { EvaluationsList } from "@/components/dashboard/EvaluationsList";
 
-const RUBRIC_AREAS = [
-  { key: "anamnes", label: "Anamnes" },
-  { key: "undersokningar", label: "Undersökningar" },
-  { key: "kommunikation", label: "Kommunikation" },
-  { key: "klinisk_resonemang", label: "Kliniskt resonemang" },
-  { key: "bedomning_och_atgard", label: "Bedömning & åtgärd" },
-] as const;
-
-/** Extract a 0-100 score per rubric-area for one evaluation, or 0 if missing. */
-function areaScore(ev: EvaluationListItem, areaKey: string): number {
-  const a = ev.rubric_scores.find((x) => x.area === areaKey);
-  return a ? Math.round(a.raw_score * 100) : 0;
-}
+const AREA_LABELS: Record<string, string> = {
+  anamnes: "Anamnes",
+  undersokningar: "Undersökningar",
+  kommunikation: "Kommunikation",
+  klinisk_resonemang: "Kliniskt resonemang",
+  bedomning_och_atgard: "Bedömning & åtgärd",
+};
 
 export default async function EvaluationsPage() {
   const user = await getOrCreateUser();
   if (!user) redirect("/sign-in");
 
-  const evaluations = await getEvaluatedSessions(user.user_id);
+  const [aggregates, firstPage] = await Promise.all([
+    getEvaluationAggregates(user.user_id),
+    getEvaluationsPage(user.user_id, null),
+  ]);
 
-  /* ---- Stats ---- */
-  const totalCases = evaluations.length;
-  const averagePct =
-    totalCases > 0
-      ? Math.round(
-          (evaluations.reduce((sum, e) => sum + e.total_score, 0) / totalCases) * 100
-        )
-      : 0;
-  const totalMinutes = evaluations.reduce(
-    (sum, e) => sum + (e.duration_min ?? 0),
-    0
-  );
+  const { totalCases, averagePct, totalMinutes, categoryData: rawCategoryData } = aggregates;
   const totalHours = (totalMinutes / 60).toFixed(1);
 
-  /* ---- Category averages from rubric_scores ---- */
-  const categoryData = RUBRIC_AREAS.map(({ key, label }) => {
-    const avg =
-      totalCases > 0
-        ? Math.round(evaluations.reduce((s, e) => s + areaScore(e, key), 0) / totalCases)
-        : 0;
-
-    let trend: string | null = null;
-    let trendUp = true;
-
-    if (totalCases >= 4) {
-      const half = Math.floor(totalCases / 2);
-      const older = evaluations.slice(half);
-      const newer = evaluations.slice(0, half);
-      const olderAvg = older.reduce((s, e) => s + areaScore(e, key), 0) / older.length;
-      const newerAvg = newer.reduce((s, e) => s + areaScore(e, key), 0) / newer.length;
-      const diff = Math.round(newerAvg - olderAvg);
-      trend = diff >= 0 ? `+${diff}` : `${diff}`;
-      trendUp = diff >= 0;
-    }
-
-    return { category: label, score: avg, trend, trendUp };
-  });
+  // Map area key → label for UI
+  const categoryData = rawCategoryData.map((c) => ({
+    category: AREA_LABELS[c.area] ?? c.area,
+    score: c.score,
+    trend: c.trend,
+    trendUp: c.trendUp,
+  }));
 
   const best =
     totalCases > 0
@@ -217,109 +182,32 @@ export default async function EvaluationsPage() {
           </FadeUp>
         )}
 
-        {/* Evaluations List */}
+        {/* Evaluations List — paginated, client-side load more */}
         <FadeUp delay={0.25}>
-        {evaluations.length > 0 ? (
-          <div>
-            <h2 className="text-lg font-bold text-[#1d3557] tracking-tight mb-4">
-              Alla utvärderingar
-            </h2>
-
-            <div className="space-y-3">
-              {evaluations.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] hover:shadow-[0_8px_24px_-8px_rgba(29,53,87,0.1)] transition-all duration-300 p-5 md:p-6"
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                    {/* Score Circle */}
-                    <div className="flex-shrink-0">
-                      <div
-                        className={`h-16 w-16 rounded-2xl border-2 flex items-center justify-center ${getScoreCircleStyle(Math.round(ev.total_score * 100))}`}
-                      >
-                        <span className="text-xl font-extrabold font-mono">
-                          {Math.round(ev.total_score * 100)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Case Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                        <div>
-                          <h3 className="text-[15px] font-bold text-[#1d3557] mb-1">
-                            {ev.case_title}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-3 text-[13px] text-[#94A3B8]">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg border border-[#1d3557]/[0.06] text-[11px] font-semibold">
-                              {ev.case_specialty}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
-                              {new Date(ev.started_at).toLocaleDateString("sv-SE")}
-                            </span>
-                            {ev.duration_min !== null && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-                                {ev.duration_min} min
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border whitespace-nowrap ${getScoreBadgeStyle(Math.round(ev.total_score * 100))}`}
-                        >
-                          {ev.grade}
-                        </span>
-                      </div>
-
-                      {/* Mini Score Breakdown — top 4 rubric areas */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {RUBRIC_AREAS.slice(0, 4).map(({ key, label }) => (
-                          <div key={key}>
-                            <p className="text-[11px] text-[#94A3B8] mb-0.5">{label}</p>
-                            <p className="text-[14px] font-bold text-[#1d3557] font-mono">
-                              {areaScore(ev, key)}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Action */}
-                    <div className="flex-shrink-0 lg:ml-4">
-                      <Link
-                        href={`/evaluations/${ev.session_id}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#F9FAFB] border border-[#1d3557]/[0.06] text-[#1d3557] text-[12px] font-semibold rounded-xl hover:border-[#1d3557]/[0.12] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] whitespace-nowrap"
-                      >
-                        Se detaljer
-                        <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.5} />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {totalCases > 0 ? (
+            <EvaluationsList
+              initialEvaluations={firstPage.evaluations}
+              initialNextCursor={firstPage.nextCursor}
+            />
+          ) : (
+            <div className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] text-center py-16 px-6">
+              <div className="w-14 h-14 rounded-2xl bg-[#457b9d]/[0.06] flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-6 h-6 text-[#94A3B8]" strokeWidth={1.5} />
+              </div>
+              <p className="text-[15px] font-medium text-[#1d3557] mb-1">
+                Inga utvärderingar än
+              </p>
+              <p className="text-[13px] text-[#94A3B8] mb-6 max-w-sm mx-auto">
+                Genomför ditt första fall för att se dina resultat och utvärderingar här.
+              </p>
+              <Link
+                href="/cases"
+                className="inline-block px-5 py-2.5 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl transition-all duration-300 hover:bg-[#3a6781] active:scale-[0.98] shadow-[0_2px_8px_-2px_rgba(69,123,157,0.3)]"
+              >
+                Börja öva
+              </Link>
             </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] text-center py-16 px-6">
-            <div className="w-14 h-14 rounded-2xl bg-[#457b9d]/[0.06] flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-6 h-6 text-[#94A3B8]" strokeWidth={1.5} />
-            </div>
-            <p className="text-[15px] font-medium text-[#1d3557] mb-1">
-              Inga utvärderingar än
-            </p>
-            <p className="text-[13px] text-[#94A3B8] mb-6 max-w-sm mx-auto">
-              Genomför ditt första fall för att se dina resultat och utvärderingar här.
-            </p>
-            <Link
-              href="/cases"
-              className="inline-block px-5 py-2.5 bg-[#457b9d] text-white text-[13px] font-semibold rounded-xl transition-all duration-300 hover:bg-[#3a6781] active:scale-[0.98] shadow-[0_2px_8px_-2px_rgba(69,123,157,0.3)]"
-            >
-              Börja öva
-            </Link>
-          </div>
-        )}
+          )}
         </FadeUp>
       </div>
     </>

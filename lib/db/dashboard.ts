@@ -407,7 +407,7 @@ export async function getSessionWithMessages(
 }
 
 /* ------------------------------------------------------------------ */
-/*  All sessions (for sessions list page)                              */
+/*  Sessions list — paginated (cursor-based)                           */
 /* ------------------------------------------------------------------ */
 
 export interface SessionListItem {
@@ -423,68 +423,148 @@ export interface SessionListItem {
   grade: Grade | null;
 }
 
-export const getAllSessions = (userId: string) =>
+export const SESSIONS_PAGE_SIZE = 10;
+
+export interface SessionsPage {
+  sessions: SessionListItem[];
+  /** ISO timestamp of the last session's started_at, or null when no more pages. */
+  nextCursor: string | null;
+}
+
+/**
+ * Cursor-based pagination for the sessions list. Cursor is the started_at ISO
+ * string of the last item from the previous page; null = fetch the first page.
+ */
+export const getSessionsPage = (userId: string, cursor: string | null) =>
   unstable_cache(
-    async (): Promise<SessionListItem[]> => {
+    async (): Promise<SessionsPage> => {
       const sb = createServiceRoleClient();
 
-  const { data: sessions } = await sb
-    .from("sessions")
-    .select("id, status, started_at, submitted_at, evaluated_at, case_id")
-    .eq("user_id", userId)
-    .order("started_at", { ascending: false });
+      let query = sb
+        .from("sessions")
+        .select("id, status, started_at, submitted_at, evaluated_at, case_id")
+        .eq("user_id", userId)
+        .order("started_at", { ascending: false })
+        .limit(SESSIONS_PAGE_SIZE);
 
-  if (!sessions || sessions.length === 0) return [];
+      if (cursor) {
+        query = query.lt("started_at", cursor);
+      }
 
-  // Fetch case info
-  const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
-  const { data: cases } = await sb
-    .from("cases")
-    .select("id, title, specialty, clinical_setting")
-    .in("id", caseIds);
-  const caseMap = new Map(
-    (cases ?? []).map((c: { id: string; title: string; specialty: string; clinical_setting: string }) => [
-      c.id,
-      c,
-    ])
-  );
+      const { data: sessions } = await query;
 
-  // Fetch evaluations for scored sessions
-  const sessionIds = sessions.map((s) => s.id as string);
-  const { data: evals } = await sb
-    .from("evaluations")
-    .select("session_id, total_score, grade")
-    .in("session_id", sessionIds);
-  const evalMap = new Map(
-    (evals ?? []).map((e: { session_id: string; total_score: number; grade: string }) => [
-      e.session_id,
-      { total_score: Number(e.total_score) || 0, grade: e.grade as Grade },
-    ])
-  );
+      if (!sessions || sessions.length === 0) {
+        return { sessions: [], nextCursor: null };
+      }
 
-  return sessions.map((s) => {
-    const c = caseMap.get(s.case_id as string);
-    const ev = evalMap.get(s.id as string);
-    return {
-      id: s.id as string,
-      status: s.status as string,
-      started_at: s.started_at as string,
-      submitted_at: (s.submitted_at as string) ?? null,
-      evaluated_at: (s.evaluated_at as string) ?? null,
-      case_title: c?.title ?? "Okänt fall",
-      case_specialty: c?.specialty ?? "",
-      case_clinical_setting: c?.clinical_setting ?? "",
-      total_score: ev?.total_score ?? null,
-      grade: ev?.grade ?? null,
-    };
-  });
+      const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
+      const { data: cases } = await sb
+        .from("cases")
+        .select("id, title, specialty, clinical_setting")
+        .in("id", caseIds);
+      const caseMap = new Map(
+        (cases ?? []).map((c: { id: string; title: string; specialty: string; clinical_setting: string }) => [
+          c.id,
+          c,
+        ])
+      );
+
+      const sessionIds = sessions.map((s) => s.id as string);
+      const { data: evals } = await sb
+        .from("evaluations")
+        .select("session_id, total_score, grade")
+        .in("session_id", sessionIds);
+      const evalMap = new Map(
+        (evals ?? []).map((e: { session_id: string; total_score: number; grade: string }) => [
+          e.session_id,
+          { total_score: Number(e.total_score) || 0, grade: e.grade as Grade },
+        ])
+      );
+
+      const items: SessionListItem[] = sessions.map((s) => {
+        const c = caseMap.get(s.case_id as string);
+        const ev = evalMap.get(s.id as string);
+        return {
+          id: s.id as string,
+          status: s.status as string,
+          started_at: s.started_at as string,
+          submitted_at: (s.submitted_at as string) ?? null,
+          evaluated_at: (s.evaluated_at as string) ?? null,
+          case_title: c?.title ?? "Okänt fall",
+          case_specialty: c?.specialty ?? "",
+          case_clinical_setting: c?.clinical_setting ?? "",
+          total_score: ev?.total_score ?? null,
+          grade: ev?.grade ?? null,
+        };
+      });
+
+      // If we got a full page, there might be more — pass cursor to next call.
+      const nextCursor =
+        items.length === SESSIONS_PAGE_SIZE ? items[items.length - 1].started_at : null;
+
+      return { sessions: items, nextCursor };
     },
-    [`all-sessions-${userId}`],
+    [`sessions-page-${userId}-${cursor ?? "first"}`],
     { tags: [`sessions-${userId}`], revalidate: 60 }
   )();
 
+/**
+ * Aggregate stats across ALL of the user's sessions — used by the stats row
+ * on the sessions page, which can't compute totals from a paginated view.
+ */
+export interface SessionStats {
+  total: number;
+  completed: number;
+  inProgress: number;
+  avgScorePct: number;
+}
+
+export const getSessionStats = (userId: string) =>
+  unstable_cache(
+    async (): Promise<SessionStats> => {
+      const sb = createServiceRoleClient();
+
+      // Count totals by status (cheap — uses head: true + count)
+      const [{ count: total }, { count: completed }, { count: inProgress }] = await Promise.all([
+        sb.from("sessions").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        sb
+          .from("sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .in("status", ["evaluated", "submitted"]),
+        sb
+          .from("sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("status", "active"),
+      ]);
+
+      // Average score across all evaluations
+      const { data: scores } = await sb
+        .from("evaluations")
+        .select("total_score")
+        .eq("user_id", userId);
+
+      const avgScorePct =
+        scores && scores.length > 0
+          ? Math.round(
+              (scores.reduce((sum, e) => sum + (Number(e.total_score) || 0), 0) / scores.length) * 100
+            )
+          : 0;
+
+      return {
+        total: total ?? 0,
+        completed: completed ?? 0,
+        inProgress: inProgress ?? 0,
+        avgScorePct,
+      };
+    },
+    [`session-stats-${userId}`],
+    { tags: [`sessions-${userId}`, `evaluations-${userId}`], revalidate: 60 }
+  )();
+
 /* ------------------------------------------------------------------ */
-/*  Evaluation detail                                                  */
+/*  Evaluations list — paginated (cursor-based) + aggregates           */
 /* ------------------------------------------------------------------ */
 
 export interface EvaluationListItem {
@@ -501,85 +581,208 @@ export interface EvaluationListItem {
   duration_min: number | null;
 }
 
-export const getEvaluatedSessions = (userId: string) =>
+export const EVALUATIONS_PAGE_SIZE = 10;
+
+export interface EvaluationsPage {
+  evaluations: EvaluationListItem[];
+  /** Cursor = the started_at ISO of the last item; null = no more pages. */
+  nextCursor: string | null;
+}
+
+/**
+ * Cursor-based pagination for the evaluations list. Cursor = the started_at
+ * ISO of the last item from the previous page. Filters to status=evaluated
+ * (these are guaranteed to have an evaluations row).
+ */
+export const getEvaluationsPage = (userId: string, cursor: string | null) =>
   unstable_cache(
-    async (): Promise<EvaluationListItem[]> => {
+    async (): Promise<EvaluationsPage> => {
       const sb = createServiceRoleClient();
 
-  // Get evaluated sessions
-  const { data: sessions } = await sb
-    .from("sessions")
-    .select("id, case_id, started_at, submitted_at, evaluated_at")
-    .eq("user_id", userId)
-    .in("status", ["evaluated", "submitted"])
-    .order("started_at", { ascending: false });
+      let sessionsQuery = sb
+        .from("sessions")
+        .select("id, case_id, started_at, submitted_at, evaluated_at")
+        .eq("user_id", userId)
+        .eq("status", "evaluated")
+        .order("started_at", { ascending: false })
+        .limit(EVALUATIONS_PAGE_SIZE);
 
-  if (!sessions || sessions.length === 0) return [];
+      if (cursor) sessionsQuery = sessionsQuery.lt("started_at", cursor);
 
-  const sessionIds = sessions.map((s) => s.id as string);
-  const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
+      const { data: sessions } = await sessionsQuery;
+      if (!sessions || sessions.length === 0) {
+        return { evaluations: [], nextCursor: null };
+      }
 
-  // Fetch evaluations
-  const { data: evals } = await sb
-    .from("evaluations")
-    .select("id, session_id, total_score, grade, rubric_scores, diagnosis_correct, created_at")
-    .in("session_id", sessionIds);
+      const sessionIds = sessions.map((s) => s.id as string);
+      const caseIds = [...new Set(sessions.map((s) => s.case_id as string))];
 
-  type EvalRow = {
-    id: string;
-    session_id: string;
-    total_score: number;
-    grade: string;
-    rubric_scores: RubricAreaScore[];
-    diagnosis_correct: boolean;
-    created_at: string;
-  };
+      const [{ data: evals }, { data: cases }] = await Promise.all([
+        sb
+          .from("evaluations")
+          .select("id, session_id, total_score, grade, rubric_scores, diagnosis_correct, created_at")
+          .in("session_id", sessionIds),
+        sb.from("cases").select("id, title, specialty").in("id", caseIds),
+      ]);
 
-  const evalMap = new Map(
-    (evals ?? []).map((e: EvalRow) => [e.session_id, e])
-  );
-
-  // Fetch cases
-  const { data: cases } = await sb
-    .from("cases")
-    .select("id, title, specialty")
-    .in("id", caseIds);
-
-  const caseMap = new Map(
-    (cases ?? []).map((c: { id: string; title: string; specialty: string }) => [c.id, c])
-  );
-
-  return sessions
-    .filter((s) => evalMap.has(s.id as string))
-    .map((s) => {
-      const ev = evalMap.get(s.id as string)!;
-      const c = caseMap.get(s.case_id as string);
-      const endTime = (s.submitted_at ?? s.evaluated_at) as string | null;
-      const durationMin = endTime
-        ? Math.round(
-            (new Date(endTime).getTime() -
-              new Date(s.started_at as string).getTime()) /
-              60000
-          )
-        : null;
-
-      return {
-        id: ev.id,
-        session_id: s.id as string,
-        case_title: c?.title ?? "Okänt fall",
-        case_specialty: c?.specialty ?? "",
-        total_score: Number(ev.total_score) || 0,
-        grade: ev.grade as Grade,
-        rubric_scores: Array.isArray(ev.rubric_scores) ? ev.rubric_scores : [],
-        diagnosis_correct: ev.diagnosis_correct,
-        created_at: ev.created_at,
-        started_at: s.started_at as string,
-        duration_min: durationMin,
+      type EvalRow = {
+        id: string;
+        session_id: string;
+        total_score: number;
+        grade: string;
+        rubric_scores: RubricAreaScore[];
+        diagnosis_correct: boolean;
+        created_at: string;
       };
-    });
+
+      const evalMap = new Map((evals ?? []).map((e: EvalRow) => [e.session_id, e]));
+      const caseMap = new Map(
+        (cases ?? []).map((c: { id: string; title: string; specialty: string }) => [c.id, c])
+      );
+
+      const items: EvaluationListItem[] = sessions
+        .filter((s) => evalMap.has(s.id as string))
+        .map((s) => {
+          const ev = evalMap.get(s.id as string)!;
+          const c = caseMap.get(s.case_id as string);
+          const endTime = (s.submitted_at ?? s.evaluated_at) as string | null;
+          const durationMin = endTime
+            ? Math.round(
+                (new Date(endTime).getTime() - new Date(s.started_at as string).getTime()) / 60000
+              )
+            : null;
+
+          return {
+            id: ev.id,
+            session_id: s.id as string,
+            case_title: c?.title ?? "Okänt fall",
+            case_specialty: c?.specialty ?? "",
+            total_score: Number(ev.total_score) || 0,
+            grade: ev.grade as Grade,
+            rubric_scores: Array.isArray(ev.rubric_scores) ? ev.rubric_scores : [],
+            diagnosis_correct: ev.diagnosis_correct,
+            created_at: ev.created_at,
+            started_at: s.started_at as string,
+            duration_min: durationMin,
+          };
+        });
+
+      // Cursor uses session start times (sessionsQuery is the limit-bearing query),
+      // not item count after the filter — otherwise pages with submitted-without-eval
+      // rows could stall pagination.
+      const nextCursor =
+        sessions.length === EVALUATIONS_PAGE_SIZE
+          ? (sessions[sessions.length - 1].started_at as string)
+          : null;
+
+      return { evaluations: items, nextCursor };
     },
-    [`evaluated-sessions-${userId}`],
+    [`evals-page-${userId}-${cursor ?? "first"}`],
     { tags: [`evaluations-${userId}`], revalidate: 60 }
+  )();
+
+/**
+ * Aggregates across ALL of the user's evaluations — totals, average score,
+ * total practice time, per-category averages, and per-category trend.
+ * Pulls all rubric_scores (small JSON per row), aggregates server-side.
+ */
+export interface CategoryAggregate {
+  /** Rubric area key, e.g. "anamnes". */
+  area: string;
+  /** Average 0-100. */
+  score: number;
+  /** "+5" / "-3" or null if too few data points. */
+  trend: string | null;
+  trendUp: boolean;
+}
+
+export interface EvaluationAggregates {
+  totalCases: number;
+  averagePct: number;
+  totalMinutes: number;
+  categoryData: CategoryAggregate[];
+}
+
+const RUBRIC_AREA_KEYS = [
+  "anamnes",
+  "undersokningar",
+  "kommunikation",
+  "klinisk_resonemang",
+  "bedomning_och_atgard",
+] as const;
+
+export const getEvaluationAggregates = (userId: string) =>
+  unstable_cache(
+    async (): Promise<EvaluationAggregates> => {
+      const sb = createServiceRoleClient();
+
+      const { data: evals } = await sb
+        .from("evaluations")
+        .select("session_id, total_score, rubric_scores, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (!evals || evals.length === 0) {
+        return { totalCases: 0, averagePct: 0, totalMinutes: 0, categoryData: [] };
+      }
+
+      const totalCases = evals.length;
+      const averagePct = Math.round(
+        (evals.reduce((s, e) => s + (Number(e.total_score) || 0), 0) / totalCases) * 100
+      );
+
+      // Total minutes — pull sessions for duration
+      const sessionIds = evals.map((e) => e.session_id as string);
+      const { data: sessions } = await sb
+        .from("sessions")
+        .select("id, started_at, submitted_at, evaluated_at")
+        .in("id", sessionIds);
+
+      const sessionMap = new Map(
+        (sessions ?? []).map((s: { id: string; started_at: string; submitted_at: string | null; evaluated_at: string | null }) => [s.id, s])
+      );
+
+      const totalMinutes = evals.reduce((sum, e) => {
+        const s = sessionMap.get(e.session_id as string);
+        if (!s) return sum;
+        const endTime = s.submitted_at ?? s.evaluated_at;
+        if (!endTime) return sum;
+        return sum + Math.round((new Date(endTime).getTime() - new Date(s.started_at).getTime()) / 60000);
+      }, 0);
+
+      // Per-category aggregates + newer-vs-older trend
+      function areaScore(rubric: unknown, areaKey: string): number {
+        if (!Array.isArray(rubric)) return 0;
+        const a = (rubric as RubricAreaScore[]).find((x) => x.area === areaKey);
+        return a ? Math.round(a.raw_score * 100) : 0;
+      }
+
+      const categoryData: CategoryAggregate[] = RUBRIC_AREA_KEYS.map((key) => {
+        const scores = evals.map((e) => areaScore(e.rubric_scores, key));
+        const avg = Math.round(scores.reduce((s, x) => s + x, 0) / totalCases);
+
+        let trend: string | null = null;
+        let trendUp = true;
+
+        if (totalCases >= 4) {
+          // evals are ordered newer-first → first half = newer
+          const half = Math.floor(totalCases / 2);
+          const newer = scores.slice(0, half);
+          const older = scores.slice(half);
+          const newerAvg = newer.reduce((s, x) => s + x, 0) / newer.length;
+          const olderAvg = older.reduce((s, x) => s + x, 0) / older.length;
+          const diff = Math.round(newerAvg - olderAvg);
+          trend = diff >= 0 ? `+${diff}` : `${diff}`;
+          trendUp = diff >= 0;
+        }
+
+        return { area: key, score: avg, trend, trendUp };
+      });
+
+      return { totalCases, averagePct, totalMinutes, categoryData };
+    },
+    [`eval-aggregates-${userId}`],
+    { tags: [`evaluations-${userId}`, `sessions-${userId}`], revalidate: 60 }
   )();
 
 export interface EvaluationDetail {
