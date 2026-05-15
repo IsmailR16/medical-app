@@ -39,7 +39,33 @@ export function DiagnosisModal({
     inflightRef.current = true;
     setSubmitting(true);
 
-    const toastId = toast.loading("Skickar inlämning…");
+    // Progress messages cycled while AI is grading. Mirrors the actual
+    // server-side work (5 rubric areas + meta in parallel) — even though
+    // those run concurrently, presenting them sequentially gives the user
+    // a sense of progress instead of an opaque spinner for 20-30s.
+    const progressMessages = [
+      "Skickar inlämning…",
+      "AI granskar din anamnes…",
+      "Bedömer beställda undersökningar…",
+      "Värderar kliniskt resonemang…",
+      "Sammanställer återkoppling…",
+      "Snart klart…",
+    ];
+    const STEP_MS = 5000;
+    // Fixed width so the toast doesn't visually "pulse" wider/narrower
+    // every time we cycle to a message of different length. Sized for the
+    // longest message ("Bedömer beställda undersökningar…").
+    const LOADING_TOAST_STYLE = { minWidth: "320px" };
+
+    const toastId = toast.loading(progressMessages[0], { style: LOADING_TOAST_STYLE });
+    let messageIndex = 0;
+    const progressInterval = setInterval(() => {
+      messageIndex = Math.min(messageIndex + 1, progressMessages.length - 1);
+      toast.loading(progressMessages[messageIndex], {
+        id: toastId,
+        style: LOADING_TOAST_STYLE,
+      });
+    }, STEP_MS);
 
     try {
       const differential_diagnoses = differentials
@@ -78,6 +104,7 @@ export function DiagnosisModal({
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Något gick fel.", { id: toastId });
     } finally {
+      clearInterval(progressInterval);
       inflightRef.current = false;
       setSubmitting(false);
     }
