@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Fakturering",
 };
 
-import { FREE_LIMIT } from "@/lib/plans";
+import { FREE_LIMIT, BETA_MODE } from "@/lib/plans";
 import { getOrCreateUser } from "@/lib/auth/user";
 import { getMonthlyUsage, currentPeriod } from "@/lib/db/dashboard";
 import BillingActions from "./billing-actions";
@@ -17,6 +17,74 @@ import { FadeUp } from "@/components/dashboard/MotionWrappers";
 export default async function BillingPage() {
   const user = await getOrCreateUser();
   if (!user) redirect("/sign-in");
+
+  // During beta everything is free with no payments — show a simple honest
+  // panel instead of the plan comparison + Stripe checkout flows. Flip
+  // BETA_MODE to false post-beta to restore the full billing page below.
+  if (BETA_MODE) {
+    return (
+      <>
+        <TopBar title="Fakturering" />
+        <div className="p-6 md:p-10 max-w-[1400px] mx-auto w-full">
+          <FadeUp className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#1d3557] tracking-tight">
+              Fakturering
+            </h1>
+            <p className="text-[15px] text-[#94A3B8] mt-1">
+              Allt är gratis under betan — ingen betalning krävs.
+            </p>
+          </FadeUp>
+
+          <FadeUp delay={0.08} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)]">
+            <div className="px-6 py-5 border-b border-[#1d3557]/[0.04] flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
+                  Helt gratis under betan
+                </h2>
+                <p className="text-[13px] text-[#94A3B8] mt-0.5">
+                  Du har full tillgång utan kostnad medan vi bygger
+                  Diagnostika tillsammans med tidiga användare.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#457b9d]/[0.06] text-[#457b9d] rounded-lg text-[12px] font-semibold">
+                <Zap className="w-3.5 h-3.5" strokeWidth={1.5} />
+                Beta
+              </div>
+            </div>
+
+            <div className="p-6">
+              <h3 className="text-[13px] font-bold text-[#1d3557] mb-3">
+                Ingår just nu:
+              </h3>
+              <ul className="space-y-2.5">
+                {[
+                  "Obegränsad träning på alla patientfall",
+                  "Full AI-feedback per OSCE-rubrikområde",
+                  "Tillgång till alla specialiteter",
+                  "Sessionshistorik och utvärderingar",
+                  "Inga betalningar, inget kort krävs",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-2.5 text-[13px] text-[#1d3557]"
+                  >
+                    <div className="w-5 h-5 rounded-lg bg-[#457b9d]/[0.06] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-[#457b9d]" strokeWidth={2} />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[12px] text-[#94A3B8] mt-5 pt-5 border-t border-[#1d3557]/[0.04]">
+                Betalda planer kan introduceras längre fram. Du kommer att få
+                veta i god tid innan något ändras — inget debiteras under betan.
+              </p>
+            </div>
+          </FadeUp>
+        </div>
+      </>
+    );
+  }
 
   const usage = await getMonthlyUsage(user.user_id);
   const usedCases = usage?.sessions_started ?? 0;

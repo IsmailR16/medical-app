@@ -1,6 +1,15 @@
 /** Max sessions per month on the free plan. */
 export const FREE_LIMIT = 3;
 
+/**
+ * Beta mode: the product is free with no payments while in beta. When true,
+ * the free-tier monthly session cap is NOT enforced (unlimited training) and
+ * usage-limit UI is hidden. Flip to false to re-enable the FREE_LIMIT cap +
+ * paid plans post-beta. (Abuse is still bounded by the per-day eval cap in
+ * the messages route.)
+ */
+export const BETA_MODE = true;
+
 export interface Plan {
   name: string;
   description: string;

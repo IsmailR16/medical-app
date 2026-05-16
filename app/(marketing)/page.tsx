@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import HeroSection from "@/components/marketing/HeroSection";
-import TrustedBySection from "@/components/marketing/TrustedBySection";
 import FeaturesSection from "@/components/marketing/FeaturesSection";
 import HowItWorksSection from "@/components/marketing/HowItWorksSection";
 import SocialProofSection from "@/components/marketing/SocialProofSection";
-import PricingSection from "@/components/marketing/PricingSection";
+import BetaPricingSection from "@/components/marketing/BetaPricingSection";
 import CTASection from "@/components/marketing/CTASection";
 
 export const metadata: Metadata = {
@@ -48,11 +47,10 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <HeroSection />
-      <TrustedBySection />
       <FeaturesSection />
       <HowItWorksSection />
       <SocialProofSection />
-      <PricingSection />
+      <BetaPricingSection />
       <CTASection />
     </>
   );

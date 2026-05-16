@@ -65,23 +65,27 @@ export default function HeroSection() {
               </Link>
             </div>
 
-            {/* Stats */}
-            <div className="mt-10 pt-6 flex items-center gap-6 border-t border-[#1d3557]/[0.06]">
+            {/* Beta value strip — honest, no fabricated metrics */}
+            <div className="mt-10 pt-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#1d3557]/[0.06]">
               <div>
-                <p className="text-2xl font-extrabold tracking-tight">500+</p>
-                <p className="text-[12px] text-[#94A3B8]">Aktiva studenter</p>
-              </div>
-              <div className="w-px h-10 bg-zinc-200" />
-              <div>
-                <p className="text-2xl font-extrabold tracking-tight">150+</p>
-                <p className="text-[12px] text-[#94A3B8]">Kliniska fall</p>
-              </div>
-              <div className="w-px h-10 bg-zinc-200" />
-              <div>
-                <p className="text-2xl font-extrabold tracking-tight">10k+</p>
-                <p className="text-[12px] text-[#94A3B8]">
-                  Genomförda sessioner
+                <p className="text-[15px] font-extrabold tracking-tight text-[#1d3557]">
+                  Helt gratis
                 </p>
+                <p className="text-[12px] text-[#94A3B8]">under beta</p>
+              </div>
+              <div className="w-px h-10 bg-zinc-200" />
+              <div>
+                <p className="text-[15px] font-extrabold tracking-tight text-[#1d3557]">
+                  AI-patienter
+                </p>
+                <p className="text-[12px] text-[#94A3B8]">realistiska fall</p>
+              </div>
+              <div className="w-px h-10 bg-zinc-200" />
+              <div>
+                <p className="text-[15px] font-extrabold tracking-tight text-[#1d3557]">
+                  OSCE-feedback
+                </p>
+                <p className="text-[12px] text-[#94A3B8]">på varje beslut</p>
               </div>
             </div>
           </div>

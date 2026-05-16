@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { FREE_LIMIT } from "@/lib/plans";
+import { FREE_LIMIT, BETA_MODE } from "@/lib/plans";
 
 export async function POST() {
   const { userId } = await auth();
@@ -43,8 +43,8 @@ export async function POST() {
     );
   }
 
-  /* ---- Free-tier limit check (atomic) ---- */
-  if (userRow.plan === "free") {
+  /* ---- Free-tier limit check (atomic) — skipped during beta ---- */
+  if (userRow.plan === "free" && !BETA_MODE) {
     const period = currentPeriod();
     const { data: result, error: rpcError } = await sb.rpc("increment_usage", {
       p_user_id: userId,

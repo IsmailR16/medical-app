@@ -15,12 +15,18 @@ export default function Footer() {
             <p className="text-[13px] leading-relaxed text-white/40 max-w-xs">
               AI-driven klinisk träning för nästa generation läkare.
             </p>
+            <a
+              href="mailto:kontakt@diagnostika.se"
+              className="inline-block text-[13px] text-white/40 hover:text-white transition-colors duration-300"
+            >
+              kontakt@diagnostika.se
+            </a>
           </div>
 
-          {/* Produkt */}
-          <div className="md:col-span-2 md:col-start-7">
+          {/* Om Diagnostika */}
+          <div className="md:col-span-2 md:col-start-9">
             <p className="text-[11px] uppercase tracking-[0.15em] font-semibold text-white/30 mb-4">
-              Produkt
+              Om Diagnostika
             </p>
             <ul className="space-y-2.5">
               <li>
@@ -33,58 +39,25 @@ export default function Footer() {
               </li>
               <li>
                 <a
+                  href="#hur-det-fungerar"
+                  className="text-[13px] hover:text-white transition-colors duration-300"
+                >
+                  Hur det fungerar
+                </a>
+              </li>
+              <li>
+                <a
                   href="#priser"
                   className="text-[13px] hover:text-white transition-colors duration-300"
                 >
                   Priser
                 </a>
               </li>
-              <li>
-                <Link
-                  href="/cases"
-                  className="text-[13px] hover:text-white transition-colors duration-300"
-                >
-                  Fallbibliotek
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Företag */}
-          <div className="md:col-span-2">
-            <p className="text-[11px] uppercase tracking-[0.15em] font-semibold text-white/30 mb-4">
-              Företag
-            </p>
-            <ul className="space-y-2.5">
-              <li>
-                <a
-                  href="#"
-                  className="text-[13px] hover:text-white transition-colors duration-300"
-                >
-                  Om oss
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[13px] hover:text-white transition-colors duration-300"
-                >
-                  Kontakt
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[13px] hover:text-white transition-colors duration-300"
-                >
-                  Karriär
-                </a>
-              </li>
             </ul>
           </div>
 
           {/* Juridiskt */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 md:col-start-11">
             <p className="text-[11px] uppercase tracking-[0.15em] font-semibold text-white/30 mb-4">
               Juridiskt
             </p>
@@ -117,9 +90,10 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             {/* Twitter / X */}
             <a
-              href="#"
-              className="text-white/30 hover:text-white/60 transition-colors duration-300"
-              aria-label="Twitter"
+              aria-disabled="true"
+              tabIndex={-1}
+              className="text-white/30 cursor-default transition-colors duration-300"
+              aria-label="Twitter (kommer snart)"
             >
               <svg
                 width="16"
@@ -132,9 +106,10 @@ export default function Footer() {
             </a>
             {/* LinkedIn */}
             <a
-              href="#"
-              className="text-white/30 hover:text-white/60 transition-colors duration-300"
-              aria-label="LinkedIn"
+              aria-disabled="true"
+              tabIndex={-1}
+              className="text-white/30 cursor-default transition-colors duration-300"
+              aria-label="LinkedIn (kommer snart)"
             >
               <svg
                 width="16"

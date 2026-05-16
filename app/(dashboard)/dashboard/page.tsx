@@ -17,7 +17,7 @@ import {
   getAverageScore,
   getSessionStreak,
 } from "@/lib/db/dashboard";
-import { FREE_LIMIT } from "@/lib/plans";
+import { FREE_LIMIT, BETA_MODE } from "@/lib/plans";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { PlanCheckout } from "@/components/dashboard/PlanCheckout";
 import { SurpriseMeButton } from "@/components/dashboard/SurpriseMeButton";
@@ -45,9 +45,8 @@ export default async function DashboardPage() {
   const firstName =
     user.full_name?.split(" ")[0] ?? user.email.split("@")[0];
 
-  const usageDisplay = isFree
-    ? `${sessionsUsed} / ${FREE_LIMIT}`
-    : `${sessionsUsed} / ∞`;
+  const usageDisplay =
+    isFree && !BETA_MODE ? `${sessionsUsed} / ${FREE_LIMIT}` : `${sessionsUsed} / ∞`;
 
   return (
     <>
@@ -228,8 +227,8 @@ export default async function DashboardPage() {
           )}
         </FadeUp>
 
-        {/* Upgrade CTA (free users only) */}
-        {isFree && (
+        {/* Upgrade CTA (free users only; hidden during no-payments beta) */}
+        {isFree && !BETA_MODE && (
           <FadeUp delay={0.45} className="mt-8 p-[3px] rounded-2xl bg-gradient-to-r from-[#457b9d]/30 to-[#a8dadc]/30">
             <div className="bg-[#1d3557] rounded-[calc(1rem-1px)] p-6 md:p-8">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

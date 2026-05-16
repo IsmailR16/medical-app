@@ -19,7 +19,8 @@ export default function CTASection() {
           Redo att förbättra ditt kliniska resonemang?
         </h2>
         <p className="reveal reveal-d1 mt-5 text-base md:text-lg leading-relaxed text-[#64748B] max-w-[50ch] mx-auto">
-          Gå med hundratals medicinstudenter som redan tränar med Diagnostika.
+          Skapa ett gratis konto och börja träna på riktiga patientfall — fritt
+          och obegränsat under betan.
         </p>
         <div className="reveal reveal-d2 mt-10">
           <Link

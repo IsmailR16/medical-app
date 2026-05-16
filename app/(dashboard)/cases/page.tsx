@@ -4,7 +4,7 @@ import { getOrCreateUser } from "@/lib/auth/user";
 import { getPublishedCases, getMonthlyUsage, getActiveSessionsByCase } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { CaseGrid } from "@/components/dashboard/CaseGrid";
-import { FREE_LIMIT } from "@/lib/plans";
+import { FREE_LIMIT, BETA_MODE } from "@/lib/plans";
 import { FadeUp } from "@/components/dashboard/MotionWrappers";
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default async function CasesPage() {
 
   const sessionsUsed = usage?.sessions_started ?? 0;
   const isFree = user.plan === "free";
-  const limitReached = isFree && sessionsUsed >= FREE_LIMIT;
+  const limitReached = !BETA_MODE && isFree && sessionsUsed >= FREE_LIMIT;
 
   return (
     <>
@@ -37,9 +37,11 @@ export default async function CasesPage() {
           <p className="text-[15px] text-[#94A3B8] mt-1">
             {limitReached
               ? `Du har använt ${sessionsUsed}/${FREE_LIMIT} fall denna månad. Uppgradera till Pro för obegränsat.`
-              : isFree
-                ? `Välj ett patientfall att träna på — ${sessionsUsed}/${FREE_LIMIT} fall använda denna månad.`
-                : "Bläddra och välj patientfall att träna på"}
+              : BETA_MODE
+                ? "Välj ett patientfall att träna på — fritt och obegränsat under betan."
+                : isFree
+                  ? `Välj ett patientfall att träna på — ${sessionsUsed}/${FREE_LIMIT} fall använda denna månad.`
+                  : "Bläddra och välj patientfall att träna på"}
           </p>
         </FadeUp>
 
