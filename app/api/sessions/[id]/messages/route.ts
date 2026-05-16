@@ -18,6 +18,18 @@ export const maxDuration = 150;
 
 const MAX_MESSAGE_LENGTH = 2000;
 
+// Hard cap on AI evaluations per user per UTC day. Each evaluation fans out to
+// ~6 OpenAI calls (~$0.02-0.04). "Pro" is unlimited *sessions* but evals must
+// still be bounded so a single account can't rack up unbounded OpenAI cost
+// (scripted create→submit→eval loops). 30/day is generous for real study use
+// (a heavy day is ~5-10 cases) while capping worst-case abuse at ~$1.20/day.
+const DAILY_EVAL_CAP = 30;
+
+/** UTC day key for the per-user daily eval counter, e.g. "eval-2026-05-15". */
+function dailyEvalPeriod(): string {
+  return `eval-${new Date().toISOString().slice(0, 10)}`;
+}
+
 // Simple in-memory rate limiter: max 10 messages per user per 60s
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_WINDOW_MS = 60_000;
@@ -233,6 +245,34 @@ export async function POST(
 
   /* ---- Handle diagnosis submission ---- */
   if (submitDiagnosis && submission) {
+    // Daily eval cap (atomic, race-safe via the same RPC as the monthly
+    // free-tier limiter). Checked BEFORE marking the session submitted so a
+    // capped user can retry tomorrow instead of being stuck with an
+    // un-evaluable submitted session. Counts even if the eval later fails —
+    // failed evals still cost OpenAI tokens.
+    const { data: evalCount, error: capError } = await sb.rpc("increment_usage", {
+      p_user_id: userId,
+      p_period: dailyEvalPeriod(),
+      p_limit: DAILY_EVAL_CAP,
+    });
+
+    if (capError) {
+      console.error("Daily eval cap RPC failed:", capError);
+      return NextResponse.json(
+        { error: "Kunde inte verifiera utvärderingsgräns." },
+        { status: 500 }
+      );
+    }
+
+    if (evalCount === -1) {
+      return NextResponse.json(
+        {
+          error: `Du har nått dagens gräns (${DAILY_EVAL_CAP} utvärderingar). Försök igen imorgon.`,
+        },
+        { status: 429 }
+      );
+    }
+
     // Update session status to submitted (also stores the structured submission)
     await sb
       .from("sessions")
