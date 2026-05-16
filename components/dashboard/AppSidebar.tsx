@@ -235,17 +235,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         {/* Legal footer links — visible only when sidebar is expanded */}
         {(mobileOpen || showLabels) && (
-          <div className="px-5 pb-4 -mt-2 flex items-center gap-2 text-[10.5px] text-white/30">
+          <div className="relative z-10 px-5 pb-4 -mt-2 flex items-center gap-2 text-[10.5px] text-white/30">
             <Link
               href="/integritetspolicy"
-              className="hover:text-white/60 transition-colors"
+              className="inline-block py-1 hover:text-white/60 transition-colors"
             >
               Integritetspolicy
             </Link>
-            <span>·</span>
+            <span className="cursor-default select-none">·</span>
             <Link
               href="/anvandarvillkor"
-              className="hover:text-white/60 transition-colors"
+              className="inline-block py-1 hover:text-white/60 transition-colors"
             >
               Villkor
             </Link>

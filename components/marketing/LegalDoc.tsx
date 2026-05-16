@@ -20,7 +20,7 @@ export function LegalDoc({ title, content }: LegalDocProps) {
     <div className="bg-white">
       {/* Hero band — matches marketing pages */}
       <div className="border-b border-[#1d3557]/[0.06] bg-gradient-to-b from-[#F9FAFB] to-white">
-        <div className="mx-auto max-w-[800px] px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-[800px] px-6 pt-28 pb-16 md:pt-36 md:pb-20">
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#1d3557] tracking-tight">
             {title}
           </h1>
