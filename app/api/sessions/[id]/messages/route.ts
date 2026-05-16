@@ -286,19 +286,24 @@ export async function POST(
       })
       .eq("id", sessionId);
 
-    // Fetch full conversation for evaluation
+    // Fetch the interview for evaluation. Exclude the submission message we
+    // just saved above (its content === `content`): it's passed separately as
+    // the `submission` arg and already rendered in the eval prompt's
+    // "STUDENTENS INLÄMNING" section, so including it in the chat log would be
+    // redundant AND would defeat the degenerate-submission gate (which counts
+    // real interview turns via user-message count).
     const { data: allMessages } = await sb
       .from("messages")
       .select("role, content")
       .eq("session_id", sessionId)
       .order("created_at", { ascending: true });
 
-    const conversationHistory: ConversationMessage[] = (allMessages ?? []).map(
-      (m: { role: string; content: string }) => ({
+    const conversationHistory: ConversationMessage[] = (allMessages ?? [])
+      .filter((m: { role: string; content: string }) => m.content !== content)
+      .map((m: { role: string; content: string }) => ({
         role: m.role as "user" | "assistant" | "system",
         content: m.content,
-      })
-    );
+      }));
 
     const orderedItems: string[] = (session.revealed_items as string[] | null) ?? [];
 

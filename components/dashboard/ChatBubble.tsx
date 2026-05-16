@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { Sparkles, AlertTriangle, FileText } from "lucide-react";
 
 interface ChatBubbleProps {
   content: string;
@@ -11,6 +11,41 @@ export function ChatBubble({ content, role, timestamp }: ChatBubbleProps) {
   const isUser = role === "user";
   const isAssistant = role === "assistant";
   const isSystem = role === "system";
+
+  // The diagnosis submission is saved as a user message with a fixed format
+  // (see the submitDiagnosis branch in /api/sessions/[id]/messages). Render it
+  // as a distinct "submitted assessment" card instead of a plain chat bubble.
+  // Require all three section headers so a real chat message that merely
+  // starts with "DIAGNOS:" can't be misdetected as a submission.
+  const isSubmission =
+    isUser &&
+    /^DIAGNOS:/.test(content) &&
+    content.includes("\nDIFFERENTIALDIAGNOSER:") &&
+    content.includes("\nHANDLÄGGNINGSPLAN:");
+
+  if (isSubmission) {
+    return (
+      <div className="flex justify-end mb-4">
+        <div className="max-w-[85%] w-full bg-[#457b9d]/[0.04] border border-[#457b9d]/25 rounded-xl px-4 py-3.5">
+          <div className="flex items-center gap-2 mb-2.5">
+            <FileText
+              className="w-4 h-4 text-[#457b9d] flex-shrink-0"
+              strokeWidth={1.5}
+            />
+            <p className="text-[11px] font-semibold text-[#457b9d] uppercase tracking-wide">
+              Inlämnad bedömning
+            </p>
+          </div>
+          <p className="text-[13px] text-[#1d3557] leading-relaxed whitespace-pre-wrap break-words">
+            {content}
+          </p>
+          {timestamp && (
+            <p className="text-[10px] text-[#94A3B8] mt-2">{timestamp}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // System messages get a distinct full-width warning card — never confused
   // with the AI-patient (which stays in character).
