@@ -124,7 +124,7 @@ export default async function SettingsPage() {
         </FadeUp>
 
         {/* Notifications */}
-        <FadeUp delay={0.16} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-6">
+        {/* <FadeUp delay={0.16} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-6">
           <div className="px-6 py-5 border-b border-[#1d3557]/[0.04] flex items-center gap-2.5">
             <Bell className="w-[18px] h-[18px] text-[#457b9d]" strokeWidth={1.5} />
             <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
@@ -154,10 +154,10 @@ export default async function SettingsPage() {
               </div>
             ))}
           </div>
-        </FadeUp>
+        </FadeUp> */}
 
         {/* Security */}
-        <FadeUp delay={0.24} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-6">
+        {/* <FadeUp delay={0.24} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-6">
           <div className="px-6 py-5 border-b border-[#1d3557]/[0.04] flex items-center gap-2.5">
             <Lock className="w-[18px] h-[18px] text-[#457b9d]" strokeWidth={1.5} />
             <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
@@ -180,10 +180,10 @@ export default async function SettingsPage() {
               </div>
             ))}
           </div>
-        </FadeUp>
+        </FadeUp> */}
 
         {/* Preferences */}
-        <FadeUp delay={0.32} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-6">
+        {/* <FadeUp delay={0.32} className="bg-white rounded-2xl border border-[#1d3557]/[0.06] shadow-[0_2px_8px_-4px_rgba(29,53,87,0.06)] mb-6">
           <div className="px-6 py-5 border-b border-[#1d3557]/[0.04] flex items-center gap-2.5">
             <Globe className="w-[18px] h-[18px] text-[#457b9d]" strokeWidth={1.5} />
             <h2 className="text-lg font-bold text-[#1d3557] tracking-tight">
@@ -224,7 +224,7 @@ export default async function SettingsPage() {
               </label>
             </div>
           </div>
-        </FadeUp>
+        </FadeUp> */}
 
         {/* Farlig Zon */}
         <FadeUp delay={0.4} className="bg-white rounded-2xl border border-[#e63946]/[0.15] shadow-[0_2px_8px_-4px_rgba(230,57,70,0.06)]">
