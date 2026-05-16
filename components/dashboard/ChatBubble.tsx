@@ -36,7 +36,7 @@ export function ChatBubble({ content, role, timestamp }: ChatBubbleProps) {
               Inlämnad bedömning
             </p>
           </div>
-          <p className="text-[13px] text-[#1d3557] leading-relaxed whitespace-pre-wrap break-words">
+          <p className="text-[13px] text-[#1d3557] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
             {content}
           </p>
           {timestamp && (
@@ -61,7 +61,7 @@ export function ChatBubble({ content, role, timestamp }: ChatBubbleProps) {
             <p className="text-[11px] font-semibold text-amber-900 uppercase tracking-wide mb-1">
               Diagnostika-systemet
             </p>
-            <p className="text-[13px] text-amber-900 leading-relaxed whitespace-pre-wrap break-words">
+            <p className="text-[13px] text-amber-900 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
               {content}
             </p>
             {timestamp && (
@@ -81,10 +81,10 @@ export function ChatBubble({ content, role, timestamp }: ChatBubbleProps) {
           <Sparkles className="w-3.5 h-3.5 text-[#457b9d]" strokeWidth={1.5} />
         </div>
       )}
-      <div className={cn("max-w-[75%]", isUser && "flex flex-col items-end")}>
+      <div className={cn("max-w-[75%] min-w-0", isUser && "flex flex-col items-end")}>
         <div
           className={cn(
-            "rounded-2xl px-4 py-3",
+            "rounded-2xl px-4 py-3 max-w-full",
             isUser
               ? "rounded-tr-md bg-gradient-to-br from-[#457b9d] to-[#3a6781] shadow-[0_2px_8px_-2px_rgba(69,123,157,0.25)]"
               : "rounded-tl-md bg-white border border-[#1d3557]/[0.04] shadow-[0_1px_2px_rgba(29,53,87,0.03)]"
@@ -92,7 +92,7 @@ export function ChatBubble({ content, role, timestamp }: ChatBubbleProps) {
         >
           <p
             className={cn(
-              "text-[13px] leading-relaxed whitespace-pre-wrap break-words overflow-hidden",
+              "text-[13px] leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]",
               isUser ? "text-white" : "text-[#1d3557]"
             )}
           >

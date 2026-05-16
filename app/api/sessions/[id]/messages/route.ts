@@ -16,7 +16,31 @@ import {
 // Allow long-running evaluation calls on Vercel (Pro plan = up to 300s).
 export const maxDuration = 150;
 
-const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGE_LENGTH = 500;
+// Cap chat turns per session. A thorough OSCE interview is ~15-40 exchanges;
+// 60 leaves generous headroom while bounding both the (quadratically growing)
+// patient-chat token cost AND the conversation size fed into the 6 evaluation
+// calls. Submission is exempt — a student can always submit at the cap.
+const MAX_USER_MESSAGES_PER_SESSION = 60;
+// A clinical submission (diagnosis + differentials + plan + reasoning) is
+// legitimately longer than a single chat turn but still tightly bounded —
+// every char is sent into ~6 evaluation calls (5 area + 1 meta), so length
+// directly multiplies token cost. Must stay above the sum of the per-field
+// client maxLengths in DiagnosisModal (150+300+1000+1000 + labels ≈ 2600).
+const MAX_SUBMISSION_LENGTH = 3000;
+
+/**
+ * Collapse whitespace abuse: runs of spaces/tabs → one space, 3+ newlines →
+ * two, trim ends. Stops users padding a submission with whitespace to bloat
+ * the evaluation prompt's token count. Single newlines are preserved so
+ * differential-per-line structure survives.
+ */
+function normalizeWhitespace(s: string): string {
+  return s
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 // Hard cap on AI evaluations per user per UTC day. Each evaluation fans out to
 // ~6 OpenAI calls (~$0.02-0.04). "Pro" is unlimited *sessions* but evals must
@@ -87,12 +111,16 @@ export async function POST(
 
     if (submitDiagnosis) {
       submission = {
-        primary_diagnosis: String(body.primary_diagnosis ?? "").trim(),
+        primary_diagnosis: normalizeWhitespace(String(body.primary_diagnosis ?? "")),
         differential_diagnoses: Array.isArray(body.differential_diagnoses)
-          ? body.differential_diagnoses.map((d: unknown) => String(d).trim()).filter(Boolean)
+          ? body.differential_diagnoses
+              .map((d: unknown) => normalizeWhitespace(String(d)))
+              .filter(Boolean)
           : [],
-        treatment_plan: String(body.treatment_plan ?? "").trim(),
-        reasoning: body.reasoning ? String(body.reasoning).trim() : undefined,
+        treatment_plan: normalizeWhitespace(String(body.treatment_plan ?? "")),
+        reasoning: body.reasoning
+          ? normalizeWhitespace(String(body.reasoning)) || undefined
+          : undefined,
       };
       if (!submission.primary_diagnosis || !submission.treatment_plan) {
         throw new Error();
@@ -118,10 +146,13 @@ export async function POST(
     );
   }
 
-  if (content.length > MAX_MESSAGE_LENGTH) {
+  const maxLen = submitDiagnosis ? MAX_SUBMISSION_LENGTH : MAX_MESSAGE_LENGTH;
+  if (content.length > maxLen) {
     return NextResponse.json(
       {
-        error: `Meddelandet är för långt (max ${MAX_MESSAGE_LENGTH} tecken).`,
+        error: submitDiagnosis
+          ? `Inlämningen är för lång (max ${MAX_SUBMISSION_LENGTH} tecken).`
+          : `Meddelandet är för långt (max ${MAX_MESSAGE_LENGTH} tecken).`,
       },
       { status: 400 }
     );
@@ -149,6 +180,24 @@ export async function POST(
       { error: "Sessionen är inte aktiv." },
       { status: 400 }
     );
+  }
+
+  /* ---- Per-session chat-turn cap (submission exempt) ---- */
+  if (!submitDiagnosis) {
+    const { count: userMsgCount } = await sb
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", sessionId)
+      .eq("role", "user");
+
+    if ((userMsgCount ?? 0) >= MAX_USER_MESSAGES_PER_SESSION) {
+      return NextResponse.json(
+        {
+          error: `Du har nått maxgränsen för meddelanden i denna session (${MAX_USER_MESSAGES_PER_SESSION}). Lämna in din bedömning för att få feedback.`,
+        },
+        { status: 429 }
+      );
+    }
   }
 
   /* ---- Fetch full case data for AI context ---- */

@@ -22,9 +22,19 @@ export function ChatComposer({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const isActive = sessionStatus === "active";
+
+  // Auto-grow the textarea with content up to a max, then scroll internally
+  // (WhatsApp-style). Recomputed whenever `input` changes, incl. after a send
+  // clears it (resets back to one line).
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
+  }, [input]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -161,18 +171,18 @@ export function ChatComposer({
         {/* Input */}
         {isActive ? (
           <div className="border-t border-[#1d3557]/[0.04] p-4 bg-white">
-            <div className="flex items-center gap-2">
-              <input
+            <div className="flex items-end gap-2">
+              <textarea
                 ref={inputRef}
-                type="text"
+                rows={1}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ställ en fråga till patienten…"
-                maxLength={2000}
+                maxLength={500}
                 autoFocus
                 aria-label="Meddelande"
-                className="flex-1 px-4 py-2.5 bg-[#F9FAFB] border border-[#1d3557]/[0.06] rounded-xl text-[13px] text-[#1d3557] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-all duration-300"
+                className="flex-1 resize-none overflow-y-auto max-h-[132px] px-4 py-2.5 bg-[#F9FAFB] border border-[#1d3557]/[0.06] rounded-xl text-[13px] leading-relaxed text-[#1d3557] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#457b9d]/40 focus:shadow-[0_0_0_3px_rgba(69,123,157,0.08)] transition-[border,box-shadow] duration-300 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               />
               <button
                 onClick={sendMessage}
