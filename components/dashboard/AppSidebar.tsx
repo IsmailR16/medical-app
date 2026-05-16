@@ -249,6 +249,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
             >
               Villkor
             </Link>
+            <span className="cursor-default select-none">·</span>
+            <a
+              href="mailto:kontakt@diagnostika.se"
+              className="inline-block py-1 hover:text-white/60 transition-colors"
+            >
+              Hjälp
+            </a>
           </div>
         )}
 

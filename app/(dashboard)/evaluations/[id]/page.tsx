@@ -17,6 +17,7 @@ import { getOrCreateUser } from "@/lib/auth/user";
 import { getEvaluationBySession } from "@/lib/db/dashboard";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { FadeUp, Stagger, StaggerItem } from "@/components/dashboard/MotionWrappers";
+import { EvaluationFeedback } from "@/components/dashboard/EvaluationFeedback";
 import {
   getScoreBadgeStyle,
   getScoreBarColor,
@@ -235,8 +236,13 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
           </FadeUp>
         )}
 
+        {/* Contextual beta feedback on the grading */}
+        <FadeUp delay={0.5}>
+          <EvaluationFeedback sessionId={sessionId} caseTitle={ev.case_title} />
+        </FadeUp>
+
         {/* Actions */}
-        <FadeUp delay={0.52} className="flex items-center justify-center gap-3 pt-4">
+        <FadeUp delay={0.54} className="flex items-center justify-center gap-3 pt-4">
           <Link
             href={`/sessions/${sessionId}`}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F9FAFB] border border-[#1d3557]/[0.06] text-[#1d3557] text-[13px] font-semibold rounded-xl hover:border-[#1d3557]/[0.12] hover:shadow-[0_2px_8px_-2px_rgba(29,53,87,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
