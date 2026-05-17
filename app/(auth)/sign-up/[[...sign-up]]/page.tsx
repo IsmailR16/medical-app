@@ -11,10 +11,12 @@ export default async function SignUpPage({
   searchParams: Promise<{ plan?: string }>;
 }) {
   const { plan } = await searchParams;
-  // Send new users straight to /accept-terms — skips a full server roundtrip
-  // through /dashboard which would just redirect here anyway. The plan param
-  // is preserved and forwarded to /dashboard after acceptance.
-  const redirectUrl = plan ? `/accept-terms?plan=${plan}` : "/accept-terms";
+  // Always route through /dashboard. The (dashboard) layout gate redirects
+  // to /accept-terms only when terms aren't accepted. This keeps a single
+  // unified flow: new users get gated to accept-terms, while returning
+  // (already-accepted) users who authenticate here go straight to the
+  // dashboard — without briefly flashing the /accept-terms skeleton.
+  const redirectUrl = plan ? `/dashboard?plan=${plan}` : "/dashboard";
 
   return (
     <main className="flex min-h-screen items-center justify-center">
